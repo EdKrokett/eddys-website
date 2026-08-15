@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
 
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxt/image', '@nuxtjs/sitemap', '@tresjs/nuxt'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxt/image', '@nuxtjs/sitemap'],
 
   devtools: {
     enabled: true,
@@ -53,7 +53,7 @@ export default defineNuxtConfig({
   },
 
   icon: {
-    // Werden nur dynamisch per Variable referenziert (SkillKnife.vue) — Nuxt Icons
+    // Werden nur dynamisch per Variable referenziert (KnifeHero.vue) — Nuxt Icons
     // Static-Scan findet sie so nicht automatisch, deshalb explizit bündeln.
     clientBundle: {
       icons: [

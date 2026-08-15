@@ -18,15 +18,11 @@
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/sitemap": "^8.2.2",
-    "@tresjs/cientos": "^5.8.1",
-    "@tresjs/nuxt": "^5.6.3",
     "nuxt": "^4.3.0",
-    "tailwindcss": "^4.1.18",
-    "three": "^0.185.1"
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.13.0",
-    "@types/three": "^0.185.4",
     "eslint": "^9.39.2",
     "happy-dom": "^20.9.0",
     "typescript": "^5.9.3",
