@@ -1,10 +1,13 @@
 <script setup lang="ts">
 /**
  * Hero: fotorealistisches Taschenmesser-Bild (KI-generiert, Eddy hat die Rechte —
- * siehe CLAUDE.md Design-Priorität) als Vollbild-Hintergrund (geblurrte Cover-Ebene)
- * + scharfes, seitenverhältnis-treues Vordergrundbild. Skills als Hotspot-Marker über
- * den einzelnen Werkzeugen, Koordinaten kalibriert auf public/images/knife-hero.webp
- * (1915×821). Platzhalter-Skillnamen, echte Inhalte folgen.
+ * siehe CLAUDE.md Design-Priorität), skaliert seitenverhältnistreu auf die verfügbare
+ * Fläche (füllt auch breite Monitore, ohne die Werkzeugspitzen zu beschneiden — object-fit:
+ * cover würde die äußeren Werkzeuge abschneiden, deshalb aspect-ratio-Container statt Crop).
+ * Skills als Hotspot-Marker über den einzelnen Werkzeugen, Koordinaten kalibriert auf
+ * public/images/knife-hero.webp (1915×821). Leichter Maus-Parallax-Tilt + sanftes
+ * Schweben für etwas Leben ohne echte 3D-Geometrie. Platzhalter-Skillnamen, echte
+ * Inhalte folgen.
  */
 interface Skill {
   id: string
@@ -26,12 +29,32 @@ const skills: Skill[] = [
 
 const activeId = ref<string | null>(null)
 const revealed = ref(false)
+const tiltX = ref(0)
+const tiltY = ref(0)
+
+const prefersReducedMotion = import.meta.client
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 onMounted(() => {
   requestAnimationFrame(() => {
     revealed.value = true
   })
 })
+
+function onFrameMouseMove(event: MouseEvent) {
+  if (prefersReducedMotion) return
+  const target = event.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  const relX = (event.clientX - rect.left) / rect.width - 0.5
+  const relY = (event.clientY - rect.top) / rect.height - 0.5
+  tiltX.value = relX * 9
+  tiltY.value = relY * -9
+}
+
+function onFrameMouseLeave() {
+  tiltX.value = 0
+  tiltY.value = 0
+}
 </script>
 
 <template>
@@ -52,35 +75,39 @@ onMounted(() => {
       </p>
     </div>
 
-    <div class="hero__frame">
-      <div class="hero__image-wrap">
-        <img
-          src="/images/knife-hero.webp"
-          width="1915"
-          height="821"
-          fetchpriority="high"
-          alt="Aufgeklapptes Taschenmesser, Sinnbild für vielseitige Fähigkeiten"
-          class="hero__image"
-        >
+    <div class="hero__frame" @mousemove="onFrameMouseMove" @mouseleave="onFrameMouseLeave">
+      <div class="hero__float">
+        <div class="hero__tilt" :style="{ '--rx': `${tiltX}deg`, '--ry': `${tiltY}deg` }">
+          <div class="hero__image-wrap">
+            <img
+              src="/images/knife-hero.webp"
+              width="1915"
+              height="821"
+              fetchpriority="high"
+              alt="Aufgeklapptes Taschenmesser, Sinnbild für vielseitige Fähigkeiten"
+              class="hero__image"
+            >
 
-        <button
-          v-for="(skill, i) in skills"
-          :key="skill.id"
-          type="button"
-          class="hotspot"
-          :class="{ 'is-revealed': revealed, 'is-active': activeId === skill.id }"
-          :style="{ 'left': `${skill.xPct}%`, 'top': `${skill.yPct}%`, '--delay': `${i * 90}ms` }"
-          @mouseenter="activeId = skill.id"
-          @mouseleave="activeId = null"
-          @focus="activeId = skill.id"
-          @blur="activeId = null"
-        >
-          <span class="hotspot__dot" />
-          <span class="hotspot__label">
-            <Icon :name="skill.icon" class="size-3.5" />
-            {{ skill.label }}
-          </span>
-        </button>
+            <button
+              v-for="(skill, i) in skills"
+              :key="skill.id"
+              type="button"
+              class="hotspot"
+              :class="{ 'is-revealed': revealed, 'is-active': activeId === skill.id }"
+              :style="{ 'left': `${skill.xPct}%`, 'top': `${skill.yPct}%`, '--delay': `${i * 90}ms` }"
+              @mouseenter="activeId = skill.id"
+              @mouseleave="activeId = null"
+              @focus="activeId = skill.id"
+              @blur="activeId = null"
+            >
+              <span class="hotspot__dot" />
+              <span class="hotspot__label">
+                <Icon :name="skill.icon" class="size-3.5" />
+                {{ skill.label }}
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -138,10 +165,39 @@ onMounted(() => {
   padding: 1rem 2rem 4rem;
 }
 
+.hero__float {
+  width: 100%;
+  animation: hero-float 6s ease-in-out infinite;
+}
+
+.hero__tilt {
+  width: 100%;
+  transform: perspective(1600px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
+  transition: transform 300ms ease-out;
+}
+
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__float {
+    animation: none;
+  }
+
+  .hero__tilt {
+    transition: none;
+  }
+}
+
 .hero__image-wrap {
   position: relative;
-  width: 100%;
-  max-width: 78rem;
+  /* Skaliert auf die verfügbare Breite, aber nie höher als 82svh — seitenverhältnistreu
+     (aspect-ratio), damit Hotspot-Prozentkoordinaten exakt bleiben. Kein object-fit:cover:
+     das würde die äußersten Werkzeuge (Klinge links, Öffner rechts) abschneiden. */
+  width: min(100%, calc(82svh * 1915 / 821));
+  margin-inline: auto;
   aspect-ratio: 1915 / 821;
 }
 
