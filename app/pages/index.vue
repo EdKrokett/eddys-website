@@ -30,7 +30,12 @@ function formatExcerpt(text: string, max = 140) {
         </p>
       </div>
 
-      <SkillKnife class="relative" />
+      <ClientOnly>
+        <SkillKnife class="relative" />
+        <template #fallback>
+          <div class="knife-fallback" />
+        </template>
+      </ClientOnly>
 
       <div class="h-16 sm:h-24" />
     </section>
@@ -90,3 +95,15 @@ function formatExcerpt(text: string, max = 140) {
     </section>
   </div>
 </template>
+
+<style scoped>
+.knife-fallback {
+  height: 32rem;
+}
+
+@media (max-width: 640px) {
+  .knife-fallback {
+    height: 26rem;
+  }
+}
+</style>
