@@ -1,5 +1,67 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
-/* Platzhalter-Theme — wird durch die eigentliche Design-Richtung ersetzt
-   (siehe CLAUDE.md, Abschnitt "Design-Priorität"). */
+/*
+ * Design-Konzept: "Schweizer Taschenmesser" — Eddys eigene Metapher für seine
+ * vielseitigen Skills (siehe CLAUDE.md, Design-Priorität). Grafit + gebürsteter
+ * Stahl als ruhige Basis, ein einziger kräftiger Rotton als Präzisionswerkzeug-Akzent.
+ * Dark-first, kein Light-Mode entworfen (nuxt.config.ts: colorMode.forced).
+ */
+@theme static {
+  --font-display: 'Fraunces', serif;
+  --font-sans: 'Manrope', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Swiss-Red — Werkzeug-Akzent, bewusst kein Tailwind-Stock-Rot */
+  --color-swiss-50: #fdf2f2;
+  --color-swiss-100: #fbe1e2;
+  --color-swiss-200: #f5c0c4;
+  --color-swiss-300: #ea939b;
+  --color-swiss-400: #da5c6c;
+  --color-swiss-500: #c8102e;
+  --color-swiss-600: #ac0c28;
+  --color-swiss-700: #8c0b23;
+  --color-swiss-800: #6e0c1f;
+  --color-swiss-900: #560d1c;
+  --color-swiss-950: #30050e;
+
+  /* Grafit — Grundfläche */
+  --color-graphite-950: #121316;
+  --color-graphite-900: #17181b;
+  --color-graphite-800: #1f2024;
+  --color-graphite-700: #2c2e33;
+  --color-graphite-600: #3a3c43;
+
+  /* Stahl — Klingen-Gradient */
+  --color-steel-200: #e4e6eb;
+  --color-steel-300: #c8cbd4;
+  --color-steel-400: #9aa0ac;
+  --color-steel-500: #767c88;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--color-graphite-900);
+    color: #f3f1ec;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer base {
+  button,
+  [role="button"],
+  a[href],
+  label[for] {
+    cursor: pointer;
+  }
+}

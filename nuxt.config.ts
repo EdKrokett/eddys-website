@@ -7,14 +7,21 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  // Fraunces/Manrope/JetBrains Mono (main.css, --font-*) werden automatisch von
+  // @nuxt/fonts erkannt und selbst gehostet (kein Google-Fonts-Request zur Laufzeit,
+  // via @nuxt/ui mitgeliefert) — kein manueller <link> nötig.
   css: ['~/assets/css/main.css'],
 
   site: {
     url: 'https://eduard-andrae.de',
   },
 
+  // Design ist bewusst dark-first gebaut (Grafit + Stahl + Rot) — kein Light-Mode-Pendant
+  // entworfen. preference: 'dark' (statt 'system') reicht zum Fixieren, es gibt ohnehin
+  // keinen Toggle auf der Seite.
   colorMode: {
-    preference: 'system',
+    preference: 'dark',
+    fallback: 'dark',
   },
 
   runtimeConfig: {
@@ -42,6 +49,21 @@ export default defineNuxtConfig({
         commaDangle: 'always-multiline',
         braceStyle: '1tbs',
       },
+    },
+  },
+
+  icon: {
+    // Werden nur dynamisch per Variable referenziert (SkillKnife.vue) — Nuxt Icons
+    // Static-Scan findet sie so nicht automatisch, deshalb explizit bündeln.
+    clientBundle: {
+      icons: [
+        'lucide:compass',
+        'lucide:terminal',
+        'lucide:pen-tool',
+        'lucide:feather',
+        'lucide:workflow',
+        'lucide:megaphone',
+      ],
     },
   },
 
