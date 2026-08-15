@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Versionierter Pre-Commit-Hook: Secret-Scan der gestageten Änderungen
+# (CLAUDE.md, "Keine Geheimnisse in Git"). Aktivierung einmalig pro Klon:
+#   git config core.hooksPath .githooks
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "⚠ gitleaks fehlt — Secret-Scan wird ÜBERSPRUNGEN (es gibt KEINEN CI-Backstop!)."
+  echo "  Installieren: Binary von https://github.com/gitleaks/gitleaks/releases nach ~/.local/bin"
+  exit 0
+fi
+
+echo "▸ Secret-Scan (gestagete Änderungen)"
+if ! gitleaks git --pre-commit --staged -c .gitleaks.toml --no-banner --redact .; then
+  echo "✘ Möglicher Geheimnis-Fund in den gestageten Änderungen — Commit abgebrochen."
+  echo "  Echtes Geheimnis → in .env auslagern (gitignored). Fehlalarm → Fundstelle"
+  echo "  sichtprüfen, dann Fingerprint in .gitleaksignore eintragen."
+  exit 1
+fi

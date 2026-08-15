@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Versionierter Pre-Push-Hook: bildet die CI-Checks aus .github/workflows/check.yml lokal ab,
+# damit ein Push nicht erst in der Pipeline scheitert (CI-Paritätsprinzip).
+# Aktivierung einmalig pro Klon:  git config core.hooksPath .githooks
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+ZERO=0000000000000000000000000000000000000000
+
+# --- Push-Range von git über stdin: <local_ref> <local_sha> <remote_ref> <remote_sha> ---
+ranges=()
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "$ZERO" ] && continue            # Branch-Löschung: nichts zu prüfen
+  if [ "$remote_sha" = "$ZERO" ]; then              # Branch ist neu auf dem Remote
+    base="$(git merge-base "$local_sha" origin/main 2>/dev/null || true)"
+  else
+    base="$remote_sha"
+  fi
+  if [ -n "${base:-}" ] && ! git cat-file -e "$base" 2>/dev/null; then
+    base="$(git merge-base "$local_sha" origin/main 2>/dev/null || true)"
+  fi
+  if [ -n "${base:-}" ]; then
+    ranges+=("$base..$local_sha")
+  else
+    ranges+=("$local_sha")   # kein Vergleichspunkt → ganzen Branch prüfen
+  fi
+done
+
+# ============================================================
+# SECRET-SCAN (CLAUDE.md "Keine Geheimnisse in Git")
+# ============================================================
+if command -v gitleaks >/dev/null 2>&1; then
+  for range in "${ranges[@]}"; do
+    echo "▸ Secret-Scan ($range)"
+    if ! gitleaks git -c "$REPO_ROOT/.gitleaks.toml" --no-banner --redact --log-opts "$range" "$REPO_ROOT"; then
+      echo "✘ Möglicher Geheimnis-Fund in den gepushten Commits — Push abgebrochen."
+      echo "  Echtes Geheimnis → Commit neu schreiben UND Wert rotieren (Historie!)."
+      echo "  Fehlalarm → Fundstelle sichtprüfen, Fingerprint in .gitleaksignore eintragen."
+      exit 1
+    fi
+  done
+else
+  echo "⚠ gitleaks fehlt — Secret-Scan wird ÜBERSPRUNGEN (es gibt KEINEN CI-Backstop!)."
+fi
+
+# ============================================================
+# FRONTEND — check-Kette aus .github/workflows/check.yml, ohne Build.
+# Der Build bleibt CI-only: teuerster Schritt, seine Fehler werden fast
+# immer schon von Lint/Typecheck erkannt.
+# ============================================================
+if [ ! -d "$REPO_ROOT/node_modules" ]; then
+  echo "⚠ node_modules fehlt — Checks werden ÜBERSPRUNGEN, die CI prüft trotzdem."
+  echo "  Einrichten: npm ci"
+else
+  cd "$REPO_ROOT"
+
+  echo "▸ npm run lint"
+  npm run lint --silent
+
+  echo "▸ npm run typecheck"
+  npm run typecheck --silent
+
+  echo "▸ npm run test"
+  npm run test --silent
+fi
+
+echo "✔ Alle Pre-Push-Checks bestanden"

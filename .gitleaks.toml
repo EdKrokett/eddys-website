@@ -1,0 +1,18 @@
+# gitleaks-Konfiguration — Secret-Scan für Repo und Hooks (siehe CLAUDE.md, "Keine Geheimnisse in Git").
+# Aufruf: gitleaks dir . -c .gitleaks.toml  (Dateibestand)
+#         gitleaks git . -c .gitleaks.toml  (Historie)
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+    '''node_modules''',
+    '''\.nuxt''',
+    '''\.output''',
+]
+regexes = [
+    # Doku-Platzhalter in Beispiel-URLs (kein echtes Geheimnis)
+    '''(?i)(DEIN_)?PASSWORT''',
+    '''<[a-z_-]+>''',
+]
