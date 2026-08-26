@@ -12,6 +12,7 @@ export function useBlogWallImages() {
   const nuxtApp = useNuxtApp()
   const { data, status } = useFetch<WordPressBlogPost[]>('/api/blog', {
     key: 'blog-wall-images',
+    query: { limit: 24 },
     lazy: true,
     server: false,
     default: () => [],

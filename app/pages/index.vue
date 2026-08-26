@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const { filteredPosts, status } = useBlog()
-
-const recentPosts = computed(() => filteredPosts.value.slice(0, 3))
+const { filteredPosts: recentPosts, status } = useBlog({ limit: 3, lazy: true })
 
 function formatExcerpt(text: string, max = 140) {
   return text.length > max ? `${text.slice(0, max).trim()}…` : text
@@ -39,7 +37,7 @@ function formatExcerpt(text: string, max = 140) {
           </div>
         </div>
 
-        <div v-if="status === 'pending'" class="text-steel-400">
+        <div v-if="status === 'pending' || status === 'idle'" class="text-steel-400">
           Lade Beiträge …
         </div>
         <div v-else-if="status === 'error'" class="text-swiss-400">

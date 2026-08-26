@@ -20,17 +20,22 @@ interface WpPost {
 }
 
 /**
- * Listet alle veröffentlichten WordPress-Posts (öffentliche, unauthentifizierte REST-API,
+ * Listet veröffentlichte WordPress-Posts (öffentliche, unauthentifizierte REST-API,
  * kein Kategorie-Filter — anders als tb26-code: dort ist WordPress eine Kategorie unter
- * vielen, hier ist es der gesamte Blog).
+ * vielen, hier ist es der gesamte Blog). `limit` steuert `per_page` — kleinere Werte für
+ * Startseiten-Teaser/Kachelwand sparen WordPress-Antwortzeit, die reale Blog-Liste bleibt
+ * beim vollen Standardwert.
  */
-export default defineEventHandler(async (): Promise<WordPressBlogPost[]> => {
-  return withWpCache('all-posts', 'blog-list', async () => {
+export default defineEventHandler(async (event): Promise<WordPressBlogPost[]> => {
+  const query = getQuery(event)
+  const limit = Math.min(Number(query.limit) || 50, 50)
+
+  return withWpCache(`all-posts:${limit}`, 'blog-list', async () => {
     const config = useRuntimeConfig()
     const wpUrl = config.public.wordpressUrl
 
     const response = await backendFetch<WpPost[]>(
-      `${wpUrl}/wp-json/wp/v2/posts?per_page=50&_embed`,
+      `${wpUrl}/wp-json/wp/v2/posts?per_page=${limit}&_embed`,
     )
 
     return response.map(post => ({
