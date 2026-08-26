@@ -6,10 +6,10 @@ export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
   const raw = config.public.wordpressUrl
 
-  let fetchResult: unknown = null
+  let fetchResult: unknown
   try {
-    fetchResult = await backendFetch(`${raw}/wp-json/wp/v2/posts?per_page=1&_embed`)
-    fetchResult = { ok: true, sample: Array.isArray(fetchResult) ? fetchResult.length : fetchResult }
+    const posts = await backendFetch(`${raw}/wp-json/wp/v2/posts?per_page=1&_embed`)
+    fetchResult = { ok: true, sample: Array.isArray(posts) ? posts.length : posts }
   } catch (err: unknown) {
     fetchResult = {
       ok: false,
