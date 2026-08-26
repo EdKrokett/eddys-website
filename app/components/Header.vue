@@ -48,7 +48,7 @@ function onSearch() {
               Impressum
             </NuxtLink>
             <a
-              href="https://www.eduard-andrae.de/disclaimer/"
+              href="https://blog.eduard-andrae.de/disclaimer/"
               class="header__dropdown-item"
             >
               Haftung und Datenschutz
@@ -103,7 +103,7 @@ function onSearch() {
       <NuxtLink to="/impressum" class="header__mobile-link" @click="mobileOpen = false">
         Impressum
       </NuxtLink>
-      <a href="https://www.eduard-andrae.de/disclaimer/" class="header__mobile-link header__mobile-link--sub">
+      <a href="https://blog.eduard-andrae.de/disclaimer/" class="header__mobile-link header__mobile-link--sub">
         Haftung und Datenschutz
       </a>
     </div>

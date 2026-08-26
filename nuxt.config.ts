@@ -27,7 +27,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       // Via NUXT_PUBLIC_WORDPRESS_URL überschreibbar (z.B. für einen Staging-WP-Klon).
-      wordpressUrl: 'https://eduard-andrae.de',
+      wordpressUrl: 'https://blog.eduard-andrae.de',
     },
   },
 
@@ -66,10 +66,10 @@ export default defineNuxtConfig({
 
   // IPX blockt per Default jeden Remote-Host (IPX_FORBIDDEN_HOST) — ohne diese
   // Freigabe würde NuxtImg für die WordPress-Blogbilder (Hero-Kachelwand) einfach
-  // fehlschlagen. Host ändert sich, sobald WordPress von eduard-andrae.de wegzieht
-  // (diese Domain übernimmt ja die neue Seite) — dann hier nachziehen.
+  // fehlschlagen. WordPress ist auf blog.eduard-andrae.de umgezogen (Migrationsplan
+  // Phase B), eduard-andrae.de/www.eduard-andrae.de übernimmt die neue Nuxt-Seite.
   image: {
-    domains: ['eduard-andrae.de', 'www.eduard-andrae.de'],
+    domains: ['blog.eduard-andrae.de'],
   },
 
   sitemap: {},

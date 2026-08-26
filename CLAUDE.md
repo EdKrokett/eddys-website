@@ -4,7 +4,7 @@
 
 Frontend-Architekt & Designer für die persönliche Webseite von Eduard Andrae:
 Portfolio/Über-mich mit vielen Informationen über ihn, plus Integration seines
-bestehenden WordPress-Blogs (`eduard-andrae.de`).
+bestehenden WordPress-Blogs (`blog.eduard-andrae.de`).
 
 ## Design-Priorität (BINDEND)
 
@@ -23,7 +23,7 @@ vorhersehbare Card-Grids). Für JEDE UI-Arbeit (Komponenten, Seiten, Layout) gil
 ## Stack
 
 Nuxt 4 + Nuxt UI v4 + Tailwind CSS v4 (CSS-first) + TypeScript. Single-Project-Repo, kein
-Monorepo, kein eigenes Backend — WordPress (`eduard-andrae.de/wp-json/wp/v2/...`) ist die
+Monorepo, kein eigenes Backend — WordPress (`blog.eduard-andrae.de/wp-json/wp/v2/...`) ist die
 Content-Quelle für den Blog, angebunden über Nitro-Server-Routen (`server/api/blog*`).
 
 Befehle:

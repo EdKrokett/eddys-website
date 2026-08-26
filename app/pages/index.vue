@@ -23,7 +23,7 @@ function formatExcerpt(text: string, max = 140) {
 
     <ServiceCategories />
 
-    <!-- ═══════════════ BLOG-VORSCHAU (live von eduard-andrae.de) ═══════════════ -->
+    <!-- ═══════════════ BLOG-VORSCHAU (live von blog.eduard-andrae.de) ═══════════════ -->
     <section class="border-t border-graphite-700 bg-graphite-950/40">
       <div class="mx-auto max-w-5xl px-6 py-24">
         <div class="mb-10 flex items-end justify-between">
