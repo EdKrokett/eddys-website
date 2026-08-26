@@ -1,4 +1,22 @@
 <script setup lang="ts">
+/**
+ * Das Zifferblatt-Motiv und die Fakten-Leiste standen zunächst auf der Startseite
+ * und sind auf Eddys Wunsch hierher gewandert (26.08.2026) — inhaltlich gehören
+ * beide zur Person, nicht zum Einstieg: Der Bezel greift die Uhrmacher-Herkunft
+ * auf, die Fakten sind die Kurzfassung der Biografie darunter.
+ *
+ * Der Bezel ist reines SVG (kein Bild, kein Canvas): skaliert verlustfrei,
+ * kostet keinen Netzwerk-Request und ist SSR-fest.
+ */
+
+/** 60 Indexstriche wie auf einem Zifferblatt; jeder 5. ist ein betonter Hauptindex. */
+const TICKS = Array.from({ length: 60 }, (_, i) => ({
+  angle: i * 6,
+  major: i % 5 === 0,
+  /** Position 8 markiert den roten Strich — bewusst asymmetrisch, nicht auf 12. */
+  accent: i === 8,
+}))
+
 useSeoMeta({
   title: 'Über mich — Eduard Andrae',
   description:
@@ -10,7 +28,32 @@ useSeoMeta({
   <div>
     <!-- ═══════════════ INTRO ═══════════════ -->
     <section class="intro">
-      <UContainer>
+      <!-- Zifferblatt-Bezel: Verweis auf die Uhrmacher-Herkunft -->
+      <svg
+        class="intro__dial"
+        viewBox="-110 -110 220 220"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <circle r="104" class="intro__dial-ring" />
+        <circle r="86" class="intro__dial-ring intro__dial-ring--inner" />
+        <g v-for="tick in TICKS" :key="tick.angle">
+          <line
+            :transform="`rotate(${tick.angle})`"
+            x1="0"
+            y1="-104"
+            x2="0"
+            :y2="tick.major ? -93 : -99"
+            :class="[
+              'intro__tick',
+              tick.major && 'intro__tick--major',
+              tick.accent && 'intro__tick--accent',
+            ]"
+          />
+        </g>
+      </svg>
+
+      <UContainer class="relative z-10">
         <p class="kicker">
           <span class="intro__mark" aria-hidden="true" />Über mich
         </p>
@@ -38,6 +81,18 @@ useSeoMeta({
             Berlin ins Ziel gekommen. Seitdem läuft es, im Wortsinn.
           </p>
         </div>
+
+        <!-- Fakten als Messwerte, nicht als Fließtext -->
+        <dl class="facts">
+          <div v-for="fact in CV_FACTS" :key="fact.label" class="facts__item">
+            <dt class="facts__value">
+              {{ fact.value }}
+            </dt>
+            <dd class="facts__label">
+              {{ fact.label }}
+            </dd>
+          </div>
+        </dl>
       </UContainer>
     </section>
 
@@ -187,6 +242,9 @@ useSeoMeta({
 <style scoped>
 /* ── Intro ──────────────────────────────────────────────────────────────── */
 .intro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: clamp(3.5rem, 9vw, 6.5rem) 0 clamp(3rem, 6vw, 4.5rem);
   background:
     radial-gradient(85% 70% at 12% 0%, rgba(200, 16, 46, 0.07) 0%, transparent 55%),
@@ -194,10 +252,100 @@ useSeoMeta({
   border-bottom: 1px solid var(--color-graphite-700);
 }
 
+/* ── Zifferblatt-Bezel ──────────────────────────────────────────────────── */
+.intro__dial {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: -14%;
+  width: min(760px, 88vw);
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  opacity: 0.75;
+  pointer-events: none;
+}
+/* Auf schmalen Screens nach oben rücken, sonst liegt er hinter dem Fließtext. */
+@media (max-width: 900px) {
+  .intro__dial {
+    top: 0;
+    right: -38%;
+    width: 130vw;
+    translate: 0 -30%;
+    opacity: 0.5;
+  }
+}
+
+.intro__dial-ring {
+  fill: none;
+  stroke: var(--color-graphite-700);
+  stroke-width: 0.4;
+}
+.intro__dial-ring--inner {
+  stroke-dasharray: 1 5;
+  opacity: 0.7;
+}
+
+.intro__tick {
+  stroke: var(--color-graphite-600);
+  stroke-width: 0.7;
+}
+.intro__tick--major {
+  stroke: var(--color-steel-600);
+  stroke-width: 1.4;
+}
+.intro__tick--accent {
+  stroke: var(--color-swiss-500);
+  stroke-width: 2;
+}
+
 .intro__mark {
   width: 1.75rem;
   height: 1px;
   background: var(--color-swiss-500);
+}
+
+/* ── Fakten ─────────────────────────────────────────────────────────────── */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  max-width: 46rem;
+  background: var(--color-graphite-700);
+  border: 1px solid var(--color-graphite-700);
+}
+@media (min-width: 720px) {
+  .facts {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.facts__item {
+  padding: 1rem 1.125rem 1.125rem;
+  background: var(--color-graphite-950);
+}
+/* Fünf Fakten in zwei Spalten lassen unten rechts ein leeres Feld stehen —
+   der letzte Eintrag nimmt deshalb die ganze Breite ein. */
+@media (max-width: 719px) {
+  .facts__item:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.facts__value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: var(--color-steel-100);
+}
+
+.facts__label {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-steel-500);
 }
 
 .intro__title {

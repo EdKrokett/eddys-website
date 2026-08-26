@@ -3,59 +3,18 @@
  * Die zwei gleichwertigen Eingänge der Startseite (Eddys Vorgabe: "Über Mich"
  * und "Zum Blog" als zwei gleich starke Türen).
  *
- * Bewusst KEIN symmetrisches Card-Grid: Die linke Tür ist typografisch und ruhig
- * (Werdegang = Text), die rechte lebt von Eddys eigenen Blogfotos. Der Kontrast
- * zwischen beiden ist die Gestaltung.
- *
- * Lade-Disziplin der Bildwand 1:1 aus dem früheren Hero übernommen, weil rohe
- * WordPress-Uploads groß sind (~870 KB pro Foto): NuxtImg/IPX auf 240px+WebP,
- * client-only Lazy-Fetch, Drift-Animation erst nach Leerlauf, Einblenden pro Kachel.
+ * Beide Türen sind seit 26.08.2026 rein typografisch: Die Bildkachelwand, die
+ * vorher hinter der Blog-Tür lag, trägt jetzt vollflächig den Hero (HomeHero.vue).
+ * Damit die Blog-Tür dadurch nicht schwächer wird als die Werdegang-Tür, bekommt
+ * sie eine gleichwertige Liste — dort die Stationen, hier die Themen.
  */
-const COLUMN_COUNT_DESKTOP = 3
-const COLUMN_COUNT_MOBILE = 2
-const MIN_IMAGES_PER_COLUMN = 4
-
-const { wallImages, status } = useBlogWallImages()
-
-const isMobile = ref(false)
-const wallActive = ref(false)
-const loadedTiles = ref(new Set<string>())
-
-onMounted(() => {
-  const mediaQuery = window.matchMedia('(max-width: 900px)')
-  isMobile.value = mediaQuery.matches
-  const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
-    isMobile.value = e.matches
-  }
-  mediaQuery.addEventListener('change', handleChange)
-
-  const startWall = () => {
-    wallActive.value = true
-  }
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(startWall, { timeout: 2000 })
-  } else {
-    setTimeout(startWall, 1200)
-  }
-
-  onUnmounted(() => {
-    mediaQuery.removeEventListener('change', handleChange)
-  })
-})
-
-const columns = computed<string[][]>(() => {
-  const columnCount = isMobile.value ? COLUMN_COUNT_MOBILE : COLUMN_COUNT_DESKTOP
-  const imgs = wallImages.value.slice(0, columnCount * MIN_IMAGES_PER_COLUMN)
-  if (imgs.length === 0) return []
-  const cols: string[][] = Array.from({ length: columnCount }, () => [])
-  imgs.forEach((img, i) => {
-    cols[i % columnCount]!.push(img)
-  })
-  return cols.filter(col => col.length > 0)
-})
-
-/** Die drei jüngsten Stationen als Vorschau auf den Werdegang. */
 const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
+
+const topics = [
+  { label: 'Laufen', note: 'Wettkämpfe, Training und ehrliche Rückschläge' },
+  { label: 'Wandern', note: 'Touren, Etappen und lange Wochenenden' },
+  { label: 'Bloggen', note: 'Übers Schreiben, Sichtbarkeit und KI' },
+]
 </script>
 
 <template>
@@ -76,15 +35,15 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
           Stationen, Projekte und was ich wirklich kann.
         </p>
 
-        <ul class="door__stations">
-          <li v-for="station in stationPreview" :key="station.company" class="door__station">
-            <span class="door__station-period">{{ station.period }}</span>
-            <span class="door__station-role">{{ station.role }}</span>
-            <span class="door__station-company">{{ station.company }}</span>
+        <ul class="door__list">
+          <li v-for="station in stationPreview" :key="station.company" class="door__row">
+            <span class="door__row-key">{{ station.period }}</span>
+            <span class="door__row-main">{{ station.role }}</span>
+            <span class="door__row-note">{{ station.company }}</span>
           </li>
-          <li class="door__station door__station--more">
-            <span class="door__station-period">…</span>
-            <span class="door__station-role">und {{ CV_STATIONS.length - 3 }} weitere bis 1991</span>
+          <li class="door__row door__row--more">
+            <span class="door__row-key">…</span>
+            <span class="door__row-main">und {{ CV_STATIONS.length - 3 }} weitere bis 1991</span>
           </li>
         </ul>
       </div>
@@ -97,44 +56,7 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
 
     <!-- ═══════════ Tür 2: Blog ═══════════ -->
     <NuxtLink to="/blog" class="door door--blog">
-      <ClientOnly>
-        <div
-          v-if="columns.length"
-          class="door__wall"
-          :class="{ 'door__wall--active': wallActive }"
-          aria-hidden="true"
-        >
-          <div v-for="(col, ci) in columns" :key="ci" class="door__col">
-            <div v-for="(img, ii) in [...col, ...col]" :key="ii" class="door__tile">
-              <NuxtImg
-                :src="img"
-                alt=""
-                width="240"
-                densities="1x 2x"
-                format="webp"
-                quality="55"
-                decoding="async"
-                class="door__tile-img"
-                :class="{ 'door__tile-img--loaded': loadedTiles.has(`${ci}-${ii}`) }"
-                @load="loadedTiles.add(`${ci}-${ii}`)"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          v-else-if="status === 'pending' || status === 'idle'"
-          class="door__wall door__wall--skeleton"
-          aria-hidden="true"
-        >
-          <div v-for="ci in (isMobile ? COLUMN_COUNT_MOBILE : COLUMN_COUNT_DESKTOP)" :key="ci" class="door__col">
-            <div v-for="ii in 4" :key="ii" class="door__tile animate-pulse" />
-          </div>
-        </div>
-      </ClientOnly>
-
-      <div class="door__veil" aria-hidden="true" />
-
-      <div class="door__body door__body--blog">
+      <div class="door__body">
         <p class="kicker">
           02 — Seit 2006
         </p>
@@ -144,13 +66,20 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
         </h2>
 
         <p class="door__text">
-          Laufen, Wandern und Gedanken übers Bloggen. Angefangen als Protokoll
-          eines Rauchers, der Marathon laufen wollte.
+          Angefangen als Protokoll eines Rauchers, der Marathon laufen wollte.
+          Inzwischen sind es über 240 Beiträge.
         </p>
 
-        <ul class="door__cats">
-          <li v-for="cat in BLOG_CATEGORIES" :key="cat.slug" class="door__cat">
-            {{ cat.label }}
+        <ul class="door__list">
+          <li v-for="topic in topics" :key="topic.label" class="door__row">
+            <span class="door__row-key door__row-key--topic">{{ topic.label }}</span>
+            <span class="door__row-main door__row-main--note">{{ topic.note }}</span>
+          </li>
+          <!-- Vierte Zeile, damit beide Türen gleich hoch bleiben (links stehen
+               drei Stationen plus die "und 5 weitere"-Zeile). -->
+          <li class="door__row door__row--more">
+            <span class="door__row-key">…</span>
+            <span class="door__row-main">und alles dazwischen, seit 2006</span>
           </li>
         </ul>
       </div>
@@ -178,31 +107,23 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
 
 .door {
   position: relative;
-  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 2.5rem;
-  overflow: hidden;
   padding: clamp(2.25rem, 5vw, 4rem);
-  min-height: clamp(26rem, 46vw, 34rem);
+  min-height: clamp(24rem, 40vw, 30rem);
   transition: background 350ms ease;
 }
 
 .door--about {
   background: var(--color-graphite-900);
 }
-.door--about:hover {
-  background: var(--color-graphite-850);
-}
-
 .door--blog {
   background: var(--color-graphite-950);
 }
-
-.door__body {
-  position: relative;
-  z-index: 2;
+.door:hover {
+  background: var(--color-graphite-850);
 }
 
 .door__title {
@@ -220,13 +141,13 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
   color: var(--color-steel-400);
 }
 
-/* ── Stationen-Vorschau ─────────────────────────────────────────────────── */
-.door__stations {
+/* ── Listen (Stationen links, Themen rechts) ────────────────────────────── */
+.door__list {
   margin-top: 2rem;
   border-top: 1px solid var(--color-graphite-700);
 }
 
-.door__station {
+.door__row {
   display: grid;
   grid-template-columns: 5.5rem 1fr;
   gap: 0 1rem;
@@ -234,7 +155,7 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
   border-bottom: 1px solid var(--color-graphite-800);
 }
 
-.door__station-period {
+.door__row-key {
   grid-row: span 2;
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -242,51 +163,39 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
   color: var(--color-swiss-400);
   font-variant-numeric: tabular-nums;
 }
+.door__row-key--topic {
+  grid-row: auto;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
 
-.door__station-role {
+.door__row-main {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-steel-200);
 }
+.door__row-main--note {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--color-steel-400);
+}
 
-.door__station-company {
+.door__row-note {
   font-size: 0.8rem;
   color: var(--color-steel-500);
 }
 
-.door__station--more .door__station-role {
+.door__row--more .door__row-main {
   font-weight: 400;
   font-style: italic;
   color: var(--color-steel-500);
 }
-.door__station--more .door__station-period {
+.door__row--more .door__row-key {
   color: var(--color-steel-600);
-}
-
-/* ── Kategorien ─────────────────────────────────────────────────────────── */
-.door__cats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 2rem;
-}
-
-.door__cat {
-  border: 1px solid var(--color-graphite-600);
-  padding: 0.3rem 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-steel-300);
-  background: rgba(14, 15, 18, 0.6);
-  backdrop-filter: blur(4px);
 }
 
 /* ── CTA ────────────────────────────────────────────────────────────────── */
 .door__cta {
-  position: relative;
-  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
@@ -304,89 +213,5 @@ const stationPreview = computed(() => CV_STATIONS.slice(0, 3))
 }
 .door:hover .door__cta-icon {
   translate: 0.35rem 0;
-}
-
-/* ── Bildwand (Tür 2) ───────────────────────────────────────────────────── */
-.door__wall {
-  position: absolute;
-  inset: -10% -4%;
-  z-index: 0;
-  display: flex;
-  gap: 10px;
-  opacity: 0.5;
-  transition: opacity 500ms ease;
-}
-.door--blog:hover .door__wall {
-  opacity: 0.65;
-}
-
-.door__col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  animation: door-drift 64s linear infinite;
-  animation-play-state: paused;
-  will-change: transform;
-}
-.door__wall--active .door__col {
-  animation-play-state: running;
-}
-.door__col:nth-child(2) {
-  animation-duration: 78s;
-  animation-direction: reverse;
-}
-.door__col:nth-child(3) {
-  animation-duration: 70s;
-}
-
-.door__tile {
-  position: relative;
-  flex: none;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--color-graphite-800);
-}
-
-.door__tile-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  opacity: 0;
-  filter: grayscale(0.35) contrast(1.05);
-  transition: opacity 500ms ease, filter 500ms ease;
-}
-.door__tile-img--loaded {
-  opacity: 1;
-}
-.door--blog:hover .door__tile-img--loaded {
-  filter: grayscale(0) contrast(1);
-}
-
-.door__veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    165deg,
-    rgba(14, 15, 18, 0.94) 0%,
-    rgba(14, 15, 18, 0.82) 45%,
-    rgba(14, 15, 18, 0.55) 100%
-  );
-}
-
-@keyframes door-drift {
-  from { transform: translateY(0); }
-  to { transform: translateY(-50%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .door__col {
-    animation: none;
-  }
-  .door__tile-img {
-    opacity: 1;
-  }
 }
 </style>
