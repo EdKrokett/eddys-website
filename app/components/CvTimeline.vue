@@ -89,21 +89,21 @@ defineProps<{ stations: CvStation[] }>()
   position: relative;
   z-index: 1;
   margin-top: 0.5rem;
-  width: 7px;
-  height: 7px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--color-graphite-500);
   outline: 4px solid var(--color-graphite-900);
 }
 .timeline__dot--current {
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
 }
 .timeline__dot--current::after {
   content: '';
   position: absolute;
   inset: -5px;
   border-radius: 50%;
-  border: 1px solid var(--color-swiss-500);
+  border: 1px solid var(--color-accent-500);
   opacity: 0;
   animation: timeline-ping 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
@@ -115,7 +115,7 @@ defineProps<{ stations: CvStation[] }>()
 
 /* ── Inhalt ─────────────────────────────────────────────────────────────── */
 .timeline__content {
-  padding-bottom: 3rem;
+  padding-bottom: 3.75rem;
 }
 .timeline__item:last-child .timeline__content {
   padding-bottom: 0;
@@ -126,31 +126,31 @@ defineProps<{ stations: CvStation[] }>()
   align-items: center;
   gap: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
-  color: var(--color-steel-500);
+  color: var(--color-steel-400);
 }
 
 .timeline__badge {
-  border: 1px solid var(--color-swiss-700);
+  border: 1px solid var(--color-accent-700);
   padding: 0.1rem 0.4rem;
-  font-size: 0.6rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.12em;
-  color: var(--color-swiss-300);
+  color: var(--color-accent-300);
 }
 
 .timeline__role {
-  margin-top: 0.5rem;
-  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
-  line-height: 1.25;
+  margin-top: 0.6rem;
+  font-size: clamp(1.375rem, 2.4vw, 1.75rem);
+  line-height: 1.2;
   color: var(--color-steel-100);
 }
 
 .timeline__company {
-  margin-top: 0.25rem;
-  font-size: 0.95rem;
+  margin-top: 0.35rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--color-brass-400);
 }
@@ -161,10 +161,10 @@ defineProps<{ stations: CvStation[] }>()
 }
 
 .timeline__description {
-  margin-top: 0.875rem;
-  max-width: 40rem;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: var(--color-steel-400);
+  margin-top: 1rem;
+  max-width: 42rem;
+  font-size: var(--text-base);
+  line-height: 1.75;
+  color: var(--color-steel-300);
 }
 </style>

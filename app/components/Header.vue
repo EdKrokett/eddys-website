@@ -115,8 +115,8 @@ watch(() => useRoute().fullPath, () => {
 /* Roter Indexstrich als Signet — greift den Sekundenzeiger aus dem Hero auf. */
 .brand__mark {
   width: 2px;
-  height: 1.125rem;
-  background: var(--color-swiss-500);
+  height: 1.25rem;
+  background: var(--color-accent-500);
   transition: height 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .brand:hover .brand__mark {
@@ -125,7 +125,7 @@ watch(() => useRoute().fullPath, () => {
 
 .brand__name {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--color-steel-100);
@@ -134,7 +134,7 @@ watch(() => useRoute().fullPath, () => {
 /* ── Navigation ─────────────────────────────────────────────────────────── */
 .navlink {
   position: relative;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-steel-300);
   transition: color 180ms ease;
@@ -146,7 +146,7 @@ watch(() => useRoute().fullPath, () => {
   bottom: -0.4rem;
   width: 100%;
   height: 1px;
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
   scale: 0 1;
   transform-origin: left;
   transition: scale 250ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -176,10 +176,10 @@ watch(() => useRoute().fullPath, () => {
 }
 
 .search__input {
-  width: 6rem;
+  width: 7rem;
   background: transparent;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-steel-100);
   transition: width 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -226,14 +226,15 @@ watch(() => useRoute().fullPath, () => {
 }
 
 .mobile__link {
-  padding: 0.75rem 0;
+  padding: 0.95rem 0;
   border-bottom: 1px solid var(--color-graphite-800);
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: var(--text-lg);
+  font-family: var(--font-display);
+  font-weight: 600;
   color: var(--color-steel-200);
 }
 .mobile__link.router-link-active {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 @media (min-width: 1024px) {
   .mobile {

@@ -76,7 +76,7 @@ useSeoMeta({
 .legal__mark {
   width: 1.75rem;
   height: 1px;
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
 }
 
 .legal__title {
@@ -108,7 +108,7 @@ useSeoMeta({
 
 .block__title {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -117,17 +117,17 @@ useSeoMeta({
 
 .block__text {
   margin-top: 0.875rem;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   line-height: 1.7;
   color: var(--color-steel-300);
 }
 
 .block__text :deep(a) {
-  color: var(--color-swiss-300);
+  color: var(--color-accent-300);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .block__text :deep(a:hover) {
-  color: var(--color-swiss-200);
+  color: var(--color-accent-200);
 }
 </style>

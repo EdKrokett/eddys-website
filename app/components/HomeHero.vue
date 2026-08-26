@@ -152,7 +152,7 @@ const columns = computed<string[][]>(() => {
   z-index: 0;
   display: flex;
   gap: 12px;
-  opacity: 0.6;
+  opacity: 0.92;
 }
 
 .hero__col {
@@ -192,26 +192,41 @@ const columns = computed<string[][]>(() => {
   object-fit: cover;
   display: block;
   opacity: 0;
-  filter: grayscale(0.3) contrast(1.05);
+  filter: grayscale(0.12) contrast(1.04) saturate(1.05);
   transition: opacity 500ms ease;
 }
 .hero__tile-img--loaded {
   opacity: 1;
 }
 
-/* Schleier: links dicht genug für den Text, rechts offener, damit die Fotos
-   sichtbar bleiben — sonst wäre die Wand nur teure Dekoration. */
+/*
+ * Schleier bewusst als GEFORMTE Fläche statt als gleichmäßiger Verlauf über alles:
+ * Er ist nur dort dicht, wo Text steht (linke Spalte), und gibt die rechten zwei
+ * Drittel fast vollständig frei. So bleiben Eddys Fotos kräftig, ohne dass die
+ * Schrift an Kontrast verliert — ein gleichmäßiger Verlauf müsste überall so dicht
+ * sein wie an der schwierigsten Stelle und würde die Wand grau waschen.
+ */
 .hero__veil {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(
-    100deg,
-    rgba(14, 15, 18, 0.97) 0%,
-    rgba(14, 15, 18, 0.93) 45%,
-    rgba(14, 15, 18, 0.72) 72%,
-    rgba(14, 15, 18, 0.45) 100%
-  );
+  background:
+    linear-gradient(
+      100deg,
+      rgba(14, 15, 18, 0.96) 0%,
+      rgba(14, 15, 18, 0.9) 30%,
+      rgba(14, 15, 18, 0.52) 56%,
+      rgba(14, 15, 18, 0.14) 80%,
+      rgba(14, 15, 18, 0.06) 100%
+    ),
+    /* Kanten leicht abdunkeln, damit die Sektion sauber abschließt */
+    linear-gradient(
+      to bottom,
+      rgba(14, 15, 18, 0.5) 0%,
+      transparent 18%,
+      transparent 82%,
+      rgba(14, 15, 18, 0.55) 100%
+    );
 }
 
 @keyframes hero-drift {
@@ -225,9 +240,10 @@ const columns = computed<string[][]>(() => {
   .hero__veil {
     background: linear-gradient(
       180deg,
-      rgba(14, 15, 18, 0.82) 0%,
-      rgba(14, 15, 18, 0.93) 40%,
-      rgba(14, 15, 18, 0.97) 100%
+      rgba(14, 15, 18, 0.45) 0%,
+      rgba(14, 15, 18, 0.82) 25%,
+      rgba(14, 15, 18, 0.9) 55%,
+      rgba(14, 15, 18, 0.94) 100%
     );
   }
 }
@@ -244,11 +260,25 @@ const columns = computed<string[][]>(() => {
 /* ── Typografie ─────────────────────────────────────────────────────────── */
 .hero__kicker {
   margin-bottom: 1.75rem;
+  color: var(--color-steel-300);
+  text-shadow: 0 1px 16px rgba(14, 15, 18, 0.9);
+}
+/* Hochkant lief die weite Laufweite bis an den Bildschirmrand und die Zeile
+   landete mitten auf einem hellen Foto — enger gesetzt bleibt sie im Textblock. */
+@media (max-width: 560px) {
+  .hero__kicker {
+    letter-spacing: 0.14em;
+    font-size: var(--text-2xs);
+    gap: 0.6rem;
+  }
+  .hero__kicker-mark {
+    width: 1.5rem;
+  }
 }
 .hero__kicker-mark {
-  width: 2rem;
-  height: 1px;
-  background: var(--color-swiss-500);
+  width: 2.25rem;
+  height: 2px;
+  background: var(--color-accent-400);
 }
 
 .hero__name {
@@ -256,6 +286,7 @@ const columns = computed<string[][]>(() => {
   line-height: 0.92;
   letter-spacing: -0.045em;
   color: var(--color-steel-100);
+  text-shadow: 0 2px 40px rgba(14, 15, 18, 0.9);
 }
 /* Auf schmalen Screens umbrechen, auf breiten in einer Zeile halten. */
 .hero__name-break::before {
@@ -270,10 +301,13 @@ const columns = computed<string[][]>(() => {
 
 .hero__lead {
   margin-top: clamp(1.5rem, 3vw, 2.25rem);
-  max-width: 34rem;
-  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
-  line-height: 1.7;
-  color: var(--color-steel-300);
+  max-width: 36rem;
+  font-size: clamp(1.125rem, 1.7vw, 1.375rem);
+  line-height: 1.65;
+  color: var(--color-steel-200);
+  /* Der Text liegt auf Fotos — ein weicher Schatten hält ihn auch dort ruhig,
+     wo unter dem Schleier eine helle Bildstelle durchkommt. */
+  text-shadow: 0 1px 24px rgba(14, 15, 18, 0.85);
 }
 
 /* ── CTAs ───────────────────────────────────────────────────────────────── */
@@ -281,37 +315,47 @@ const columns = computed<string[][]>(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.875rem;
-  margin-top: clamp(2rem, 4vw, 2.75rem);
+  margin-top: clamp(2.25rem, 4vw, 3rem);
 }
 
 .hero__cta {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  border: 1px solid var(--color-steel-600);
-  padding: 0.9rem 1.75rem;
+  border: 1px solid var(--color-steel-500);
+  padding: 1.05rem 2rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
+  font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-100);
-  background: rgba(14, 15, 18, 0.55);
-  backdrop-filter: blur(6px);
+  background: rgba(14, 15, 18, 0.68);
+  backdrop-filter: blur(8px);
   transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
 }
 .hero__cta:hover {
-  border-color: var(--color-steel-400);
-  background: rgba(14, 15, 18, 0.85);
+  border-color: var(--color-accent-300);
+  color: var(--color-accent-200);
+  background: rgba(14, 15, 18, 0.9);
 }
 
+/*
+ * Teal-Fläche mit DUNKLER Schrift: 6,30:1. Weiße Schrift auf demselben Teal
+ * käme nur auf 3,04:1 und verfehlte AA für diese Schriftgröße — deshalb hier
+ * bewusst invertiert statt der naheliegenden weißen Beschriftung.
+ */
 .hero__cta--primary {
-  border-color: var(--color-swiss-500);
-  background: var(--color-swiss-500);
-  color: #fff;
+  border-color: var(--color-accent-500);
+  background: var(--color-accent-500);
+  color: var(--color-graphite-950);
+  font-weight: 600;
 }
 .hero__cta--primary:hover {
-  border-color: var(--color-swiss-400);
-  background: var(--color-swiss-400);
+  border-color: var(--color-accent-300);
+  background: var(--color-accent-300);
+  color: var(--color-graphite-950);
 }
 
 .hero__cta-icon {

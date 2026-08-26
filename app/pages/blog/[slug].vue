@@ -93,7 +93,7 @@ useSeoMeta({
 .post__head {
   padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2rem, 4vw, 3rem);
   background:
-    radial-gradient(70% 80% at 10% 0%, rgba(200, 16, 46, 0.06) 0%, transparent 60%),
+    radial-gradient(70% 80% at 10% 0%, rgba(33, 164, 163, 0.06) 0%, transparent 60%),
     var(--color-graphite-950);
   border-bottom: 1px solid var(--color-graphite-700);
 }
@@ -103,14 +103,14 @@ useSeoMeta({
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-steel-400);
   transition: color 200ms ease;
 }
 .post__back:hover {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 
 .post__meta {
@@ -119,7 +119,7 @@ useSeoMeta({
   gap: 0.75rem;
   margin-top: 2rem;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.1em;
   color: var(--color-steel-500);
   font-variant-numeric: tabular-nums;
@@ -133,7 +133,7 @@ useSeoMeta({
 
 .post__cat {
   text-transform: uppercase;
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 
 .post__title {
@@ -173,7 +173,7 @@ useSeoMeta({
 .post__tags-label {
   margin-right: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-steel-600);
@@ -182,7 +182,7 @@ useSeoMeta({
 .post__tag {
   border: 1px solid var(--color-graphite-700);
   padding: 0.25rem 0.7rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-steel-400);
 }
 
@@ -197,15 +197,15 @@ useSeoMeta({
   align-items: center;
   gap: 0.6rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-200);
-  border-bottom: 1px solid var(--color-swiss-500);
+  border-bottom: 1px solid var(--color-accent-500);
   padding-bottom: 0.35rem;
   transition: color 200ms ease;
 }
 .post__foot-link:hover {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 </style>

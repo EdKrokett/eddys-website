@@ -184,14 +184,14 @@ useSeoMeta({
 .head {
   padding: clamp(3.5rem, 8vw, 5.5rem) 0 clamp(2.5rem, 5vw, 3.5rem);
   background:
-    radial-gradient(80% 70% at 88% 0%, rgba(200, 16, 46, 0.07) 0%, transparent 55%),
+    radial-gradient(80% 70% at 88% 0%, rgba(33, 164, 163, 0.07) 0%, transparent 55%),
     var(--color-graphite-950);
 }
 
 .head__mark {
   width: 1.75rem;
   height: 1px;
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
 }
 
 .head__title {
@@ -205,9 +205,9 @@ useSeoMeta({
 .head__lead {
   margin-top: 1.25rem;
   max-width: 34rem;
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  color: var(--color-steel-400);
+  font-size: var(--text-lg);
+  line-height: 1.65;
+  color: var(--color-steel-300);
 }
 
 /* ── Filter ─────────────────────────────────────────────────────────────── */
@@ -239,7 +239,7 @@ useSeoMeta({
   border: 1px solid var(--color-graphite-700);
   padding: 0.4rem 0.9rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-steel-400);
@@ -251,8 +251,8 @@ useSeoMeta({
 }
 .chip--active {
   color: var(--color-steel-100);
-  border-color: var(--color-swiss-500);
-  background: color-mix(in oklab, var(--color-swiss-500) 14%, transparent);
+  border-color: var(--color-accent-500);
+  background: color-mix(in oklab, var(--color-accent-500) 14%, transparent);
 }
 
 .filters__search {
@@ -272,7 +272,7 @@ useSeoMeta({
   width: 100%;
   background: transparent;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-steel-100);
 }
 .filters__input::placeholder {
@@ -290,7 +290,7 @@ useSeoMeta({
 .list__count {
   margin-bottom: 1.75rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-600);
@@ -300,11 +300,11 @@ useSeoMeta({
 .state {
   padding: 3rem 0;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--color-steel-500);
 }
 .state--error {
-  color: var(--color-swiss-300);
+  color: var(--color-accent-300);
 }
 .state__hint {
   margin-top: 0.5rem;
@@ -330,9 +330,9 @@ useSeoMeta({
 
 .state__reset {
   margin-top: 1rem;
-  border-bottom: 1px solid var(--color-swiss-500);
+  border-bottom: 1px solid var(--color-accent-500);
   padding-bottom: 0.2rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-steel-200);
@@ -352,15 +352,15 @@ useSeoMeta({
   border: 1px solid var(--color-graphite-600);
   padding: 0.9rem 2rem;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-200);
   transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
 }
 .more__button:hover:not(:disabled) {
-  border-color: var(--color-swiss-500);
-  color: var(--color-swiss-300);
+  border-color: var(--color-accent-500);
+  color: var(--color-accent-300);
 }
 .more__button:disabled {
   color: var(--color-steel-600);

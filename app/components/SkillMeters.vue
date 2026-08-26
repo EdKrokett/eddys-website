@@ -56,21 +56,21 @@ defineProps<{ groups: CvSkillGroup[] }>()
 }
 
 .skills__group-title {
-  padding-bottom: 0.875rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--color-graphite-700);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--color-steel-400);
+  color: var(--color-accent-300);
 }
 
 .skills__list {
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.15rem;
 }
 
 .skills__item {
@@ -81,23 +81,27 @@ defineProps<{ groups: CvSkillGroup[] }>()
 }
 
 .skills__name {
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   color: var(--color-steel-200);
 }
 
 /* Segmentanzeige statt weichem Balken — exakt ablesbar. */
 .skills__meter {
   display: inline-flex;
-  gap: 3px;
+  gap: 4px;
   flex: none;
 }
 
 .skills__segment {
-  width: 14px;
-  height: 3px;
+  width: 20px;
+  height: 5px;
   background: var(--color-graphite-700);
+  transition: background 300ms ease;
 }
 .skills__segment--on {
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
+}
+.skills__item:hover .skills__segment--on {
+  background: var(--color-accent-300);
 }
 </style>

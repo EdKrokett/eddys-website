@@ -64,3 +64,19 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Welche CSS-Klassen liefert eine Fremdquelle (WordPress-Blöcke, eingebettete Widgets) mit,
   für die wir keine Regeln definiert haben? Fehlendes Layout-CSS sieht aus wie ein Bug im
   Inhalt, nicht wie eine Lücke im Stylesheet.
+
+### Farbe & Kontrast (abgeleitet 2026-08-26)
+
+- Ist der Kontrast jeder Farbkombination nachgerechnet statt geschätzt? WCAG AA verlangt
+  4,5:1 für Fließtext und 3:1 für große Schrift. Besonders prüfen: Akzentfarben auf dunklem
+  Grund und Text auf farbigen Flächen — weiße Schrift auf einer mittelhellen Fläche ist
+  fast immer zu schwach.
+- Wird eine Farbe, die nur als Dekoration gedacht war, irgendwo doch für kleine Schrift
+  verwendet (Meta-Zeilen, Labels, Zeitangaben)?
+
+### Effekte ohne Scroll-Kontext (abgeleitet 2026-08-26)
+
+- Was passiert mit diesem Effekt, wenn nicht gescrollt werden kann — Druckansicht,
+  Vollseiten-Screenshot, Reader-Modus, sehr hohes Viewport?
+- Startet eine Animation bei `opacity: 0` oder `visibility: hidden`? Dann ist der
+  Ausfallmodus „Inhalt komplett unsichtbar" — gibt es einen Reset, der das auffängt?

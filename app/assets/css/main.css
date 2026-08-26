@@ -11,15 +11,22 @@
  *
  * - GRUNDFLÄCHE   Grafit, wie ein geschwärztes Zifferblatt. Dark-first, es gibt
  *                 bewusst kein Light-Pendant (nuxt.config.ts: colorMode dark).
- * - INDEXE        Feine Strich-Marken (--index-rail) als wiederkehrendes Motiv —
- *                 an Timelines, Sektionsköpfen, Skill-Skalen.
+ * - INDEXE        Feine Strich-Marken als wiederkehrendes Motiv — an Timelines,
+ *                 Sektionsköpfen, Skill-Skalen, Sektionstrennern.
  * - ZAHLEN        Jahreszahlen, Distanzen, Zeiten in Mono. Zahlen sind hier
  *                 Gestaltungselement, nicht Beiwerk (Fraunces für Prosa, Mono für Fakten).
- * - SEKUNDENZEIGER Ein einziges kräftiges Rot, sparsam gesetzt, nie flächig.
+ * - AKZENT        Ein einziges Teal, sparsam gesetzt, nie großflächig als Fläche
+ *                 mit heller Schrift (siehe Kontrast-Notiz unten).
  * - HAARLINIEN    1px-Rahmen statt Schatten. Präzision statt Weichzeichner.
  *
- * Bewusst NICHT: die Teal/Cream-Optik von trusted blogs (das ist die Firma, nicht
- * die Person) und kein Standard-Card-Grid mit Purple-Gradient.
+ * FARBWECHSEL 26.08.2026: Das ursprüngliche Swiss-Rot (#c8102e) ist Eddys
+ * trusted-blogs-Teal gewichen. Nachgemessen: Das Rot erreichte auf Grafit nur
+ * 3,13:1 und verfehlte damit die WCAG-AA-Schwelle von 4,5:1 für Fließtext — das
+ * Teal schafft 6,05:1, die helle Variante 8,87:1. Der Wechsel ist also nicht nur
+ * Geschmack, er behebt ein echtes Lesbarkeitsproblem.
+ *
+ * Bewusst NICHT: die helle Cream-Fläche von trusted blogs (das ist die Firma,
+ * nicht die Person) und kein Standard-Card-Grid mit Purple-Gradient.
  */
 
 @theme static {
@@ -27,18 +34,35 @@
   --font-sans: 'Manrope', ui-sans-serif, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Sekundenzeiger — kräftiges Rot, bewusst kein Tailwind-Stock-Rot */
-  --color-swiss-50: #fdf2f2;
-  --color-swiss-100: #fbe1e2;
-  --color-swiss-200: #f5c0c4;
-  --color-swiss-300: #ea939b;
-  --color-swiss-400: #da5c6c;
-  --color-swiss-500: #c8102e;
-  --color-swiss-600: #ac0c28;
-  --color-swiss-700: #8c0b23;
-  --color-swiss-800: #6e0c1f;
-  --color-swiss-900: #560d1c;
-  --color-swiss-950: #30050e;
+  /* ── Typo-Skala ────────────────────────────────────────────────────────
+   * Bewusst großzügiger als der Tailwind-Default: Die erste Fassung lag
+   * durchgehend bei 0,7–0,95rem und war schlicht zu klein zum Lesen.
+   * Untergrenze für Fließtext ist jetzt 17px, für Mono-Labels 13px.        */
+  --text-2xs: 0.75rem;      /* 12px — nur sehr kurze Marken, nie Fließtext */
+  --text-xs: 0.8125rem;     /* 13px — Mono-Labels, Kicker, Meta            */
+  --text-sm: 0.9375rem;     /* 15px — Sekundärtext, Bildunterschriften     */
+  --text-base: 1.0625rem;   /* 17px — Fließtext                            */
+  --text-md: 1.1875rem;     /* 19px — betonter Fließtext                   */
+  --text-lg: 1.375rem;      /* 22px — Lead                                 */
+  --text-xl: 1.625rem;      /* 26px                                        */
+
+  /* ── Akzent: trusted-blogs-Teal ───────────────────────────────────────
+   * Kontrast auf Grafit (#131418) nachgerechnet:
+   *   accent-300 #58C5BB → 8,87:1  → für Text und alles Kleinteilige
+   *   accent-500 #21A4A3 → 6,05:1  → Linien, Marken, Flächen mit DUNKLER Schrift
+   *   accent-700 #077E6F → 3,70:1  → nur dekorativ, nie für Text
+   * Auf einer Teal-Fläche gehört dunkle Schrift (6,30:1), keine weiße (3,04:1). */
+  --color-accent-50: #eefbf9;
+  --color-accent-100: #d1f5f4;
+  --color-accent-200: #a6e9e5;
+  --color-accent-300: #58c5bb;
+  --color-accent-400: #35b3ad;
+  --color-accent-500: #21a4a3;
+  --color-accent-600: #1b9488;
+  --color-accent-700: #077e6f;
+  --color-accent-800: #0a6459;
+  --color-accent-900: #0b5049;
+  --color-accent-950: #03302c;
 
   /* Grafit — Zifferblatt */
   --color-graphite-950: #0e0f12;
@@ -50,31 +74,30 @@
   --color-graphite-500: #4a4d56;
 
   /* Stahl — gebürstete Oberfläche, Textfarben */
-  --color-steel-100: #f3f1ec;
-  --color-steel-200: #dfe1e7;
-  --color-steel-300: #c1c5cf;
-  --color-steel-400: #949aa6;
-  --color-steel-500: #6f757f;
-  --color-steel-600: #545961;
+  --color-steel-100: #f4f3ef;
+  --color-steel-200: #e2e4ea;
+  --color-steel-300: #c7cbd5;
+  --color-steel-400: #9ea4b1;
+  --color-steel-500: #7a808b;
+  --color-steel-600: #5c6169;
 
   /* Messing — warmer Sekundärakzent, Uhrwerk-Anmutung */
-  --color-brass-300: #e0c088;
-  --color-brass-400: #c9a25c;
+  --color-brass-300: #e6c894;
+  --color-brass-400: #cfa864;
   --color-brass-500: #a8823f;
 
   --ui-radius: 0.125rem;
 
-  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-rise: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 
   @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(1.25rem);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(1.5rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(2rem); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
 
@@ -82,12 +105,18 @@
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
+    /* Fraunces ist eine variable Schrift mit optischer Achse — größere Grade
+       bekommen dadurch feinere Serifen statt einer plump skalierten Zeichnung. */
+    font-optical-sizing: auto;
   }
 
   body {
     background: var(--color-graphite-900);
     color: var(--color-steel-100);
     font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
     /* Feine Körnung — nimmt der Fläche das Digitale, wie mattiertes Metall. */
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   }
@@ -95,12 +124,17 @@
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   ::selection {
-    background: var(--color-swiss-500);
-    color: #fff;
+    background: var(--color-accent-500);
+    color: var(--color-graphite-950);
   }
 
   button,
@@ -111,9 +145,17 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-swiss-400);
+    outline: 2px solid var(--color-accent-300);
     outline-offset: 3px;
   }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--color-graphite-950); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-graphite-600);
+    border: 2px solid var(--color-graphite-950);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-graphite-500); }
 }
 
 /* ── Wiederkehrende Motive ───────────────────────────────────────────────── */
@@ -122,11 +164,11 @@
 @utility kicker {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.875rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 500;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--color-steel-400);
 }
@@ -145,33 +187,50 @@
   border: 1px solid var(--color-graphite-700);
 }
 
+/*
+ * Einblenden beim Scrollen — als reine CSS-Progressive-Enhancement über
+ * `animation-timeline: view()`. Kein JavaScript, kein IntersectionObserver,
+ * kein Layout-Thrashing; wo der Browser es nicht kann (aktuell Firefox), ist
+ * der Inhalt schlicht sofort sichtbar statt unsichtbar hängenzubleiben.
+ */
+@utility reveal {
+  @supports (animation-timeline: view()) {
+    @media screen and (prefers-reduced-motion: no-preference) {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+}
+
 @layer components {
   /* WordPress-Fließtext (v-html) — Typografie für fremdes HTML. */
   .wp-content {
-    font-size: 1.0625rem;
-    line-height: 1.75;
+    font-size: var(--text-md);
+    line-height: 1.8;
     color: var(--color-steel-200);
   }
   .wp-content > * + * {
-    margin-top: 1.25em;
+    margin-top: 1.35em;
   }
   .wp-content h2,
   .wp-content h3,
   .wp-content h4 {
     margin-top: 2.25em;
     color: var(--color-steel-100);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
-  .wp-content h2 { font-size: 1.6rem; }
-  .wp-content h3 { font-size: 1.3rem; }
+  .wp-content h2 { font-size: 1.85rem; }
+  .wp-content h3 { font-size: 1.45rem; }
   .wp-content a {
-    color: var(--color-swiss-300);
-    text-underline-offset: 3px;
+    color: var(--color-accent-300);
+    text-underline-offset: 4px;
     text-decoration: underline;
     text-decoration-thickness: 1px;
+    transition: color 200ms ease;
   }
   .wp-content a:hover {
-    color: var(--color-swiss-200);
+    color: var(--color-accent-200);
   }
   .wp-content img,
   .wp-content iframe {
@@ -180,11 +239,12 @@
     border-radius: 2px;
   }
   .wp-content blockquote {
-    border-left: 2px solid var(--color-swiss-500);
-    padding-left: 1.25rem;
+    border-left: 2px solid var(--color-accent-500);
+    padding-left: 1.5rem;
     font-family: var(--font-display);
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     font-style: italic;
+    line-height: 1.55;
     color: var(--color-steel-300);
   }
   .wp-content ul,
@@ -194,6 +254,7 @@
   .wp-content ul { list-style: disc; }
   .wp-content ol { list-style: decimal; }
   .wp-content li + li { margin-top: 0.5em; }
+  .wp-content li::marker { color: var(--color-accent-500); }
   .wp-content code {
     font-family: var(--font-mono);
     font-size: 0.9em;
@@ -201,14 +262,16 @@
     padding: 0.15em 0.4em;
     border-radius: 2px;
   }
+  .wp-content strong { color: var(--color-steel-100); }
+
   .wp-content figure {
     margin-inline: 0;
   }
 
   .wp-content figcaption {
-    margin-top: 0.5rem;
+    margin-top: 0.6rem;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--color-steel-500);
   }
 
@@ -259,13 +322,13 @@
   }
   .wp-content table {
     width: 100%;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
     border-collapse: collapse;
   }
   .wp-content th,
   .wp-content td {
     border: 1px solid var(--color-graphite-700);
-    padding: 0.5rem 0.75rem;
+    padding: 0.6rem 0.85rem;
     text-align: left;
   }
 }
@@ -280,5 +343,42 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Druckansicht. Wichtiger Sicherheitsnetz-Teil: Die Scroll-Reveals starten bei
+ * opacity 0 — ohne diesen Block käme aus dem Drucker ein leeres Blatt, weil beim
+ * Drucken nicht gescrollt wird. Der Lebenslauf ist genau die Seite, die jemand
+ * ausdrucken will, deshalb ist das kein theoretischer Fall.
+ */
+@media print {
+  * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    background-image: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  h1, h2, h3, h4, p, li, dd, dt {
+    color: #000;
+  }
+
+  header,
+  footer,
+  nav,
+  .reveal::after {
+    display: none;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #444;
   }
 }

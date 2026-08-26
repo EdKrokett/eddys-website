@@ -219,3 +219,97 @@ links / Mitte / rechts" verwies. Verifiziert nach dem Fix: 3 Bilder à 227px neb
 
 **→ AUDIT-PERSPEKTIVE:** „Welche CSS-Klassen liefert die Fremdquelle mit, für die wir keine
 Regeln haben?"
+
+---
+
+### Akzentfarbe verfehlte die Kontrast-Mindestanforderung
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Handwerklich |
+| Gefunden | 2026-08-26 |
+| Schwere | Mittel |
+
+**FALSCH:**
+```css
+--color-swiss-500: #c8102e;   /* auf Grafit #131418 nur 3,13:1 */
+
+.cta--primary {
+  background: var(--color-swiss-500);
+  color: #fff;               /* weiß auf diesem Rot: 3,04:1 */
+}
+```
+
+**RICHTIG:**
+```css
+--color-accent-500: #21a4a3;  /* auf Grafit 6,05:1 */
+--color-accent-300: #58c5bb;  /* 8,87:1 — für Text und Kleinteiliges */
+
+.cta--primary {
+  background: var(--color-accent-500);
+  color: var(--color-graphite-950);  /* dunkel auf Teal: 6,30:1 */
+}
+```
+
+**WARUM:** Die Akzentfarbe wurde nach Gefühl gewählt und nie nachgemessen. WCAG AA verlangt
+4,5:1 für Fließtext; das Rot erreichte auf der dunklen Grundfläche nur 3,13:1 und wurde
+trotzdem für Meta-Zeilen, Kategorie-Labels und Zeitangaben verwendet — also durchgehend für
+kleine Schrift. Der zweite Fehler war die naheliegende weiße Beschriftung auf der Akzentfläche
+(3,04:1); auf einer mittelhellen Farbe gehört dunkle Schrift, nicht helle.
+
+Der Wechsel auf Eddys trusted-blogs-Teal war als reine Geschmacksfrage angefragt und hat
+nebenbei ein echtes Lesbarkeitsproblem behoben — aufgefallen ist es erst, weil vor dem
+Einsetzen der neuen Farbe gerechnet statt geschätzt wurde.
+
+**→ AUDIT-PERSPEKTIVE:** „Ist der Kontrast jeder Farbkombination nachgerechnet — besonders für
+kleine Schrift und für Text auf farbigen Flächen?"
+
+---
+
+### Scroll-Animation startet bei `opacity: 0` und macht die Druckansicht leer
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Unvollständig |
+| Gefunden | 2026-08-26 |
+| Schwere | Mittel |
+
+**FALSCH:**
+```css
+@utility reveal {
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: reveal linear both;   /* startet bei opacity: 0 */
+      animation-timeline: view();
+    }
+  }
+}
+```
+
+**RICHTIG:**
+```css
+@utility reveal {
+  @supports (animation-timeline: view()) {
+    @media screen and (prefers-reduced-motion: no-preference) { /* screen! */
+      animation: reveal linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+@media print {
+  * { animation: none !important; opacity: 1 !important; }
+}
+```
+
+**WARUM:** Scroll-gebundene Einblendungen setzen Inhalte vor dem Eintreten auf `opacity: 0`.
+Beim Drucken wird nicht gescrollt — ohne `screen` in der Media Query und ohne
+`@media print`-Reset kommen leere Seiten aus dem Drucker. Ausgerechnet der Lebenslauf ist die
+Seite, die jemand ausdrucken will, das ist also kein theoretischer Fall.
+
+Nebenbefund für die eigene Prüfung: Vollseiten-Screenshots zeigen aus demselben Grund alles
+unterhalb des Falzes unsichtbar. Das Prüfskript muss erst durch die Seite scrollen und
+danach verifizieren, dass keine `.reveal`-Sektion unter `opacity: 0.99` bleibt — sonst hält
+man einen echten Fehler für ein Artefakt oder umgekehrt.
+
+**→ AUDIT-PERSPEKTIVE:** „Was passiert mit diesem Effekt, wenn nicht gescrollt werden kann?"

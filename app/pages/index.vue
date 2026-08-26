@@ -15,7 +15,7 @@ useSeoMeta({
     <HomeDoors />
 
     <!-- ═══════════════ BLOG-VORSCHAU (live von blog.eduard-andrae.de) ═══════════════ -->
-    <section class="section">
+    <section class="section reveal">
       <UContainer>
         <div class="section__head">
           <SectionHead
@@ -47,7 +47,7 @@ useSeoMeta({
     </section>
 
     <!-- ═══════════════ KONTAKT-BAND ═══════════════ -->
-    <section class="cta">
+    <section class="cta reveal">
       <UContainer>
         <div class="cta__inner">
           <div>
@@ -88,7 +88,7 @@ useSeoMeta({
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-steel-300);
@@ -97,17 +97,17 @@ useSeoMeta({
   transition: color 200ms ease, border-color 200ms ease;
 }
 .section__all:hover {
-  color: var(--color-swiss-400);
-  border-color: var(--color-swiss-500);
+  color: var(--color-accent-400);
+  border-color: var(--color-accent-500);
 }
 
 .state {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--color-steel-500);
 }
 .state--error {
-  color: var(--color-swiss-300);
+  color: var(--color-accent-300);
 }
 .state__link {
   display: block;
@@ -121,7 +121,7 @@ useSeoMeta({
 .cta {
   border-top: 1px solid var(--color-graphite-700);
   background:
-    radial-gradient(90% 140% at 85% 50%, rgba(200, 16, 46, 0.09) 0%, transparent 60%),
+    radial-gradient(90% 140% at 85% 50%, rgba(33, 164, 163, 0.09) 0%, transparent 60%),
     var(--color-graphite-950);
   padding: clamp(3.5rem, 8vw, 6rem) 0;
 }
@@ -137,7 +137,7 @@ useSeoMeta({
 .cta__mark {
   width: 1.75rem;
   height: 1px;
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
 }
 
 .cta__title {
@@ -154,15 +154,15 @@ useSeoMeta({
   border: 1px solid var(--color-steel-600);
   padding: 0.9rem 1.75rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-100);
   transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
 }
 .cta__button:hover {
-  background: var(--color-swiss-500);
-  border-color: var(--color-swiss-500);
+  background: var(--color-accent-500);
+  border-color: var(--color-accent-500);
   color: #fff;
 }
 </style>

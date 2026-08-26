@@ -120,7 +120,7 @@ useSeoMeta({
 .head {
   padding: clamp(3.5rem, 8vw, 5.5rem) 0 clamp(2.5rem, 5vw, 3.5rem);
   background:
-    radial-gradient(80% 70% at 15% 0%, rgba(200, 16, 46, 0.07) 0%, transparent 55%),
+    radial-gradient(80% 70% at 15% 0%, rgba(33, 164, 163, 0.07) 0%, transparent 55%),
     var(--color-graphite-950);
   border-bottom: 1px solid var(--color-graphite-700);
 }
@@ -128,7 +128,7 @@ useSeoMeta({
 .head__mark {
   width: 1.75rem;
   height: 1px;
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
 }
 
 .head__title {
@@ -142,9 +142,9 @@ useSeoMeta({
 .head__lead {
   margin-top: 1.25rem;
   max-width: 32rem;
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  color: var(--color-steel-400);
+  font-size: var(--text-lg);
+  line-height: 1.65;
+  color: var(--color-steel-300);
 }
 
 .body {
@@ -179,7 +179,7 @@ useSeoMeta({
 
 .channel__num {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--color-steel-600);
   padding-top: 0.4rem;
   font-variant-numeric: tabular-nums;
@@ -193,15 +193,15 @@ useSeoMeta({
 .channel__value {
   margin-top: 0.4rem;
   font-family: var(--font-mono);
-  font-size: 0.9rem;
-  color: var(--color-swiss-400);
+  font-size: var(--text-base);
+  color: var(--color-accent-400);
   word-break: break-word;
 }
 
 .channel__hint {
   margin-top: 0.6rem;
   max-width: 30rem;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   line-height: 1.6;
   color: var(--color-steel-500);
 }
@@ -211,7 +211,7 @@ useSeoMeta({
   transition: color 200ms ease, translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .channel:hover .channel__icon {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
   translate: 0.2rem -0.2rem;
 }
 
@@ -228,13 +228,13 @@ useSeoMeta({
   gap: 0.5rem;
   border: 1px solid var(--color-graphite-700);
   padding: 0.5rem 0.9rem;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--color-steel-300);
   transition: color 200ms ease, border-color 200ms ease;
 }
 .social:hover {
   color: var(--color-steel-100);
-  border-color: var(--color-swiss-500);
+  border-color: var(--color-accent-500);
 }
 .social__icon {
   color: var(--color-steel-600);
@@ -258,7 +258,7 @@ useSeoMeta({
 
 .place__label {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-steel-600);
@@ -267,7 +267,7 @@ useSeoMeta({
 
 .place__text {
   max-width: 30rem;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   line-height: 1.7;
   color: var(--color-steel-400);
 }

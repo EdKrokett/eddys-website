@@ -28,9 +28,9 @@ defineProps<{
 
 <style scoped>
 .head__mark {
-  width: 1.75rem;
-  height: 1px;
-  background: var(--color-swiss-500);
+  width: 2rem;
+  height: 2px;
+  background: var(--color-accent-400);
 }
 
 .head__title {
@@ -41,10 +41,10 @@ defineProps<{
 }
 
 .head__lead {
-  margin-top: 1rem;
-  max-width: 38rem;
-  font-size: 1rem;
+  margin-top: 1.15rem;
+  max-width: 40rem;
+  font-size: var(--text-md);
   line-height: 1.7;
-  color: var(--color-steel-400);
+  color: var(--color-steel-300);
 }
 </style>

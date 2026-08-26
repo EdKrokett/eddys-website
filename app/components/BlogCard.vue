@@ -64,12 +64,32 @@ defineProps<{ post: WordPressBlogPost }>()
   flex-direction: column;
   border: 1px solid var(--color-graphite-700);
   background: var(--color-graphite-850);
-  transition: border-color 250ms ease, background 250ms ease, translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    border-color 300ms ease,
+    background 300ms ease,
+    translate 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card:hover {
-  border-color: var(--color-graphite-500);
+  border-color: var(--color-accent-700);
   background: var(--color-graphite-800);
-  translate: 0 -3px;
+  translate: 0 -4px;
+}
+/* Feine Akzentkante, die beim Hover von links einläuft — greift den
+   Indexstrich-Gedanken auf, statt eines beliebigen Schattens. */
+.card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--color-accent-500);
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card:hover::after {
+  scale: 1 1;
 }
 
 .card__media {
@@ -83,7 +103,7 @@ defineProps<{ post: WordPressBlogPost }>()
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: grayscale(0.3);
+  filter: grayscale(0.15);
   transition: filter 400ms ease, scale 600ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card:hover .card__img {
@@ -100,7 +120,7 @@ defineProps<{ post: WordPressBlogPost }>()
   height: 100%;
   overflow: hidden;
   background:
-    radial-gradient(75% 100% at 50% 100%, rgba(200, 16, 46, 0.1) 0%, transparent 65%),
+    radial-gradient(75% 100% at 50% 100%, rgba(33, 164, 163, 0.1) 0%, transparent 65%),
     var(--color-graphite-900);
 }
 
@@ -129,7 +149,7 @@ defineProps<{ post: WordPressBlogPost }>()
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 1.25rem 1.375rem 1.75rem;
+  padding: 1.5rem 1.625rem 2rem;
 }
 
 .card__meta {
@@ -137,7 +157,7 @@ defineProps<{ post: WordPressBlogPost }>()
   align-items: center;
   gap: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.1em;
   color: var(--color-steel-500);
   font-variant-numeric: tabular-nums;
@@ -147,14 +167,15 @@ defineProps<{ post: WordPressBlogPost }>()
   border-left: 1px solid var(--color-graphite-600);
   padding-left: 0.75rem;
   text-transform: uppercase;
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 
 .card__title {
-  margin-top: 0.625rem;
-  font-size: 1.125rem;
-  line-height: 1.35;
+  margin-top: 0.75rem;
+  font-size: 1.375rem;
+  line-height: 1.28;
   color: var(--color-steel-100);
+  transition: color 250ms ease;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -162,10 +183,14 @@ defineProps<{ post: WordPressBlogPost }>()
   overflow: hidden;
 }
 
+.card:hover .card__title {
+  color: var(--color-accent-200);
+}
+
 .card__excerpt {
-  margin-top: 0.625rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
+  margin-top: 0.75rem;
+  font-size: var(--text-base);
+  line-height: 1.62;
   color: var(--color-steel-400);
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -180,17 +205,17 @@ defineProps<{ post: WordPressBlogPost }>()
   right: 0;
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  background: var(--color-graphite-950);
-  border-left: 1px solid var(--color-graphite-700);
-  border-bottom: 1px solid var(--color-graphite-700);
-  color: var(--color-steel-400);
+  width: 2.75rem;
+  height: 2.75rem;
+  background: var(--color-accent-500);
+  color: var(--color-graphite-950);
   opacity: 0;
-  transition: opacity 250ms ease, color 250ms ease;
+  scale: 0.8;
+  transform-origin: top right;
+  transition: opacity 300ms ease, scale 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card:hover .card__arrow {
   opacity: 1;
-  color: var(--color-swiss-400);
+  scale: 1;
 }
 </style>

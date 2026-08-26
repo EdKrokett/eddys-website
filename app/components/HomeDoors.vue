@@ -136,7 +136,7 @@ const topics = [
 .door__text {
   margin-top: 1.125rem;
   max-width: 26rem;
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.65;
   color: var(--color-steel-400);
 }
@@ -158,9 +158,9 @@ const topics = [
 .door__row-key {
   grid-row: span 2;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   line-height: 1.6;
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
   font-variant-numeric: tabular-nums;
 }
 .door__row-key--topic {
@@ -170,18 +170,18 @@ const topics = [
 }
 
 .door__row-main {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-steel-200);
 }
 .door__row-main--note {
   font-weight: 400;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--color-steel-400);
 }
 
 .door__row-note {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--color-steel-500);
 }
 
@@ -201,11 +201,11 @@ const topics = [
   gap: 0.6rem;
   align-self: flex-start;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-200);
-  border-bottom: 1px solid var(--color-swiss-500);
+  border-bottom: 1px solid var(--color-accent-500);
   padding-bottom: 0.4rem;
 }
 .door__cta-icon {

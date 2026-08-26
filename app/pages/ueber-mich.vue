@@ -97,7 +97,7 @@ useSeoMeta({
     </section>
 
     <!-- ═══════════════ WERDEGANG ═══════════════ -->
-    <section class="section section--bordered">
+    <section class="section section--bordered reveal">
       <UContainer>
         <SectionHead
           kicker="Stationen"
@@ -112,7 +112,7 @@ useSeoMeta({
     </section>
 
     <!-- ═══════════════ SKILLS ═══════════════ -->
-    <section class="section section--bordered section--muted">
+    <section class="section section--bordered section--muted reveal">
       <UContainer>
         <SectionHead
           kicker="Kompetenzen"
@@ -180,7 +180,7 @@ useSeoMeta({
     </section>
 
     <!-- ═══════════════ PROJEKTE ═══════════════ -->
-    <section class="section section--bordered">
+    <section class="section section--bordered reveal">
       <UContainer>
         <SectionHead
           kicker="Projekte"
@@ -220,7 +220,7 @@ useSeoMeta({
     </section>
 
     <!-- ═══════════════ ABSCHLUSS ═══════════════ -->
-    <section class="outro">
+    <section class="outro reveal">
       <UContainer>
         <p class="outro__quote">
           „Es ist nicht die Zeit, die zählt — es ist Deine Leidenschaft.“
@@ -247,7 +247,7 @@ useSeoMeta({
   overflow: hidden;
   padding: clamp(3.5rem, 9vw, 6.5rem) 0 clamp(3rem, 6vw, 4.5rem);
   background:
-    radial-gradient(85% 70% at 12% 0%, rgba(200, 16, 46, 0.07) 0%, transparent 55%),
+    radial-gradient(85% 70% at 12% 0%, rgba(33, 164, 163, 0.07) 0%, transparent 55%),
     var(--color-graphite-950);
   border-bottom: 1px solid var(--color-graphite-700);
 }
@@ -294,14 +294,14 @@ useSeoMeta({
   stroke-width: 1.4;
 }
 .intro__tick--accent {
-  stroke: var(--color-swiss-500);
+  stroke: var(--color-accent-500);
   stroke-width: 2;
 }
 
 .intro__mark {
   width: 1.75rem;
   height: 1px;
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
 }
 
 /* ── Fakten ─────────────────────────────────────────────────────────────── */
@@ -343,7 +343,7 @@ useSeoMeta({
 
 .facts__label {
   margin-top: 0.35rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   line-height: 1.4;
   color: var(--color-steel-500);
 }
@@ -361,9 +361,9 @@ useSeoMeta({
   gap: 1.25rem;
   margin-top: clamp(2rem, 4vw, 3rem);
   max-width: 40rem;
-  font-size: 1.0625rem;
+  font-size: var(--text-lg);
   line-height: 1.75;
-  color: var(--color-steel-300);
+  color: var(--color-steel-200);
 }
 
 /* ── Sektionen ──────────────────────────────────────────────────────────── */
@@ -398,7 +398,7 @@ useSeoMeta({
 
 .datasheet__title {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -421,7 +421,7 @@ useSeoMeta({
 
 .datasheet__year {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
   color: var(--color-steel-600);
@@ -429,19 +429,19 @@ useSeoMeta({
 
 .datasheet__name {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   color: var(--color-steel-200);
 }
 
 .datasheet__meta {
   display: block;
   margin-top: 0.15rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-steel-500);
 }
 
 .datasheet__row--playful .datasheet__year {
-  font-size: 0.6rem;
+  font-size: var(--text-2xs);
   color: var(--color-brass-400);
 }
 .datasheet__row--playful .datasheet__name {
@@ -472,7 +472,7 @@ useSeoMeta({
 
 .project__num {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-steel-600);
   font-variant-numeric: tabular-nums;
 }
@@ -489,21 +489,21 @@ useSeoMeta({
   transition: color 200ms ease;
 }
 .project__link:hover {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 .project__link-icon {
   color: var(--color-steel-600);
   transition: color 200ms ease, translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .project__link:hover .project__link-icon {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
   translate: 0.15rem -0.15rem;
 }
 
 .project__description {
   margin-top: 0.5rem;
   max-width: 40rem;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   line-height: 1.65;
   color: var(--color-steel-400);
 }
@@ -525,14 +525,14 @@ useSeoMeta({
 
 .project__period {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.1em;
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
   font-variant-numeric: tabular-nums;
 }
 
 .project__role {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-steel-500);
 }
 
@@ -567,16 +567,16 @@ useSeoMeta({
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-100);
-  border-bottom: 1px solid var(--color-swiss-500);
+  border-bottom: 1px solid var(--color-accent-500);
   padding-bottom: 0.35rem;
   transition: color 200ms ease;
 }
 .outro__link:hover {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 
 .outro__link--muted {

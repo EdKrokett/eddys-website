@@ -63,7 +63,7 @@ const isNotFound = computed(() => props.error?.statusCode === 404)
   place-items: center;
   min-height: 100dvh;
   background:
-    radial-gradient(70% 60% at 50% 0%, rgba(200, 16, 46, 0.09) 0%, transparent 60%),
+    radial-gradient(70% 60% at 50% 0%, rgba(33, 164, 163, 0.09) 0%, transparent 60%),
     var(--color-graphite-950);
   text-align: center;
 }
@@ -91,7 +91,7 @@ const isNotFound = computed(() => props.error?.statusCode === 404)
 .err__text {
   margin: 1.25rem auto 0;
   max-width: 32rem;
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.7;
   color: var(--color-steel-400);
 }
@@ -109,16 +109,16 @@ const isNotFound = computed(() => props.error?.statusCode === 404)
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-steel-100);
-  border-bottom: 1px solid var(--color-swiss-500);
+  border-bottom: 1px solid var(--color-accent-500);
   padding-bottom: 0.35rem;
   transition: color 200ms ease;
 }
 .err__link:hover {
-  color: var(--color-swiss-400);
+  color: var(--color-accent-400);
 }
 
 .err__link--muted {

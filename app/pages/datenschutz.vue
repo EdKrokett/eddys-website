@@ -130,7 +130,7 @@ useSeoMeta({
 .legal__mark {
   width: 1.75rem;
   height: 1px;
-  background: var(--color-swiss-500);
+  background: var(--color-accent-500);
 }
 
 .legal__title {
@@ -150,7 +150,7 @@ useSeoMeta({
   border-left: 2px solid var(--color-brass-400);
   background: color-mix(in oklab, var(--color-brass-500) 10%, transparent);
   padding: 1rem 1.25rem;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   line-height: 1.6;
   color: var(--color-steel-300);
 }
@@ -158,7 +158,7 @@ useSeoMeta({
 .draft__title {
   margin-bottom: 0.35rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-brass-300);
@@ -184,17 +184,17 @@ useSeoMeta({
 
 .legal__body :deep(p) {
   margin-top: 1rem;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   line-height: 1.75;
   color: var(--color-steel-400);
 }
 
 .legal__body :deep(a) {
-  color: var(--color-swiss-300);
+  color: var(--color-accent-300);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .legal__body :deep(a:hover) {
-  color: var(--color-swiss-200);
+  color: var(--color-accent-200);
 }
 </style>
