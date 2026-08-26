@@ -282,7 +282,7 @@ const columns = computed<string[][]>(() => {
 }
 
 .hero__name {
-  font-size: clamp(3rem, 11vw, 7.5rem);
+  font-size: clamp(2.75rem, 9.5vw, 6.25rem);
   line-height: 0.92;
   letter-spacing: -0.045em;
   color: var(--color-steel-100);
@@ -302,7 +302,7 @@ const columns = computed<string[][]>(() => {
 .hero__lead {
   margin-top: clamp(1.5rem, 3vw, 2.25rem);
   max-width: 36rem;
-  font-size: clamp(1.125rem, 1.7vw, 1.375rem);
+  font-size: clamp(1.0625rem, 1.35vw, 1.1875rem);
   line-height: 1.65;
   color: var(--color-steel-200);
   /* Der Text liegt auf Fotos — ein weicher Schatten hält ihn auch dort ruhig,

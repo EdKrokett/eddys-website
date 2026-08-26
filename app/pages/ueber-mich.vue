@@ -13,9 +13,24 @@
 const TICKS = Array.from({ length: 60 }, (_, i) => ({
   angle: i * 6,
   major: i % 5 === 0,
-  /** Position 8 markiert den roten Strich — bewusst asymmetrisch, nicht auf 12. */
-  accent: i === 8,
+  /** Akzentindex auf 12 Uhr — die klassische Referenzmarke einer Uhr. */
+  accent: i === 0,
 }))
+
+/**
+ * Stunden- und Minutenzeiger stehen fest auf 4:30 — Eddys Zeit beim ersten
+ * Berlin-Marathon (viereinhalb Stunden, neun Monate nach der letzten Zigarette).
+ * Das ist der Grund für die Uhr auf dieser Seite und kein zufällig gewählter Stand.
+ *
+ * Der Sekundenzeiger läuft dagegen: 60 s pro Umlauf, gleitend wie bei einem
+ * mechanischen Werk statt im Quarz-Sekundentakt — der Uhrmacher hätte es so gewollt.
+ *
+ * Bewusst KEINE echte Uhrzeit: Die käme auf Server und Client unterschiedlich heraus
+ * und würde einen Hydration-Mismatch erzeugen (siehe docs/error-catalog.md). Ein
+ * fester Stand plus reine CSS-Animation braucht kein JavaScript und keinen Timer.
+ */
+const HOUR_HAND_ANGLE = 135 // 4,5 h von 12 aus: 4,5 / 12 * 360
+const MINUTE_HAND_ANGLE = 180 // 30 min: 30 / 60 * 360
 
 useSeoMeta({
   title: 'Über mich — Eduard Andrae',
@@ -28,58 +43,109 @@ useSeoMeta({
   <div>
     <!-- ═══════════════ INTRO ═══════════════ -->
     <section class="intro">
-      <!-- Zifferblatt-Bezel: Verweis auf die Uhrmacher-Herkunft -->
-      <svg
-        class="intro__dial"
-        viewBox="-110 -110 220 220"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <circle r="104" class="intro__dial-ring" />
-        <circle r="86" class="intro__dial-ring intro__dial-ring--inner" />
-        <g v-for="tick in TICKS" :key="tick.angle">
-          <line
-            :transform="`rotate(${tick.angle})`"
-            x1="0"
-            y1="-104"
-            x2="0"
-            :y2="tick.major ? -93 : -99"
-            :class="[
-              'intro__tick',
-              tick.major && 'intro__tick--major',
-              tick.accent && 'intro__tick--accent',
-            ]"
-          />
-        </g>
-      </svg>
-
       <UContainer class="relative z-10">
-        <p class="kicker">
-          <span class="intro__mark" aria-hidden="true" />Über mich
-        </p>
+        <div class="intro__top">
+          <!-- Textspalte -->
+          <div class="intro__body">
+            <p class="kicker">
+              <span class="intro__mark" aria-hidden="true" />Über mich
+            </p>
 
-        <h1 class="intro__title">
-          Erst Uhren.<br>Dann Startups.<br>Dann Marathon.
-        </h1>
+            <h1 class="intro__title">
+              Erst Uhren.<br>Dann Startups.<br>Dann Marathon.
+            </h1>
 
-        <div class="intro__text">
-          <p>
-            Geboren 1966 in Nettetal am Niederrhein, gelernt habe ich ein Handwerk,
-            das Geduld verlangt: Uhrmacher. Acht Jahre stand ich im familiengeführten
-            Fachgeschäft, ab 1996 in der Geschäftsführung. Dann kam das Internet — und
-            ich habe schweren Herzens verkauft und neu angefangen.
-          </p>
-          <p>
-            Seit 2000 arbeite ich im Netz. Über den Schwarzwald, Gütersloh und Hamburg
-            bin ich in Bremen gelandet, wo ich mit meiner Frau Kathi lebe. Zwei
-            Unternehmen habe ich gegründet: 1Apreis.de, mein erstes Startup, und
-            trusted blogs, das ich bis heute führe.
-          </p>
-          <p>
-            Mit 40 habe ich das Rauchen aufgegeben — über 50 Zigaretten am Tag — und
-            mir vorgenommen, einen Marathon zu laufen. Neun Monate später bin ich in
-            Berlin ins Ziel gekommen. Seitdem läuft es, im Wortsinn.
-          </p>
+            <div class="intro__text">
+              <p>
+                Geboren 1966 in Nettetal am Niederrhein, gelernt habe ich ein Handwerk,
+                das Geduld verlangt: Uhrmacher. Acht Jahre stand ich im familiengeführten
+                Fachgeschäft, ab 1996 in der Geschäftsführung. Dann kam das Internet — und
+                ich habe schweren Herzens verkauft und neu angefangen.
+              </p>
+              <p>
+                Seit 2000 arbeite ich im Netz. Über den Schwarzwald, Gütersloh und Hamburg
+                bin ich in Bremen gelandet, wo ich mit meiner Frau Kathi lebe. Zwei
+                Unternehmen habe ich gegründet: 1Apreis.de, mein erstes Startup, und
+                trusted blogs, das ich bis heute führe.
+              </p>
+              <p>
+                Mit 40 habe ich das Rauchen aufgegeben — über 50 Zigaretten am Tag — und
+                mir vorgenommen, einen Marathon zu laufen. Neun Monate später bin ich in
+                Berlin ins Ziel gekommen. Seitdem läuft es, im Wortsinn.
+              </p>
+            </div>
+          </div>
+
+          <!--
+            Bildspalte: Eddy vor dem Zifferblatt — der Uhrmacher vor der Uhr.
+            Der Freisteller hat echte Transparenz (geprüft), deshalb steht er ohne
+            Rahmen oder Kasten direkt auf der dunklen Fläche.
+          -->
+          <div class="intro__visual">
+            <svg
+              class="intro__dial"
+              viewBox="-110 -110 220 220"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle r="104" class="intro__dial-ring" />
+              <circle r="86" class="intro__dial-ring intro__dial-ring--inner" />
+
+              <g v-for="tick in TICKS" :key="tick.angle">
+                <line
+                  :transform="`rotate(${tick.angle})`"
+                  x1="0"
+                  y1="-104"
+                  x2="0"
+                  :y2="tick.major ? -93 : -99"
+                  :class="[
+                    'intro__tick',
+                    tick.major && 'intro__tick--major',
+                    tick.accent && 'intro__tick--accent',
+                  ]"
+                />
+              </g>
+
+              <!-- Zeiger: Stunde und Minute fest auf 4:30, Sekunde läuft -->
+              <line
+                :transform="`rotate(${HOUR_HAND_ANGLE})`"
+                x1="0"
+                y1="8"
+                x2="0"
+                y2="-48"
+                class="intro__hand intro__hand--hour"
+              />
+              <line
+                :transform="`rotate(${MINUTE_HAND_ANGLE})`"
+                x1="0"
+                y1="10"
+                x2="0"
+                y2="-74"
+                class="intro__hand intro__hand--minute"
+              />
+              <line
+                x1="0"
+                y1="18"
+                x2="0"
+                y2="-88"
+                class="intro__hand intro__hand--second"
+              />
+
+              <!-- Zeigerkappe über den Zeigerenden, wie die Lagerschraube im Werk -->
+              <circle r="3.5" class="intro__cap" />
+              <circle r="1.2" class="intro__cap-pin" />
+            </svg>
+
+            <NuxtImg
+              src="/images/eddy-portrait.png"
+              alt="Eduard Andrae"
+              width="620"
+              densities="1x 2x"
+              format="webp"
+              quality="88"
+              class="intro__portrait"
+            />
+          </div>
         </div>
 
         <!-- Fakten als Messwerte, nicht als Fließtext -->
@@ -252,29 +318,84 @@ useSeoMeta({
   border-bottom: 1px solid var(--color-graphite-700);
 }
 
-/* ── Zifferblatt-Bezel ──────────────────────────────────────────────────── */
-.intro__dial {
-  position: absolute;
-  z-index: 0;
-  top: 50%;
-  right: -14%;
-  width: min(760px, 88vw);
-  aspect-ratio: 1;
-  translate: 0 -50%;
-  opacity: 0.75;
-  pointer-events: none;
+/* ── Zwei-Spalten-Kopf ──────────────────────────────────────────────────── */
+.intro__top {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
 }
-/* Auf schmalen Screens nach oben rücken, sonst liegt er hinter dem Fließtext. */
-@media (max-width: 900px) {
-  .intro__dial {
-    top: 0;
-    right: -38%;
-    width: 130vw;
-    translate: 0 -30%;
-    opacity: 0.5;
+/* Erst ab dieser Breite ist wirklich Platz für Text UND Bild nebeneinander —
+   darunter stapeln beide, damit die Zeilenlänge lesbar bleibt. */
+@media (min-width: 1000px) {
+  .intro__top {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+    align-items: center;
   }
 }
 
+.intro__body {
+  max-width: 40rem;
+}
+
+/* ── Bildspalte: Porträt vor dem Zifferblatt ───────────────────────────── */
+.intro__visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(20rem, 42vw, 30rem);
+}
+
+.intro__dial {
+  position: absolute;
+  /*
+   * Bewusst nicht mittig: Der Zeigerdrehpunkt läge sonst genau auf Eddys Kinn.
+   * Um 14 % nach unten versetzt sitzt die Achse auf Brusthöhe, die Zeiger laufen
+   * über Hemd und Arme statt übers Gesicht.
+   */
+  top: 50%;
+  left: 50%;
+  translate: -50% -36%;
+  width: min(115%, 34rem);
+  aspect-ratio: 1;
+  /*
+   * Bewusst ÜBER dem Porträt (z-index 2): Die Zeiger stehen auf 4:30 und zeigen
+   * damit nach unten rechts — also genau dorthin, wo Eddys Schulter ist. Hinter
+   * dem Bild wären sie unsichtbar und die Uhr hätte nur einen laufenden Zeiger.
+   * Davor gelegt liest sich das Ganze wie ein Zifferblatt unter Uhrenglas.
+   */
+  z-index: 2;
+  pointer-events: none;
+}
+
+.intro__portrait {
+  position: relative;
+  z-index: 1;
+  width: min(74%, 21rem);
+  height: auto;
+  /* Etwas tiefer gesetzt, damit oben genug Zifferblatt frei bleibt, um die
+     Zeiger zu erkennen — sonst verdeckt der Freisteller die halbe Uhr. */
+  margin-top: 1rem;
+  /* Weicher Abriss nach unten, damit der Freisteller nicht wie ausgeschnitten
+     auf der Fläche klebt, sondern in den Hintergrund ausläuft. */
+  mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
+  filter: drop-shadow(0 18px 45px rgba(14, 15, 18, 0.75));
+}
+
+/* Hochkant: Bild zuerst, Zifferblatt deutlich zurückgenommener Hintergrund. */
+@media (max-width: 999px) {
+  .intro__visual {
+    order: -1;
+    min-height: 0;
+  }
+  .intro__dial {
+    width: min(120%, 26rem);
+    opacity: 0.45;
+  }
+  .intro__portrait {
+    width: min(78%, 20rem);
+  }
+}
+
+/* ── Zifferblatt-Details ────────────────────────────────────────────────── */
 .intro__dial-ring {
   fill: none;
   stroke: var(--color-graphite-700);
@@ -286,8 +407,9 @@ useSeoMeta({
 }
 
 .intro__tick {
-  stroke: var(--color-graphite-600);
+  stroke: var(--color-steel-600);
   stroke-width: 0.7;
+  opacity: 0.75;
 }
 .intro__tick--major {
   stroke: var(--color-steel-600);
@@ -295,7 +417,59 @@ useSeoMeta({
 }
 .intro__tick--accent {
   stroke: var(--color-accent-500);
-  stroke-width: 2;
+  stroke-width: 2.4;
+}
+
+/* ── Zeiger ─────────────────────────────────────────────────────────────── */
+.intro__hand {
+  stroke-linecap: round;
+  /* Leichter Schatten, damit die Zeiger auch über hellen Bildstellen ablesbar
+     bleiben — auf dem hellblauen Hemd würden sie sonst verschwinden. */
+  filter: drop-shadow(0 1px 3px rgba(14, 15, 18, 0.85));
+}
+
+.intro__hand--hour {
+  stroke: var(--color-steel-100);
+  stroke-width: 4.5;
+}
+
+.intro__hand--minute {
+  stroke: var(--color-steel-200);
+  stroke-width: 3;
+}
+
+/*
+ * Der Sekundenzeiger dreht um den Zifferblattmittelpunkt. Die viewBox ist auf
+ * (0 0) zentriert (-110 -110 220 220), deshalb liegt `transform-origin: center`
+ * mit `transform-box: view-box` exakt auf der Zeigerachse — ohne dass hier
+ * Pixelwerte nachgerechnet werden müssten.
+ */
+.intro__hand--second {
+  stroke: var(--color-accent-300);
+  stroke-width: 1.6;
+  transform-box: view-box;
+  transform-origin: center;
+  animation: clock-sweep 60s linear infinite;
+}
+
+@keyframes clock-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Sekundenzeiger anhalten, wenn reduzierte Bewegung gewünscht ist. Er bleibt
+   sichtbar, die Uhr wirkt dann nur stehengeblieben statt zu verschwinden. */
+@media (prefers-reduced-motion: reduce) {
+  .intro__hand--second {
+    animation: none;
+  }
+}
+
+.intro__cap {
+  fill: var(--color-steel-300);
+}
+.intro__cap-pin {
+  fill: var(--color-graphite-950);
 }
 
 .intro__mark {
@@ -350,7 +524,7 @@ useSeoMeta({
 
 .intro__title {
   margin-top: 1.25rem;
-  font-size: clamp(2.5rem, 7.5vw, 4.75rem);
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
   line-height: 0.98;
   letter-spacing: -0.04em;
   color: var(--color-steel-100);

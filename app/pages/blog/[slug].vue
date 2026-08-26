@@ -139,7 +139,7 @@ useSeoMeta({
 .post__title {
   margin-top: 0.875rem;
   max-width: 46rem;
-  font-size: clamp(1.9rem, 5vw, 3.25rem);
+  font-size: clamp(1.75rem, 4.2vw, 2.75rem);
   line-height: 1.08;
   letter-spacing: -0.035em;
   color: var(--color-steel-100);

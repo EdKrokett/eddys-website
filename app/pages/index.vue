@@ -142,7 +142,7 @@ useSeoMeta({
 
 .cta__title {
   margin-top: 1rem;
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.35rem);
   line-height: 1.15;
   color: var(--color-steel-100);
 }

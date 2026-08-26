@@ -133,7 +133,7 @@ useSeoMeta({
 
 .head__title {
   margin-top: 1.25rem;
-  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-size: clamp(2.25rem, 5.5vw, 3.5rem);
   line-height: 1;
   letter-spacing: -0.04em;
   color: var(--color-steel-100);

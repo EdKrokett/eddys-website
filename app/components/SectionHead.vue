@@ -35,7 +35,7 @@ defineProps<{
 
 .head__title {
   margin-top: 1rem;
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.35rem);
   line-height: 1.1;
   color: var(--color-steel-100);
 }
@@ -43,7 +43,7 @@ defineProps<{
 .head__lead {
   margin-top: 1.15rem;
   max-width: 40rem;
-  font-size: var(--text-md);
+  font-size: var(--text-base);
   line-height: 1.7;
   color: var(--color-steel-300);
 }

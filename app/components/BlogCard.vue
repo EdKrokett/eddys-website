@@ -172,8 +172,8 @@ defineProps<{ post: WordPressBlogPost }>()
 
 .card__title {
   margin-top: 0.75rem;
-  font-size: 1.375rem;
-  line-height: 1.28;
+  font-size: 1.25rem;
+  line-height: 1.3;
   color: var(--color-steel-100);
   transition: color 250ms ease;
   display: -webkit-box;

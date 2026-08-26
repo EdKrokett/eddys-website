@@ -136,7 +136,7 @@ useSeoMeta({
 .legal__title {
   margin-top: 1.25rem;
   max-width: 20ch;
-  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  font-size: clamp(2rem, 4.8vw, 2.85rem);
   line-height: 1.02;
   letter-spacing: -0.035em;
   color: var(--color-steel-100);

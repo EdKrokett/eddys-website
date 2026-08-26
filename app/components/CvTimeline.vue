@@ -143,7 +143,7 @@ defineProps<{ stations: CvStation[] }>()
 
 .timeline__role {
   margin-top: 0.6rem;
-  font-size: clamp(1.375rem, 2.4vw, 1.75rem);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
   line-height: 1.2;
   color: var(--color-steel-100);
 }

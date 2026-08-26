@@ -128,7 +128,7 @@ const topics = [
 
 .door__title {
   margin-top: 1.25rem;
-  font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+  font-size: clamp(2rem, 3.6vw, 2.85rem);
   line-height: 1;
   color: var(--color-steel-100);
 }
