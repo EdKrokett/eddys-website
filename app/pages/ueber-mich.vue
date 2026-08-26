@@ -18,20 +18,18 @@ const TICKS = Array.from({ length: 60 }, (_, i) => ({
 }))
 
 /**
- * Stunden- und Minutenzeiger stehen fest auf 13:50 (Eddys Vorgabe). Die beiden
- * Zeiger bilden dabei ein nach oben geöffnetes V — dieselbe Logik, aus der
- * Uhrenhersteller ihre Katalogfotos auf 10:10 stellen: Das Zifferblatt wirkt
- * freundlich statt hängend, und die Marke in der Mitte bleibt frei.
+ * Die Uhr trägt bewusst NUR einen Sekundenzeiger (Eddys Wunsch, 26.08.2026).
  *
- * Der Sekundenzeiger läuft dagegen: 60 s pro Umlauf, gleitend wie bei einem
- * mechanischen Werk statt im Quarz-Sekundentakt — der Uhrmacher hätte es so gewollt.
+ * Stunden- und Minutenzeiger sind entfallen, weil sie zwangsläufig eine feste
+ * und damit falsche Uhrzeit angezeigt hätten — eine echte Uhrzeit wiederum käme
+ * auf Server und Client unterschiedlich heraus und erzeugte einen
+ * Hydration-Mismatch (siehe docs/error-catalog.md). Ein einzelner laufender
+ * Zeiger behauptet gar keine Zeit, sondern zeigt nur, dass sie vergeht: als
+ * Motiv genau das Richtige für den Uhrmacher, der Marathon läuft.
  *
- * Bewusst KEINE echte Uhrzeit: Die käme auf Server und Client unterschiedlich heraus
- * und würde einen Hydration-Mismatch erzeugen (siehe docs/error-catalog.md). Ein
- * fester Stand plus reine CSS-Animation braucht kein JavaScript und keinen Timer.
+ * Er dreht gleitend statt im Quarz-Sekundentakt, wie ein mechanisches Werk —
+ * 60 s pro Umlauf, reine CSS-Animation, kein JavaScript und kein Timer.
  */
-const HOUR_HAND_ANGLE = 55 // 13:50 → 1 h 50 min: (1 + 50/60) / 12 * 360
-const MINUTE_HAND_ANGLE = 300 // 50 min: 50 / 60 * 360
 
 useSeoMeta({
   title: 'Über mich — Eduard Andrae',
@@ -75,26 +73,12 @@ useSeoMeta({
                 Berlin ins Ziel gekommen. Seitdem läuft es, im Wortsinn.
               </p>
             </div>
-
-            <!-- Fakten als Messwerte, nicht als Fließtext. Bewusst IN der
-                 Textspalte: Nur so schließt das Porträt rechts unten auf
-                 derselben Linie ab (siehe align-items: end oben). -->
-            <dl class="facts">
-              <div v-for="fact in CV_FACTS" :key="fact.label" class="facts__item">
-                <dt class="facts__value">
-                  {{ fact.value }}
-                </dt>
-                <dd class="facts__label">
-                  {{ fact.label }}
-                </dd>
-              </div>
-            </dl>
           </div>
 
           <!--
-            Bildspalte: Eddy vor dem Zifferblatt — der Uhrmacher vor der Uhr.
-            Der Freisteller hat echte Transparenz (geprüft), deshalb steht er ohne
-            Rahmen oder Kasten direkt auf der dunklen Fläche.
+            Das Porträt, das hier zwischenzeitlich vor der Uhr stand, ist auf
+            Eddys Wunsch auf die Startseite in den Kontaktbereich gewandert:
+            Uhr und Freisteller haben sich gegenseitig die Wirkung genommen.
           -->
           <div class="intro__visual">
             <svg
@@ -121,23 +105,7 @@ useSeoMeta({
                 />
               </g>
 
-              <!-- Zeiger: Stunde und Minute fest auf 4:30, Sekunde läuft -->
-              <line
-                :transform="`rotate(${HOUR_HAND_ANGLE})`"
-                x1="0"
-                y1="8"
-                x2="0"
-                y2="-48"
-                class="intro__hand intro__hand--hour"
-              />
-              <line
-                :transform="`rotate(${MINUTE_HAND_ANGLE})`"
-                x1="0"
-                y1="10"
-                x2="0"
-                y2="-74"
-                class="intro__hand intro__hand--minute"
-              />
+              <!-- Einziger Zeiger: die Sekunde, laufend -->
               <line
                 x1="0"
                 y1="18"
@@ -150,18 +118,23 @@ useSeoMeta({
               <circle r="3.5" class="intro__cap" />
               <circle r="1.2" class="intro__cap-pin" />
             </svg>
-
-            <NuxtImg
-              src="/images/eddy-portrait.png"
-              alt="Eduard Andrae"
-              width="620"
-              densities="1x 2x"
-              format="webp"
-              quality="88"
-              class="intro__portrait"
-            />
           </div>
         </div>
+
+        <!-- Fakten als Messwerte, nicht als Fließtext. Wieder über die volle
+             Breite, seit die Bildspalte weggefallen ist: In der schmalen
+             Textspalte brachen die fünf Zellen auf zwei Zeilen um und
+             hinterließen eine leere Restfläche. -->
+        <dl class="facts">
+          <div v-for="fact in CV_FACTS" :key="fact.label" class="facts__item">
+            <dt class="facts__value">
+              {{ fact.value }}
+            </dt>
+            <dd class="facts__label">
+              {{ fact.label }}
+            </dd>
+          </div>
+        </dl>
       </UContainer>
     </section>
 
@@ -321,81 +294,55 @@ useSeoMeta({
   border-bottom: 1px solid var(--color-graphite-700);
 }
 
-/* ── Zwei-Spalten-Kopf ──────────────────────────────────────────────────── */
+/* ── Kopf mit großer, angeschnittener Uhr ──────────────────────────────── */
 .intro__top {
-  display: grid;
-  gap: clamp(2.5rem, 5vw, 4rem);
-}
-/* Erst ab dieser Breite ist wirklich Platz für Text UND Bild nebeneinander —
-   darunter stapeln beide, damit die Zeilenlänge lesbar bleibt.
-   `align-items: end` sorgt dafür, dass das Porträt unten auf derselben Linie
-   abschließt wie die Fakten-Leiste in der Textspalte. */
-@media (min-width: 1000px) {
-  .intro__top {
-    /* Bezugsrahmen für die absolut gesetzte Uhr: Sie soll sich an der GESAMTEN
-       Zeilenhöhe orientieren, nicht an der Bildzelle — sonst klebt sie am
-       Porträt (das durch align-items:end nur so hoch ist wie das Bild selbst). */
-    position: relative;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
-    align-items: end;
-  }
+  position: relative;
 }
 
 .intro__body {
+  position: relative;
+  z-index: 1;
   max-width: 40rem;
 }
 
-/* ── Bildspalte: Uhr oben angeschnitten, Porträt groß darunter ──────────── */
-.intro__visual {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-}
-
 /*
- * Die Uhr steht oben in der freien Fläche rechts neben dem Fließtext und läuft
- * rechts aus dem Bild (der Anschnitt, den Eddy wollte). Sie überlappt das
- * Porträt bewusst NICHT mehr: In der vorigen Fassung verschwand der
- * Minutenzeiger — der bei 13:50 nach oben links zeigt — hinter Eddys Kopf,
- * und von der Uhr blieb nur ein halbes Zifferblatt übrig.
+ * Die Uhr ist bewusst größer als ihr Platz und läuft rechts aus dem Bild —
+ * sichtbar bleibt etwas mehr als die Hälfte. Der Anschnitt gibt ihr Maßstab,
+ * ohne dass sie mit dem Text um die Fläche konkurriert. Sie liegt hinter dem
+ * Text, der auf der ruhigen linken Hälfte steht.
  */
-.intro__dial {
+.intro__visual {
   position: absolute;
-  top: -2rem;
-  /* Bewusst über den rechten Rand hinaus: Der Anschnitt lässt die Uhr größer
-     wirken, als sie Platz braucht — Eddys ausdrücklicher Wunsch. */
-  right: clamp(-9rem, -6vw, -4rem);
-  width: clamp(15rem, 24vw, 22rem);
+  z-index: 0;
+  top: 50%;
+  right: 0;
+  translate: 0 -50%;
+  width: min(52vw, 44rem);
   aspect-ratio: 1;
-  opacity: 0.9;
   pointer-events: none;
 }
 
-.intro__portrait {
-  position: relative;
-  width: min(100%, 30rem);
-  height: auto;
-  /* Nur ein kurzer Abriss am unteren Rand: Das Porträt soll unten sauber
-     abschließen, nicht ausfransen. */
-  mask-image: linear-gradient(to bottom, #000 92%, transparent 100%);
-  filter: drop-shadow(0 18px 45px rgba(14, 15, 18, 0.75));
+.intro__dial {
+  position: absolute;
+  inset: 0;
+  /* Nach rechts herausgeschoben: gut ein Drittel liegt außerhalb. */
+  translate: 32% 0;
+  width: 100%;
+  aspect-ratio: 1;
+  opacity: 0.9;
 }
 
-/* Hochkant: Bild zuerst, Uhr als angeschnittenes Motiv oben rechts dahinter. */
+/* Hochkant ist keine freie Spalte da — die Uhr wird zum Hintergrundmotiv oben
+   rechts und deutlich zurückgenommen, damit der Fließtext lesbar bleibt. */
 @media (max-width: 999px) {
   .intro__visual {
-    position: relative;
-    order: -1;
-    justify-content: center;
+    top: 0;
+    translate: 0 -20%;
+    width: 115vw;
   }
   .intro__dial {
-    top: -2rem;
-    right: -4rem;
-    width: 14rem;
-    opacity: 0.6;
-  }
-  .intro__portrait {
-    width: min(88%, 22rem);
+    translate: 26% 0;
+    opacity: 0.4;
   }
 }
 
@@ -430,16 +377,6 @@ useSeoMeta({
   /* Leichter Schatten, damit die Zeiger auch über hellen Bildstellen ablesbar
      bleiben — auf dem hellblauen Hemd würden sie sonst verschwinden. */
   filter: drop-shadow(0 1px 3px rgba(14, 15, 18, 0.85));
-}
-
-.intro__hand--hour {
-  stroke: var(--color-steel-100);
-  stroke-width: 4.5;
-}
-
-.intro__hand--minute {
-  stroke: var(--color-steel-200);
-  stroke-width: 3;
 }
 
 /*
@@ -491,12 +428,22 @@ useSeoMeta({
 /* auto-fit statt fester Spaltenzahl: Die Leiste steht jetzt in der schmaleren
    Textspalte und muss sich selbst umbrechen, statt fünf Zellen zu quetschen. */
 .facts {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  max-width: 52rem;
   background: var(--color-graphite-700);
   border: 1px solid var(--color-graphite-700);
+}
+/* Feste Spaltenzahl statt auto-fit: Bei fünf Fakten und automatischer
+   Spaltenzahl blieb eine Zeile halb leer und die Rasterfläche schien durch. */
+@media (min-width: 720px) {
+  .facts {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
 .facts__item {

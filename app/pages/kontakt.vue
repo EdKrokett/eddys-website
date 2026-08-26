@@ -4,8 +4,8 @@
  * Drittanbieter laufen (zusätzliche Auftragsverarbeitung, Spam-Schutz, Consent).
  * Direkter Mail-Link plus Terminbuchung erfüllen denselben Zweck ohne diesen Aufwand.
  *
- * `CALENDLY_URL` ist noch nicht gepflegt (app/utils/site.ts) — der Terminblock
- * erscheint erst, wenn der Link eingetragen ist.
+ * Die Terminbuchung öffnet Calendly in einem neuen Tab statt als eingebettetes
+ * Popup — die Begründung steht bei `CALENDLY_URL` in app/utils/site.ts.
  */
 const socials = activeSocialProfiles()
 

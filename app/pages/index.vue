@@ -12,6 +12,60 @@ useSeoMeta({
   <div>
     <HomeHero />
 
+    <!--
+      Kontakt bewusst weit oben, direkt hinter dem Hero (Eddys Wunsch) — mit
+      viel Luft nach oben und unten, damit der Block trotz der frühen Position
+      nicht drängelt.
+    -->
+    <section class="contact reveal">
+      <UContainer>
+        <div class="contact__inner">
+          <div class="contact__body">
+            <p class="kicker">
+              <span class="contact__mark" aria-hidden="true" />Kontakt
+            </p>
+
+            <h2 class="contact__title">
+              Reden wir über Blogs.<br>
+              Oder übers Laufen.<br>
+              Oder über KI.<br>
+              <span class="contact__title-open">Oder …</span>
+            </h2>
+
+            <!--
+              Neuer Tab statt Calendly-Modal: Das Popup-Widget verlangt Calendlys
+              eigenes Skript im Seitenkopf. Das wäre eine Drittanbieter-Einbindung
+              mit eigener Datenverarbeitung — und würde der Datenschutzerklärung
+              widersprechen, die ausdrücklich sagt, dass nichts automatisch
+              eingebettet wird und eine Verbindung erst beim Klick entsteht.
+            -->
+            <a
+              :href="CALENDLY_URL ?? '/kontakt'"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact__button"
+            >
+              Kontakt aufnehmen
+              <Icon name="lucide:arrow-up-right" class="contact__button-icon size-4" />
+            </a>
+          </div>
+
+          <div class="contact__visual">
+            <NuxtImg
+              src="/images/eddy-portrait.png"
+              alt="Eduard Andrae"
+              width="440"
+              densities="1x 2x"
+              format="webp"
+              quality="88"
+              loading="lazy"
+              class="contact__portrait"
+            />
+          </div>
+        </div>
+      </UContainer>
+    </section>
+
     <HomeDoors />
 
     <!-- ═══════════════ BLOG-VORSCHAU (live von blog.eduard-andrae.de) ═══════════════ -->
@@ -42,27 +96,6 @@ useSeoMeta({
         </div>
         <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <BlogCard v-for="post in recentPosts" :key="post.id" :post="post" />
-        </div>
-      </UContainer>
-    </section>
-
-    <!-- ═══════════════ KONTAKT-BAND ═══════════════ -->
-    <section class="cta reveal">
-      <UContainer>
-        <div class="cta__inner">
-          <div>
-            <p class="kicker">
-              <span class="cta__mark" aria-hidden="true" />Kontakt
-            </p>
-            <h2 class="cta__title">
-              Reden wir über Blogs.<br>Oder übers Laufen.
-            </h2>
-          </div>
-
-          <NuxtLink to="/kontakt" class="cta__button">
-            Kontakt aufnehmen
-            <Icon name="lucide:arrow-right" class="size-4" />
-          </NuxtLink>
         </div>
       </UContainer>
     </section>
@@ -118,51 +151,96 @@ useSeoMeta({
 }
 
 /* ── Kontaktband ────────────────────────────────────────────────────────── */
-.cta {
-  border-top: 1px solid var(--color-graphite-700);
+.contact {
+  border-bottom: 1px solid var(--color-graphite-700);
   background:
-    radial-gradient(90% 140% at 85% 50%, rgba(33, 164, 163, 0.09) 0%, transparent 60%),
+    radial-gradient(75% 130% at 78% 55%, rgba(33, 164, 163, 0.1) 0%, transparent 62%),
     var(--color-graphite-950);
-  padding: clamp(3.5rem, 8vw, 6rem) 0;
+  /* Viel Luft: Der Block steht sehr weit oben und braucht Abstand, damit er
+     nicht am Hero klebt. */
+  padding: clamp(4.5rem, 11vw, 9rem) 0;
 }
 
-.cta__inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+.contact__inner {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+  align-items: end;
+}
+@media (min-width: 880px) {
+  .contact__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
+  }
 }
 
-.cta__mark {
-  width: 1.75rem;
-  height: 1px;
-  background: var(--color-accent-500);
+.contact__mark {
+  width: 2rem;
+  height: 2px;
+  background: var(--color-accent-400);
 }
 
-.cta__title {
-  margin-top: 1rem;
-  font-size: clamp(1.6rem, 3.2vw, 2.35rem);
-  line-height: 1.15;
+.contact__title {
+  margin-top: 1.25rem;
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  line-height: 1.18;
   color: var(--color-steel-100);
 }
 
-.cta__button {
+/* Die offene vierte Zeile bewusst zurückgenommen — sie ist eine Einladung,
+   keine Aussage. */
+.contact__title-open {
+  color: var(--color-steel-500);
+}
+
+/* Button unten links, mit Abstand zur Überschrift. */
+.contact__button {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  border: 1px solid var(--color-steel-600);
-  padding: 0.9rem 1.75rem;
+  margin-top: clamp(2rem, 4vw, 2.75rem);
+  border: 1px solid var(--color-accent-500);
+  background: var(--color-accent-500);
+  padding: 1.05rem 2rem;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
+  font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-steel-100);
-  transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
+  /* Dunkle Schrift auf Teal: 6,30:1. Weiß käme nur auf 3,04:1. */
+  color: var(--color-graphite-950);
+  transition: background 250ms ease, border-color 250ms ease;
 }
-.cta__button:hover {
-  background: var(--color-accent-500);
-  border-color: var(--color-accent-500);
-  color: #fff;
+.contact__button:hover {
+  border-color: var(--color-accent-300);
+  background: var(--color-accent-300);
+}
+.contact__button-icon {
+  transition: translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.contact__button:hover .contact__button-icon {
+  translate: 0.2rem -0.2rem;
+}
+
+/* ── Porträt ────────────────────────────────────────────────────────────── */
+.contact__visual {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.contact__portrait {
+  width: min(100%, 22rem);
+  height: auto;
+  /* Kurzer Abriss unten, damit der Freisteller nicht abgeschnitten wirkt. */
+  mask-image: linear-gradient(to bottom, #000 90%, transparent 100%);
+  filter: drop-shadow(0 18px 45px rgba(14, 15, 18, 0.7));
+}
+
+@media (max-width: 879px) {
+  .contact__visual {
+    justify-content: center;
+  }
+  .contact__portrait {
+    width: min(72%, 17rem);
+  }
 }
 </style>

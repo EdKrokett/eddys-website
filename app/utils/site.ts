@@ -8,8 +8,14 @@
 
 export const CONTACT_EMAIL = 'info@eduard-andrae.de'
 
-/** Sobald der Calendly-Link vorliegt: hier eintragen, die Kontaktseite zeigt ihn dann an. */
-export const CALENDLY_URL: string | null = null
+/**
+ * Terminbuchung. Bewusst nur als Link (neuer Tab), nicht als eingebettetes
+ * Calendly-Popup: Das Widget verlangt Calendlys eigenes Skript im Seitenkopf und
+ * wäre damit eine Drittanbieter-Einbindung mit eigener Datenverarbeitung — im
+ * Widerspruch zur Datenschutzerklärung, die zusagt, dass nichts automatisch
+ * eingebettet wird und eine Verbindung erst beim Klick entsteht.
+ */
+export const CALENDLY_URL: string | null = 'https://calendly.com/trustedblogs/besprechung'
 
 export interface SocialProfile {
   name: string
