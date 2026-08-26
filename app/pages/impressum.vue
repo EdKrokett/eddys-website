@@ -6,33 +6,128 @@
  * nicht stillschweigend ergänzt.
  */
 useSeoMeta({
-  title: 'Impressum – Eduard Andrae',
+  title: 'Impressum — Eduard Andrae',
+  robots: 'noindex',
 })
 </script>
 
 <template>
-  <section class="mx-auto max-w-2xl px-6 py-24">
-    <p class="font-mono text-xs tracking-[0.3em] text-steel-400 uppercase">
-      Impressum
-    </p>
-    <h1 class="mt-3 text-3xl font-semibold sm:text-4xl">
-      Angaben gemäß § 5 TMG
-    </h1>
-
-    <div class="mt-8 space-y-1 text-steel-300">
-      <p>Eduard (Eddy) Andrae</p>
-      <p>Felix-von-Eckardt-Str. 22</p>
-      <p>D-28279 Bremen</p>
-    </div>
-
-    <div class="mt-8 space-y-1 text-steel-300">
-      <p>Telefon: +49 171 263 20 15</p>
-      <p>
-        E-Mail:
-        <a href="mailto:info@eduard-andrae.de" class="text-swiss-400 hover:text-swiss-300">
-          info@eduard-andrae.de
-        </a>
+  <div class="legal">
+    <UContainer>
+      <p class="kicker">
+        <span class="legal__mark" aria-hidden="true" />Impressum
       </p>
-    </div>
-  </section>
+
+      <h1 class="legal__title">
+        Angaben gemäß § 5 TMG
+      </h1>
+
+      <div class="legal__grid">
+        <section class="block">
+          <h2 class="block__title">
+            Anschrift
+          </h2>
+          <p class="block__text">
+            Eduard (Eddy) Andrae<br>
+            Felix-von-Eckardt-Str. 22<br>
+            D-28279 Bremen
+          </p>
+        </section>
+
+        <section class="block">
+          <h2 class="block__title">
+            Kontakt
+          </h2>
+          <p class="block__text">
+            Telefon: <a href="tel:+491712632015">+49 171 263 20 15</a><br>
+            E-Mail: <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
+          </p>
+        </section>
+
+        <section class="block">
+          <h2 class="block__title">
+            Verantwortlich für den Inhalt
+          </h2>
+          <p class="block__text">
+            Eduard Andrae<br>
+            Anschrift wie oben
+          </p>
+        </section>
+
+        <section class="block">
+          <h2 class="block__title">
+            Weiteres
+          </h2>
+          <p class="block__text">
+            <NuxtLink to="/datenschutz">Datenschutzerklärung</NuxtLink><br>
+            <a href="https://blog.eduard-andrae.de/disclaimer/">Haftung & Disclaimer (Blog)</a>
+          </p>
+        </section>
+      </div>
+    </UContainer>
+  </div>
 </template>
+
+<style scoped>
+.legal {
+  padding: clamp(3.5rem, 8vw, 5.5rem) 0 clamp(4rem, 9vw, 7rem);
+}
+
+.legal__mark {
+  width: 1.75rem;
+  height: 1px;
+  background: var(--color-swiss-500);
+}
+
+.legal__title {
+  margin-top: 1.25rem;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--color-steel-100);
+}
+
+.legal__grid {
+  display: grid;
+  gap: 1px;
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  max-width: 46rem;
+  background: var(--color-graphite-700);
+  border: 1px solid var(--color-graphite-700);
+}
+@media (min-width: 640px) {
+  .legal__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.block {
+  padding: 1.5rem 1.625rem 1.75rem;
+  background: var(--color-graphite-950);
+}
+
+.block__title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-steel-600);
+}
+
+.block__text {
+  margin-top: 0.875rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-steel-300);
+}
+
+.block__text :deep(a) {
+  color: var(--color-swiss-300);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.block__text :deep(a:hover) {
+  color: var(--color-swiss-200);
+}
+</style>

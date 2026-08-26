@@ -4,6 +4,13 @@ export interface WordPressTag {
   slug: string
 }
 
+/** Kategorien des Blogs: laufen, wandern, bloggen, werbung (Stand 26.08.2026). */
+export interface WordPressCategory {
+  id: number
+  name: string
+  slug: string
+}
+
 export interface WordPressBlogPost {
   id: number
   slug: string
@@ -12,6 +19,7 @@ export interface WordPressBlogPost {
   date: string
   featuredImage?: string
   tags: WordPressTag[]
+  categories: WordPressCategory[]
 }
 
 export interface WordPressBlogPostDetail extends WordPressBlogPost {

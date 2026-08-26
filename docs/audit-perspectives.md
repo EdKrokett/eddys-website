@@ -33,3 +33,34 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 ---
 
 ## Projektspezifische Perspektiven
+
+### SSR/Hydration (abgeleitet 2026-08-26)
+
+- Liest dieser Code `useFetch`-Daten zu einem Zeitpunkt, zu dem sie noch der Default sein
+  können? Watcher mit `immediate: true` und Code direkt nach dem `useFetch`-Aufruf laufen
+  serverseitig **vor** dem Auflösen — abgeleitete Werte gehören in ein `computed`.
+- Kann eine Bedingung im Template auf Server und Client zu unterschiedlichen Zweigen führen?
+  (Zeit, Zufall, Reihenfolge von Effekten, Locale-abhängige Formatierung.)
+
+### Duplizierte Wahrheit (abgeleitet 2026-08-26)
+
+- Dupliziert diese Liste/Konstante Wissen, das das Framework oder eine andere Quelle schon
+  hat? Handgepflegte Routen-, Feld- oder Seiten-Listen laufen dem Original zwangsläufig
+  hinterher — gibt es einen Mechanismus, der dieselbe Information aus erster Hand liefert?
+
+### Migration & Altbestand (abgeleitet 2026-08-26)
+
+- Welche Daten wurden VOR einer Umstellung erzeugt und tragen den alten Zustand noch in sich?
+  Konfigurationsänderungen (WP_HOME, Env-Vars, Feature-Flags) wirken meist nur auf **neu**
+  erzeugte Inhalte, nicht rückwirkend auf gespeicherte.
+- Was an dieser Änderung funktioniert nur deshalb, weil eine Übergangslösung (Redirect,
+  Alias, Weiterleitung) noch aktiv ist — und bricht, sobald sie abgeschaltet wird?
+
+### Styling-Kollisionen (abgeleitet 2026-08-26)
+
+- Setzt eine Scoped-Regel dieselbe CSS-Property wie eine Tailwind-Utility am selben Element?
+  Bei gleicher Spezifität gewinnt das später eingebundene Stylesheet — Scoped Styles schlagen
+  Utilities, responsive Utility-Präfixe wirken dann nicht mehr.
+- Welche CSS-Klassen liefert eine Fremdquelle (WordPress-Blöcke, eingebettete Widgets) mit,
+  für die wir keine Regeln definiert haben? Fehlendes Layout-CSS sieht aus wie ein Bug im
+  Inhalt, nicht wie eine Lücke im Stylesheet.

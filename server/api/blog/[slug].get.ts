@@ -50,18 +50,27 @@ export default defineEventHandler(async (event): Promise<WordPressBlogPostDetail
       }
 
       const post = response[0]!
+      const terms = post._embedded?.['wp:term']?.flat() ?? []
 
       return {
         id: post.id,
         slug: post.slug,
-        title: post.title.rendered,
-        content: post.content.rendered,
-        excerpt: post.excerpt.rendered.replace(/<[^>]*>/g, '').trim(),
+        // Siehe blog.get.ts: Entities dekodieren, weil der Titel per v-text gerendert wird.
+        title: decodeHtmlEntities(post.title.rendered),
+        // `content` bleibt bewusst rohes HTML (v-html), aber Alt-Domain-URLs müssen
+        // raus — sonst brechen die Beitragsbilder nach der DNS-Umschaltung (Phase C).
+        content: rewriteLegacyWpUrls(post.content.rendered),
+        excerpt: decodeHtmlEntities(post.excerpt.rendered.replace(/<[^>]*>/g, '')).trim(),
         date: post.date,
-        featuredImage: post._embedded?.['wp:featuredmedia']?.[0]?.source_url,
-        tags: (post._embedded?.['wp:term']?.flat() ?? [])
+        // Auch hier defensiv umschreiben: `image.domains` in nuxt.config.ts erlaubt
+        // nur blog.eduard-andrae.de — eine Alt-Domain-URL würde NuxtImg blockieren.
+        featuredImage: normalizeImageUrl(post._embedded?.['wp:featuredmedia']?.[0]?.source_url),
+        tags: terms
           .filter(term => term.taxonomy === 'post_tag')
-          .map(tag => ({ id: tag.id, name: tag.name, slug: tag.slug })),
+          .map(tag => ({ id: tag.id, name: decodeHtmlEntities(tag.name), slug: tag.slug })),
+        categories: terms
+          .filter(term => term.taxonomy === 'category')
+          .map(cat => ({ id: cat.id, name: decodeHtmlEntities(cat.name), slug: cat.slug })),
       }
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'statusCode' in error) {

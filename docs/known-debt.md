@@ -39,3 +39,49 @@ vor dem ersten Deploy.
 auf ≥22.19 aktualisieren (`nvm install 22.19`, dann `npm install nuxt@latest`) oder prüfen, ob
 Vercels Build-Environment (die tatsächliche Deploy-Umgebung) bereits eine passende Node-Version
 mitbringt und der Fix dort unabhängig vom lokalen Node gezogen werden kann.
+
+---
+
+## KD-003 — Alt-Domain-URLs in der WordPress-Datenbank werden nur zur Laufzeit umgeschrieben
+
+**Status:** offen, Symptom entschärft · **Erfasst:** 2026-08-26 · **Schweregrad:** mittel
+
+Die Beitragsinhalte in der WordPress-Datenbank enthalten absolute URLs auf
+`www.eduard-andrae.de` (Messung 26.08.2026: **41 von 50** zuletzt veröffentlichten Beiträgen).
+Das Umstellen von `WP_HOME`/`WP_SITEURL`/`WP_CONTENT_URL` in Phase B wirkte nur auf neu
+gerendertes Markup, nicht rückwirkend auf gespeicherte Block-Inhalte.
+
+`shared/utils/rewrite-wp-urls.ts` schreibt diese URLs beim Ausliefern um, sodass die Seite
+auch nach Phase C funktioniert. Das behebt aber nur das Symptom auf **dieser** Seite — im
+WordPress-Backend, in RSS-Feeds, in der WP-eigenen Suche und für jeden anderen Konsumenten
+der REST-API stehen die alten URLs weiterhin drin.
+
+**Warum jetzt nicht gefixt:** Ein Search-Replace über die Produktivdatenbank ist ein Eingriff
+mit Backup-Pflicht und gehört Eddy vorgelegt, nicht nebenbei erledigt. Serialisierte
+PHP-Felder (Theme-Optionen, Custom Fields) dürfen dabei nicht per naivem SQL-`REPLACE`
+angefasst werden — dafür braucht es `wp search-replace` (WP-CLI) oder das Better-Search-Replace-Plugin.
+
+**Wann fällig:** Vor oder kurz nach Phase C. Danach kann der Laufzeit-Rewrite als
+Sicherheitsnetz bestehen bleiben (er ist idempotent), oder mit einem Test auf 0 Vorkommen
+entfernt werden.
+
+---
+
+## KD-004 — Blog-Suche und Kategoriefilter arbeiten nur auf den geladenen Beiträgen
+
+**Status:** offen, bewusst akzeptiert · **Erfasst:** 2026-08-26 · **Schweregrad:** niedrig
+
+`/blog` lädt 30 Beiträge pro Seite (von 242) und filtert clientseitig über
+`app/utils/filter-posts.ts`. Wer nach einem Begriff sucht, der nur in einem alten Beitrag
+vorkommt, findet ihn erst, nachdem er weit genug nachgeladen hat. Die Oberfläche macht das
+transparent („3 Beiträge von 30 geladenen") und bietet im Leerzustand das Nachladen an.
+
+**Warum jetzt nicht gefixt:** Serverseitige Suche über die WordPress-REST-API (`?search=`)
+wäre korrekt, verlangt aber ein zweites Fetch-Regime mit eigenem Cache-Key, Debouncing und
+Fehlerbehandlung — spürbar mehr Fläche als der aktuelle Nutzen rechtfertigt, solange
+unklar ist, wie stark die Suche überhaupt genutzt wird.
+
+**Wann fällig:** Sobald Suche/Filter tatsächlich genutzt werden (Rückmeldung von Eddy oder
+Nutzern) oder die Beitragszahl deutlich über 242 wächst. Fix: `search`- und
+`categories`-Parameter an `server/api/blog.get.ts` durchreichen und die clientseitige
+Filterung auf reine Anzeige reduzieren.

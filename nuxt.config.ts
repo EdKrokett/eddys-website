@@ -53,13 +53,16 @@ export default defineNuxtConfig({
   },
 
   icon: {
-    // Werden nur dynamisch per Variable referenziert (ServiceCategories.vue) — Nuxt
-    // Icons Static-Scan findet sie so nicht automatisch, deshalb explizit bündeln.
+    // Die Social-Icons werden nur dynamisch per Variable referenziert
+    // (SiteFooter/kontakt.vue über SOCIAL_PROFILES) — der Static-Scan von Nuxt Icons
+    // findet sie so nicht, deshalb explizit bündeln.
     clientBundle: {
       icons: [
-        'lucide:sparkles',
-        'lucide:layers',
-        'lucide:target',
+        'lucide:linkedin',
+        'lucide:rss',
+        'lucide:globe',
+        'lucide:youtube',
+        'lucide:instagram',
       ],
     },
   },

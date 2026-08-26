@@ -2,17 +2,32 @@
 @import '@nuxt/ui';
 
 /*
- * Design-Konzept: "Schweizer Taschenmesser" — Eddys eigene Metapher für seine
- * vielseitigen Skills (siehe CLAUDE.md, Design-Priorität). Grafit + gebürsteter
- * Stahl als ruhige Basis, ein einziger kräftiger Rotton als Präzisionswerkzeug-Akzent.
- * Dark-first, kein Light-Mode entworfen (nuxt.config.ts: colorMode.forced).
+ * ══════════════════════════════════════════════════════════════════════════
+ * Design-Konzept: "PRÄZISIONSWERK"
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * Der rote Faden in Eddys Biografie ist der Uhrmachermeister, der Gründer und
+ * Marathonläufer wurde. Die Seite ist deshalb wie ein Messinstrument gebaut:
+ *
+ * - GRUNDFLÄCHE   Grafit, wie ein geschwärztes Zifferblatt. Dark-first, es gibt
+ *                 bewusst kein Light-Pendant (nuxt.config.ts: colorMode dark).
+ * - INDEXE        Feine Strich-Marken (--index-rail) als wiederkehrendes Motiv —
+ *                 an Timelines, Sektionsköpfen, Skill-Skalen.
+ * - ZAHLEN        Jahreszahlen, Distanzen, Zeiten in Mono. Zahlen sind hier
+ *                 Gestaltungselement, nicht Beiwerk (Fraunces für Prosa, Mono für Fakten).
+ * - SEKUNDENZEIGER Ein einziges kräftiges Rot, sparsam gesetzt, nie flächig.
+ * - HAARLINIEN    1px-Rahmen statt Schatten. Präzision statt Weichzeichner.
+ *
+ * Bewusst NICHT: die Teal/Cream-Optik von trusted blogs (das ist die Firma, nicht
+ * die Person) und kein Standard-Card-Grid mit Purple-Gradient.
  */
-@theme static {
-  --font-display: 'Fraunces', serif;
-  --font-sans: 'Manrope', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
 
-  /* Swiss-Red — Werkzeug-Akzent, bewusst kein Tailwind-Stock-Rot */
+@theme static {
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Manrope', ui-sans-serif, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Sekundenzeiger — kräftiges Rot, bewusst kein Tailwind-Stock-Rot */
   --color-swiss-50: #fdf2f2;
   --color-swiss-100: #fbe1e2;
   --color-swiss-200: #f5c0c4;
@@ -25,43 +40,245 @@
   --color-swiss-900: #560d1c;
   --color-swiss-950: #30050e;
 
-  /* Grafit — Grundfläche */
-  --color-graphite-950: #121316;
-  --color-graphite-900: #17181b;
-  --color-graphite-800: #1f2024;
-  --color-graphite-700: #2c2e33;
-  --color-graphite-600: #3a3c43;
+  /* Grafit — Zifferblatt */
+  --color-graphite-950: #0e0f12;
+  --color-graphite-900: #131418;
+  --color-graphite-850: #17191d;
+  --color-graphite-800: #1d1f24;
+  --color-graphite-700: #292b31;
+  --color-graphite-600: #383a42;
+  --color-graphite-500: #4a4d56;
 
-  /* Stahl — Klingen-Gradient */
-  --color-steel-200: #e4e6eb;
-  --color-steel-300: #c8cbd4;
-  --color-steel-400: #9aa0ac;
-  --color-steel-500: #767c88;
+  /* Stahl — gebürstete Oberfläche, Textfarben */
+  --color-steel-100: #f3f1ec;
+  --color-steel-200: #dfe1e7;
+  --color-steel-300: #c1c5cf;
+  --color-steel-400: #949aa6;
+  --color-steel-500: #6f757f;
+  --color-steel-600: #545961;
+
+  /* Messing — warmer Sekundärakzent, Uhrwerk-Anmutung */
+  --color-brass-300: #e0c088;
+  --color-brass-400: #c9a25c;
+  --color-brass-500: #a8823f;
+
+  --ui-radius: 0.125rem;
+
+  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @layer base {
   html {
     color-scheme: dark;
+    scroll-behavior: smooth;
   }
 
   body {
     background: var(--color-graphite-900);
-    color: #f3f1ec;
+    color: var(--color-steel-100);
     font-family: var(--font-sans);
+    /* Feine Körnung — nimmt der Fläche das Digitale, wie mattiertes Metall. */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
-}
 
-@layer base {
+  ::selection {
+    background: var(--color-swiss-500);
+    color: #fff;
+  }
+
   button,
-  [role="button"],
+  [role='button'],
   a[href],
   label[for] {
     cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-swiss-400);
+    outline-offset: 3px;
+  }
+}
+
+/* ── Wiederkehrende Motive ───────────────────────────────────────────────── */
+
+/* Sektions-Kicker: Mono-Label mit vorangestelltem Indexstrich. */
+@utility kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-steel-400);
+}
+
+/* Zifferblatt-Indexe: feine Strichreihe, als Trenner oder Rail. */
+@utility index-rail {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-graphite-600) 0 1px,
+    transparent 1px 8px
+  );
+}
+
+/* Haarlinien-Rahmen — Präzision statt Schatten. */
+@utility hairline {
+  border: 1px solid var(--color-graphite-700);
+}
+
+@layer components {
+  /* WordPress-Fließtext (v-html) — Typografie für fremdes HTML. */
+  .wp-content {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-steel-200);
+  }
+  .wp-content > * + * {
+    margin-top: 1.25em;
+  }
+  .wp-content h2,
+  .wp-content h3,
+  .wp-content h4 {
+    margin-top: 2.25em;
+    color: var(--color-steel-100);
+    letter-spacing: -0.02em;
+  }
+  .wp-content h2 { font-size: 1.6rem; }
+  .wp-content h3 { font-size: 1.3rem; }
+  .wp-content a {
+    color: var(--color-swiss-300);
+    text-underline-offset: 3px;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
+  .wp-content a:hover {
+    color: var(--color-swiss-200);
+  }
+  .wp-content img,
+  .wp-content iframe {
+    max-width: 100%;
+    height: auto;
+    border-radius: 2px;
+  }
+  .wp-content blockquote {
+    border-left: 2px solid var(--color-swiss-500);
+    padding-left: 1.25rem;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--color-steel-300);
+  }
+  .wp-content ul,
+  .wp-content ol {
+    padding-left: 1.5rem;
+  }
+  .wp-content ul { list-style: disc; }
+  .wp-content ol { list-style: decimal; }
+  .wp-content li + li { margin-top: 0.5em; }
+  .wp-content code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-graphite-800);
+    padding: 0.15em 0.4em;
+    border-radius: 2px;
+  }
+  .wp-content figure {
+    margin-inline: 0;
+  }
+
+  .wp-content figcaption {
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-steel-500);
+  }
+
+  /*
+   * Gutenberg-Galerien: WordPress liefert nur die Klassen (is-layout-flex,
+   * has-nested-images), das zugehörige Block-CSS lädt hier niemand — ohne diese
+   * Regeln stapeln sich die Bilder auf ihre winzige Thumbnail-Breite (real
+   * beobachtet: 69px) und die Galerie sieht aus wie ein Rendering-Fehler.
+   */
+  .wp-content .wp-block-gallery.has-nested-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .wp-content .wp-block-gallery.has-nested-images > figure {
+    flex: 1 1 12rem;
+    margin: 0;
+    min-width: 0;
+  }
+  .wp-content .wp-block-gallery.has-nested-images > figure > img {
+    width: 100%;
+    height: auto;
+    /* Die srcset-Breiten stammen aus WP; ohne Reset bleibt das <img width>-Attribut
+       (z. B. 69) maßgeblich und das Bild winzig. */
+    max-width: none;
+  }
+
+  /* Lightbox-Button gehört zu WPs Interaktivitäts-API, die hier nicht läuft. */
+  .wp-content .lightbox-trigger {
+    display: none;
+  }
+
+  .wp-content .aligncenter {
+    margin-inline: auto;
+  }
+  .wp-content .alignwide,
+  .wp-content .alignfull {
+    width: 100%;
+  }
+  .wp-content .wp-block-embed__wrapper {
+    position: relative;
+  }
+  .wp-content .wp-block-embed iframe {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+  }
+  .wp-content table {
+    width: 100%;
+    font-size: 0.9rem;
+    border-collapse: collapse;
+  }
+  .wp-content th,
+  .wp-content td {
+    border: 1px solid var(--color-graphite-700);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
