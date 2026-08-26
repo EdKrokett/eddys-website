@@ -313,3 +313,47 @@ danach verifizieren, dass keine `.reveal`-Sektion unter `opacity: 0.99` bleibt �
 man einen echten Fehler für ein Artefakt oder umgekehrt.
 
 **→ AUDIT-PERSPEKTIVE:** „Was passiert mit diesem Effekt, wenn nicht gescrollt werden kann?"
+
+---
+
+### `transform-origin: center` dreht SVG um den falschen Punkt
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Handwerklich |
+| Gefunden | 2026-08-26 |
+| Schwere | Mittel |
+
+**FALSCH:**
+```css
+/* viewBox="-110 -110 220 220" — Mittelpunkt liegt bei den Nutzerkoordinaten 0 0 */
+.hand--second {
+  transform-box: view-box;
+  transform-origin: center;      /* löst auf zu: 110px 110px */
+  animation: clock-sweep 60s linear infinite;
+}
+```
+
+**RICHTIG:**
+```css
+.hand--second {
+  transform-box: view-box;
+  transform-origin: 0 0;         /* der tatsächliche Mittelpunkt dieser viewBox */
+  animation: clock-sweep 60s linear infinite;
+}
+```
+
+**WARUM:** `center` entspricht `50% 50%`. Die Prozentwerte werden gegen die **Größe**
+der viewBox gerechnet (220 → 110px), das Ergebnis aber im **Nutzerkoordinatensystem**
+angewendet. Bei einer auf `0 0` zentrierten viewBox ist (110, 110) nicht die Mitte,
+sondern der Rand unten rechts — der Sekundenzeiger drehte um einen Punkt am
+Zifferblattrand und flog aus dem Bild.
+
+Der Fehler ist besonders tückisch, weil er im Ruhezustand unsichtbar ist: Das erste
+Bild sieht korrekt aus, die Abweichung zeigt sich erst im Lauf der Animation. Er fiel
+auch bei mehreren Screenshots nicht auf und wurde erst durch eine Messung sichtbar:
+Bounding-Box-Mittelpunkt des Zeigers über die Zeit protokollieren und gegen den
+gemessenen Zifferblattmittelpunkt halten. Wandert er, stimmt der Drehpunkt nicht.
+
+**→ AUDIT-PERSPEKTIVE:** „Ist bei einer Rotation der Drehpunkt gemessen — oder nur
+das Standbild betrachtet worden?"

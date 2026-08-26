@@ -18,9 +18,10 @@ const TICKS = Array.from({ length: 60 }, (_, i) => ({
 }))
 
 /**
- * Stunden- und Minutenzeiger stehen fest auf 4:30 — Eddys Zeit beim ersten
- * Berlin-Marathon (viereinhalb Stunden, neun Monate nach der letzten Zigarette).
- * Das ist der Grund für die Uhr auf dieser Seite und kein zufällig gewählter Stand.
+ * Stunden- und Minutenzeiger stehen fest auf 13:50 (Eddys Vorgabe). Die beiden
+ * Zeiger bilden dabei ein nach oben geöffnetes V — dieselbe Logik, aus der
+ * Uhrenhersteller ihre Katalogfotos auf 10:10 stellen: Das Zifferblatt wirkt
+ * freundlich statt hängend, und die Marke in der Mitte bleibt frei.
  *
  * Der Sekundenzeiger läuft dagegen: 60 s pro Umlauf, gleitend wie bei einem
  * mechanischen Werk statt im Quarz-Sekundentakt — der Uhrmacher hätte es so gewollt.
@@ -29,8 +30,8 @@ const TICKS = Array.from({ length: 60 }, (_, i) => ({
  * und würde einen Hydration-Mismatch erzeugen (siehe docs/error-catalog.md). Ein
  * fester Stand plus reine CSS-Animation braucht kein JavaScript und keinen Timer.
  */
-const HOUR_HAND_ANGLE = 135 // 4,5 h von 12 aus: 4,5 / 12 * 360
-const MINUTE_HAND_ANGLE = 180 // 30 min: 30 / 60 * 360
+const HOUR_HAND_ANGLE = 55 // 13:50 → 1 h 50 min: (1 + 50/60) / 12 * 360
+const MINUTE_HAND_ANGLE = 300 // 50 min: 50 / 60 * 360
 
 useSeoMeta({
   title: 'Über mich — Eduard Andrae',
@@ -74,6 +75,20 @@ useSeoMeta({
                 Berlin ins Ziel gekommen. Seitdem läuft es, im Wortsinn.
               </p>
             </div>
+
+            <!-- Fakten als Messwerte, nicht als Fließtext. Bewusst IN der
+                 Textspalte: Nur so schließt das Porträt rechts unten auf
+                 derselben Linie ab (siehe align-items: end oben). -->
+            <dl class="facts">
+              <div v-for="fact in CV_FACTS" :key="fact.label" class="facts__item">
+                <dt class="facts__value">
+                  {{ fact.value }}
+                </dt>
+                <dd class="facts__label">
+                  {{ fact.label }}
+                </dd>
+              </div>
+            </dl>
           </div>
 
           <!--
@@ -147,18 +162,6 @@ useSeoMeta({
             />
           </div>
         </div>
-
-        <!-- Fakten als Messwerte, nicht als Fließtext -->
-        <dl class="facts">
-          <div v-for="fact in CV_FACTS" :key="fact.label" class="facts__item">
-            <dt class="facts__value">
-              {{ fact.value }}
-            </dt>
-            <dd class="facts__label">
-              {{ fact.label }}
-            </dd>
-          </div>
-        </dl>
       </UContainer>
     </section>
 
@@ -324,11 +327,17 @@ useSeoMeta({
   gap: clamp(2.5rem, 5vw, 4rem);
 }
 /* Erst ab dieser Breite ist wirklich Platz für Text UND Bild nebeneinander —
-   darunter stapeln beide, damit die Zeilenlänge lesbar bleibt. */
+   darunter stapeln beide, damit die Zeilenlänge lesbar bleibt.
+   `align-items: end` sorgt dafür, dass das Porträt unten auf derselben Linie
+   abschließt wie die Fakten-Leiste in der Textspalte. */
 @media (min-width: 1000px) {
   .intro__top {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
-    align-items: center;
+    /* Bezugsrahmen für die absolut gesetzte Uhr: Sie soll sich an der GESAMTEN
+       Zeilenhöhe orientieren, nicht an der Bildzelle — sonst klebt sie am
+       Porträt (das durch align-items:end nur so hoch ist wie das Bild selbst). */
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    align-items: end;
   }
 }
 
@@ -336,62 +345,57 @@ useSeoMeta({
   max-width: 40rem;
 }
 
-/* ── Bildspalte: Porträt vor dem Zifferblatt ───────────────────────────── */
+/* ── Bildspalte: Uhr oben angeschnitten, Porträt groß darunter ──────────── */
 .intro__visual {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: clamp(20rem, 42vw, 30rem);
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
+/*
+ * Die Uhr steht oben in der freien Fläche rechts neben dem Fließtext und läuft
+ * rechts aus dem Bild (der Anschnitt, den Eddy wollte). Sie überlappt das
+ * Porträt bewusst NICHT mehr: In der vorigen Fassung verschwand der
+ * Minutenzeiger — der bei 13:50 nach oben links zeigt — hinter Eddys Kopf,
+ * und von der Uhr blieb nur ein halbes Zifferblatt übrig.
+ */
 .intro__dial {
   position: absolute;
-  /*
-   * Bewusst nicht mittig: Der Zeigerdrehpunkt läge sonst genau auf Eddys Kinn.
-   * Um 14 % nach unten versetzt sitzt die Achse auf Brusthöhe, die Zeiger laufen
-   * über Hemd und Arme statt übers Gesicht.
-   */
-  top: 50%;
-  left: 50%;
-  translate: -50% -36%;
-  width: min(115%, 34rem);
+  top: -2rem;
+  /* Bewusst über den rechten Rand hinaus: Der Anschnitt lässt die Uhr größer
+     wirken, als sie Platz braucht — Eddys ausdrücklicher Wunsch. */
+  right: clamp(-9rem, -6vw, -4rem);
+  width: clamp(15rem, 24vw, 22rem);
   aspect-ratio: 1;
-  /*
-   * Bewusst ÜBER dem Porträt (z-index 2): Die Zeiger stehen auf 4:30 und zeigen
-   * damit nach unten rechts — also genau dorthin, wo Eddys Schulter ist. Hinter
-   * dem Bild wären sie unsichtbar und die Uhr hätte nur einen laufenden Zeiger.
-   * Davor gelegt liest sich das Ganze wie ein Zifferblatt unter Uhrenglas.
-   */
-  z-index: 2;
+  opacity: 0.9;
   pointer-events: none;
 }
 
 .intro__portrait {
   position: relative;
-  z-index: 1;
-  width: min(74%, 21rem);
+  width: min(100%, 30rem);
   height: auto;
-  /* Etwas tiefer gesetzt, damit oben genug Zifferblatt frei bleibt, um die
-     Zeiger zu erkennen — sonst verdeckt der Freisteller die halbe Uhr. */
-  margin-top: 1rem;
-  /* Weicher Abriss nach unten, damit der Freisteller nicht wie ausgeschnitten
-     auf der Fläche klebt, sondern in den Hintergrund ausläuft. */
-  mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
+  /* Nur ein kurzer Abriss am unteren Rand: Das Porträt soll unten sauber
+     abschließen, nicht ausfransen. */
+  mask-image: linear-gradient(to bottom, #000 92%, transparent 100%);
   filter: drop-shadow(0 18px 45px rgba(14, 15, 18, 0.75));
 }
 
-/* Hochkant: Bild zuerst, Zifferblatt deutlich zurückgenommener Hintergrund. */
+/* Hochkant: Bild zuerst, Uhr als angeschnittenes Motiv oben rechts dahinter. */
 @media (max-width: 999px) {
   .intro__visual {
+    position: relative;
     order: -1;
-    min-height: 0;
+    justify-content: center;
   }
   .intro__dial {
-    width: min(120%, 26rem);
-    opacity: 0.45;
+    top: -2rem;
+    right: -4rem;
+    width: 14rem;
+    opacity: 0.6;
   }
   .intro__portrait {
-    width: min(78%, 20rem);
+    width: min(88%, 22rem);
   }
 }
 
@@ -439,16 +443,21 @@ useSeoMeta({
 }
 
 /*
- * Der Sekundenzeiger dreht um den Zifferblattmittelpunkt. Die viewBox ist auf
- * (0 0) zentriert (-110 -110 220 220), deshalb liegt `transform-origin: center`
- * mit `transform-box: view-box` exakt auf der Zeigerachse — ohne dass hier
- * Pixelwerte nachgerechnet werden müssten.
+ * Der Sekundenzeiger dreht um den Zifferblattmittelpunkt — der liegt in dieser
+ * viewBox (-110 -110 220 220) bei den Nutzerkoordinaten 0 0.
+ *
+ * ACHTUNG, hier lag ein Fehler: `transform-origin: center` sieht richtig aus,
+ * löst aber zu `110px 110px` auf. Die 50 % werden gegen die GRÖSSE der viewBox
+ * (220) gerechnet, das Ergebnis aber im Nutzerkoordinatensystem angewendet — und
+ * dort ist (110,110) nicht die Mitte, sondern unten rechts. Der Zeiger drehte
+ * dadurch um einen Punkt am Zifferblattrand und flog aus dem Bild.
+ * Bei einer auf 0 0 zentrierten viewBox muss der Ursprung explizit `0 0` sein.
  */
 .intro__hand--second {
   stroke: var(--color-accent-300);
   stroke-width: 1.6;
   transform-box: view-box;
-  transform-origin: center;
+  transform-origin: 0 0;
   animation: clock-sweep 60s linear infinite;
 }
 
@@ -479,19 +488,15 @@ useSeoMeta({
 }
 
 /* ── Fakten ─────────────────────────────────────────────────────────────── */
+/* auto-fit statt fester Spaltenzahl: Die Leiste steht jetzt in der schmaleren
+   Textspalte und muss sich selbst umbrechen, statt fünf Zellen zu quetschen. */
 .facts {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
   gap: 1px;
   margin-top: clamp(2.5rem, 5vw, 3.5rem);
-  max-width: 46rem;
   background: var(--color-graphite-700);
   border: 1px solid var(--color-graphite-700);
-}
-@media (min-width: 720px) {
-  .facts {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
 }
 
 .facts__item {

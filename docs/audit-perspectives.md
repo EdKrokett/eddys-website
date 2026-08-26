@@ -80,3 +80,15 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
   Vollseiten-Screenshot, Reader-Modus, sehr hohes Viewport?
 - Startet eine Animation bei `opacity: 0` oder `visibility: hidden`? Dann ist der
   Ausfallmodus „Inhalt komplett unsichtbar" — gibt es einen Reset, der das auffängt?
+
+### Animation & Transformationen (abgeleitet 2026-08-26)
+
+- Ist bei einer Rotation der Drehpunkt **gemessen** worden, oder wurde nur das Standbild
+  betrachtet? Ein falscher `transform-origin` sieht im ersten Frame korrekt aus und fällt
+  erst im Lauf auf. Prüfmethode: Bounding-Box-Mittelpunkt des bewegten Elements über
+  mehrere Zeitpunkte protokollieren und gegen den erwarteten Drehpunkt halten.
+- Bei SVG: Stimmt das Zusammenspiel aus `transform-box` und `transform-origin`?
+  Prozentwerte beziehen sich auf die GRÖSSE der viewBox, wirken aber im
+  Nutzerkoordinatensystem — bei einer auf `0 0` zentrierten viewBox ist `center` falsch.
+- Verdeckt ein anderes Element den bewegten Teil? Eine Animation, die hinter einem Bild
+  läuft, ist genauso kaputt wie eine, die gar nicht läuft.
