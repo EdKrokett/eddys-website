@@ -10,10 +10,10 @@ function formatExcerpt(text: string, max = 140) {
 
 <template>
   <div>
-    <KnifeHero />
+    <Hero />
 
     <!-- ═══════════════ ÜBER MICH (Platzhalter) ═══════════════ -->
-    <section class="mx-auto max-w-3xl px-6 py-24 text-center">
+    <section id="ueber-mich" class="mx-auto max-w-3xl px-6 py-24 text-center scroll-mt-16">
       <p class="font-mono text-xs tracking-[0.3em] text-steel-400 uppercase">
         Über mich
       </p>
@@ -22,6 +22,8 @@ function formatExcerpt(text: string, max = 140) {
         Abschnitt wird als Nächstes befüllt.
       </p>
     </section>
+
+    <ServiceCategories />
 
     <!-- ═══════════════ BLOG-VORSCHAU (live von eduard-andrae.de) ═══════════════ -->
     <section class="border-t border-graphite-700 bg-graphite-950/40">

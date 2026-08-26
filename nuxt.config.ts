@@ -53,18 +53,23 @@ export default defineNuxtConfig({
   },
 
   icon: {
-    // Werden nur dynamisch per Variable referenziert (KnifeHero.vue) — Nuxt Icons
-    // Static-Scan findet sie so nicht automatisch, deshalb explizit bündeln.
+    // Werden nur dynamisch per Variable referenziert (ServiceCategories.vue) — Nuxt
+    // Icons Static-Scan findet sie so nicht automatisch, deshalb explizit bündeln.
     clientBundle: {
       icons: [
-        'lucide:compass',
-        'lucide:terminal',
-        'lucide:pen-tool',
-        'lucide:feather',
-        'lucide:workflow',
-        'lucide:megaphone',
+        'lucide:sparkles',
+        'lucide:layers',
+        'lucide:target',
       ],
     },
+  },
+
+  // IPX blockt per Default jeden Remote-Host (IPX_FORBIDDEN_HOST) — ohne diese
+  // Freigabe würde NuxtImg für die WordPress-Blogbilder (Hero-Kachelwand) einfach
+  // fehlschlagen. Host ändert sich, sobald WordPress von eduard-andrae.de wegzieht
+  // (diese Domain übernimmt ja die neue Seite) — dann hier nachziehen.
+  image: {
+    domains: ['eduard-andrae.de', 'www.eduard-andrae.de'],
   },
 
   sitemap: {},
