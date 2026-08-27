@@ -59,7 +59,7 @@ export default defineNuxtConfig({
     clientBundle: {
       icons: [
         'lucide:linkedin',
-        'lucide:rss',
+        'lucide:facebook',
         'lucide:globe',
         'lucide:youtube',
         'lucide:instagram',

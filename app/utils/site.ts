@@ -26,8 +26,8 @@ export interface SocialProfile {
 
 export const SOCIAL_PROFILES: SocialProfile[] = [
   { name: 'LinkedIn', url: 'https://www.linkedin.com/in/eduard-andrae/', icon: 'lucide:linkedin' },
-  { name: 'Blog', url: 'https://blog.eduard-andrae.de', icon: 'lucide:rss' },
-  { name: 'trusted blogs', url: 'https://www.trusted-blogs.com', icon: 'lucide:globe' },
+  { name: 'Facebook', url: 'https://www.facebook.com/schweinehundbesieger', icon: 'lucide:facebook' },
+  { name: 'trusted blogs', url: 'https://www.trusted-blogs.com/hilfe/das-team', icon: 'lucide:globe' },
   { name: 'YouTube', url: null, icon: 'lucide:youtube' },
   { name: 'Instagram', url: null, icon: 'lucide:instagram' },
 ]
