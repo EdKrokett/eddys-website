@@ -23,7 +23,7 @@ const topics = [
     <NuxtLink to="/ueber-mich" class="door door--about">
       <div class="door__body">
         <p class="kicker">
-          01 — Werdegang
+          Werdegang
         </p>
 
         <h2 class="door__title">
@@ -58,7 +58,7 @@ const topics = [
     <NuxtLink to="/blog" class="door door--blog">
       <div class="door__body">
         <p class="kicker">
-          02 — Seit 2006
+          Seit 2006
         </p>
 
         <h2 class="door__title">

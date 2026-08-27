@@ -107,9 +107,9 @@ const columns = computed<string[][]>(() => {
         </h1>
 
         <p class="hero__lead">
-          Uhrmachermeister, der Unternehmer wurde. Kettenraucher, der Marathon lief.
-          Heute verbinde ich Marken mit Blogs — und schreibe über alles, was
-          zwischen Start und Ziel passiert.
+          Uhrmachermeister, der Startup-Gründer wurde. Kettenraucher, der
+          Marathonläufer wurde. Heute verbinde ich Blogs und Brands. Und schreibe
+          über alles, was zwischen Start und Ziel passiert.
         </p>
 
         <div class="hero__actions">
