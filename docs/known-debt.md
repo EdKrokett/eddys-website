@@ -85,3 +85,15 @@ unklar ist, wie stark die Suche überhaupt genutzt wird.
 Nutzern) oder die Beitragszahl deutlich über 242 wächst. Fix: `search`- und
 `categories`-Parameter an `server/api/blog.get.ts` durchreichen und die clientseitige
 Filterung auf reine Anzeige reduzieren.
+
+## OG-Bild der Startseite wird lokal gebaut, nicht im Build
+
+`public/images/og-startseite.jpg` entsteht über `npm run og:build`
+(`scripts/build-og-image.mjs`) und liegt als fertige Datei im Repo. Es hängt
+NICHT am Nuxt-Build — wer den Hero-Text in `HomeHero.vue` ändert, muss das Skript
+von Hand nachziehen, sonst zeigt die Link-Vorschau den alten Satz.
+
+Bewusst so: Der Build läuft auf Vercel ohne Netzzugang zu Google Fonts und ohne
+Schreibrecht im Dateisystem — beides braucht das Skript. Ein CI-Check, der Bild
+und Hero-Text vergleicht, wäre die saubere Lösung, wenn sich der Text öfter
+ändert als bisher.

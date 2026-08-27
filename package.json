@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxt typecheck",
-    "test": "vitest run"
+    "test": "vitest run",
+    "og:build": "node scripts/build-og-image.mjs"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.87",
@@ -24,7 +25,9 @@
   "devDependencies": {
     "@nuxt/eslint": "^1.13.0",
     "eslint": "^9.39.2",
+    "fontkitten": "^1.0.3",
     "happy-dom": "^20.9.0",
+    "sharp": "^0.35.4",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
     "vue-tsc": "^3.2.4"

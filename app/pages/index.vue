@@ -1,10 +1,34 @@
 <script setup lang="ts">
 const { filteredPosts: recentPosts, status } = useBlog({ limit: 3, lazy: true })
 
+const title = 'Eduard Andrae — Blog-Marketing, Agile & Laufen'
+const description
+  = 'Uhrmachermeister, der Startup-Gründer wurde. Kettenraucher, der Marathonläufer wurde. Heute verbinde ich Blogs und Brands.'
+
+// Facebook, LinkedIn und WhatsApp lösen relative Pfade nicht auf — og:url und
+// og:image müssen absolut sein. Die Basis kommt aus site.url (nuxt.config) statt
+// als Literal hierher, damit es genau eine Stelle gibt, die die Domain kennt.
+const { url: siteUrl } = useSiteConfig()
+
 useSeoMeta({
-  title: 'Eduard Andrae — Blog-Marketing, Agile & Laufen',
-  description:
-    'Uhrmachermeister, der Unternehmer wurde. Gründer von trusted blogs, Scrum Master und seit 2006 Laufblogger aus Bremen.',
+  title,
+  description,
+  ogTitle: title,
+  ogDescription: description,
+  ogType: 'website',
+  ogSiteName: 'Eduard Andrae',
+  ogUrl: `${siteUrl}/`,
+  ogImage: `${siteUrl}/images/og-startseite.jpg`,
+  // Breite/Höhe mitzugeben erspart den Crawlern einen zweiten Abruf, sonst
+  // zeigen manche Netzwerke beim ersten Teilen noch keine Vorschau.
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  ogImageType: 'image/jpeg',
+  ogImageAlt: 'Eduard Andrae vor dunklem Grafit-Hintergrund, daneben der Satz "Uhrmachermeister, der Startup-Gründer wurde."',
+  ogLocale: 'de_DE',
+  // X liest Titel, Beschreibung und Bild aus den og:-Tags — nur den Kartentyp
+  // nicht. Ohne ihn bleibt die Vorschau die kleine quadratische Variante.
+  twitterCard: 'summary_large_image',
 })
 </script>
 
