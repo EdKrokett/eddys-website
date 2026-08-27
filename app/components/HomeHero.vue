@@ -9,12 +9,59 @@
  * umgezogen, wo sie inhaltlich hingehören.
  *
  * Lade-Disziplin unverändert übernommen, weil rohe WordPress-Uploads groß sind
- * (~870 KB pro Foto): NuxtImg/IPX auf 240px+WebP, client-only Lazy-Fetch,
- * Drift-Animation erst nach Leerlauf, Einblenden pro Kachel. Auf schmalen Screens
- * werden weniger Spalten gerendert, damit dort gar nicht erst mehr Bilder laden.
+ * (~870 KB pro Foto): NuxtImg auf Kachelbreite+WebP, client-only Lazy-Fetch,
+ * Drift-Animation erst nach Leerlauf, Einblenden pro Kachel. Spaltenzahl, Bildanzahl
+ * und angeforderte Bildbreite leiten sich aus der gemessenen Kachelgeometrie ab
+ * (siehe `imagesPerColumn` / `tileImageWidth`), statt pro Breakpoint gesetzt zu sein.
  */
-const COLUMN_COUNT_DESKTOP = 6
+const COLUMN_COUNT_DESKTOP = 5
 const COLUMN_COUNT_MOBILE = 3
+
+/**
+ * Abstand zwischen den Kacheln — muss mit `gap` in `.hero__col`/`.hero__wall`
+ * übereinstimmen, weil die Kachelbreite unten daraus zurückgerechnet wird.
+ */
+const WALL_GAP = 12
+
+/** `.hero__wall` sitzt auf `inset: -8% -2%`, ist also 4% breiter als der Viewport. */
+const WALL_OVERHANG = 1.04
+
+/**
+ * Erlaubte Bildbreiten — muss eine Teilmenge von `image.screens` (nuxt.config.ts)
+ * bleiben. Steht eine Breite dort nicht drin, rundet der Vercel-Provider still nach
+ * oben und die Kachel lädt unnötig groß (genau der Fehler, der die Wand vorher
+ * 24× 640px laden ließ, obwohl die Kachel 240px breit war).
+ */
+const TILE_SCREEN_WIDTHS = [240, 320, 480, 640]
+
+/**
+ * Wie scharf die Kacheln geladen werden, als Faktor auf die CSS-Kachelbreite.
+ * 1,5 statt der sonst üblichen 2, weil die Wand reine Dekoration ist: Sie liegt
+ * hinter `.hero__veil`, ist auf `opacity: 0.92` gedimmt und zusätzlich per
+ * `grayscale(0.12) contrast(1.04)` gefiltert. Ein echtes 2x wäre dort nicht
+ * sichtbar, würde die Wand aber fast verdoppeln.
+ */
+const TILE_SHARPNESS = 1.5
+
+/** Kachel-Seitenverhältnis, muss zu `aspect-ratio: 4 / 3` in `.hero__tile` passen. */
+const TILE_ASPECT = 4 / 3
+
+/** `.hero__wall` sitzt auf `inset: -8%` oben und unten, ist also 16% höher als der Hero. */
+const WALL_VERTICAL_OVERHANG = 1.16
+
+/** `.hero`: `min-height: min(78vh, 44rem)` — 44rem sind 704px. */
+const HERO_VH_FACTOR = 0.78
+const HERO_MAX_HEIGHT = 704
+
+/**
+ * Sicherheitsaufschlag auf die Zahl der gleichzeitig sichtbaren Kacheln. Bei Faktor 1
+ * stünde das erste Foto exakt am unteren Bildrand wieder im Bild; 1,35 hält die
+ * Wiederholung zuverlässig außerhalb des Sichtfensters, ohne unnötig viele Bilder
+ * zu laden.
+ */
+const TILE_REPEAT_HEADROOM = 1.35
+
+/** Untergrenze, damit eine sehr niedrige Wand nicht zu einer Zwei-Bild-Schleife wird. */
 const MIN_IMAGES_PER_COLUMN = 4
 
 const { wallImages, status } = useBlogWallImages()
@@ -23,6 +70,58 @@ const isMobile = ref(false)
 const wallActive = ref(false)
 const loadedTiles = ref(new Set<string>())
 
+/**
+ * Startwert entspricht dem Desktop-Zweig; bis `onMounted` läuft, wird die Wand
+ * ohnehin nicht gerendert (`ClientOnly` + `columns.length`).
+ */
+const viewportWidth = ref(1440)
+const viewportHeight = ref(900)
+
+const columnCount = computed(() =>
+  isMobile.value ? COLUMN_COUNT_MOBILE : COLUMN_COUNT_DESKTOP,
+)
+
+/** Breite EINER Kachel in CSS-px — dieselbe Rechnung, die das Flex-Layout macht. */
+const tileCssWidth = computed(() => {
+  const wallWidth = viewportWidth.value * WALL_OVERHANG
+  return (wallWidth - (columnCount.value - 1) * WALL_GAP) / columnCount.value
+})
+
+/**
+ * Eine einzige Bildbreite statt `densities="1x 2x"`: Die Kachelgröße ist hier bekannt,
+ * also lässt sich direkt die passende Datei anfordern, statt dem Browser zwei
+ * Kandidaten anzubieten. Das war vorher sogar wirkungslos — 1x (240) und 2x (480)
+ * rundeten beide auf 640 auf und lieferten dieselbe Datei zweimal im srcset.
+ */
+const tileImageWidth = computed(() => {
+  const target = tileCssWidth.value * TILE_SHARPNESS
+  return TILE_SCREEN_WIDTHS.find(w => w >= target) ?? TILE_SCREEN_WIDTHS.at(-1)!
+})
+
+/**
+ * Einzigartige Bilder PRO SPALTE, bevor die Spalte für die Drift-Schleife per
+ * `[...col, ...col]` verdoppelt wird. Muss über der Zahl der gleichzeitig sichtbaren
+ * Kacheln liegen, sonst steht dasselbe Foto zweimal auf einem Screen.
+ *
+ * Bewusst gerechnet statt pro Breakpoint gesetzt: Der Bedarf hängt an der Kachelhöhe,
+ * und die schwankt über die Viewports um mehr als das Doppelte. Auf einem 360px-Handy
+ * ist eine Kachel nur 88px hoch, es passen 7,3 übereinander; auf 1920px sind es 292px
+ * und nur noch 2,7. Zwei feste Werte für "Mobile" und "Desktop" träfen beides daneben —
+ * Mobile bekäme zu wenige Bilder (sichtbare Wiederholung), Tablet zu viele (unnötiger
+ * Transfer). Genau dieser Fehler steckte vorher drin: 4 Bilder pro Spalte bei
+ * 4,24 sichtbaren Kacheln.
+ *
+ * Die Formel ist gegen echte Messungen geprüft (27.08.2026) — berechnet vs. im Browser
+ * gemessen: 7,26 / 7,26 (Android 360), 3,98 / 3,96 (Tablet 768), 3,55 / 3,54 (1440).
+ */
+const imagesPerColumn = computed(() => {
+  const heroHeight = Math.min(viewportHeight.value * HERO_VH_FACTOR, HERO_MAX_HEIGHT)
+  const wallHeight = heroHeight * WALL_VERTICAL_OVERHANG
+  const tileHeight = tileCssWidth.value / TILE_ASPECT
+  const visibleTiles = wallHeight / (tileHeight + WALL_GAP)
+  return Math.max(MIN_IMAGES_PER_COLUMN, Math.ceil(visibleTiles * TILE_REPEAT_HEADROOM))
+})
+
 onMounted(() => {
   const mediaQuery = window.matchMedia('(max-width: 900px)')
   isMobile.value = mediaQuery.matches
@@ -30,6 +129,16 @@ onMounted(() => {
     isMobile.value = e.matches
   }
   mediaQuery.addEventListener('change', handleChange)
+
+  // Nur die gerundete Bildbreite hängt hieran, und die kennt genau vier Stufen —
+  // deshalb reicht ein grobes Raster statt eines Resize-Observers pro Pixel.
+  viewportWidth.value = window.innerWidth
+  viewportHeight.value = window.innerHeight
+  const handleResize = () => {
+    viewportWidth.value = window.innerWidth
+    viewportHeight.value = window.innerHeight
+  }
+  window.addEventListener('resize', handleResize, { passive: true })
 
   const startWall = () => {
     wallActive.value = true
@@ -42,16 +151,17 @@ onMounted(() => {
 
   onUnmounted(() => {
     mediaQuery.removeEventListener('change', handleChange)
+    window.removeEventListener('resize', handleResize)
   })
 })
 
 const columns = computed<string[][]>(() => {
-  const columnCount = isMobile.value ? COLUMN_COUNT_MOBILE : COLUMN_COUNT_DESKTOP
-  const imgs = wallImages.value.slice(0, columnCount * MIN_IMAGES_PER_COLUMN)
+  const count = columnCount.value
+  const imgs = wallImages.value.slice(0, count * imagesPerColumn.value)
   if (imgs.length === 0) return []
-  const cols: string[][] = Array.from({ length: columnCount }, () => [])
+  const cols: string[][] = Array.from({ length: count }, () => [])
   imgs.forEach((img, i) => {
-    cols[i % columnCount]!.push(img)
+    cols[i % count]!.push(img)
   })
   return cols.filter(col => col.length > 0)
 })
@@ -71,8 +181,8 @@ const columns = computed<string[][]>(() => {
             <NuxtImg
               :src="img"
               alt=""
-              width="240"
-              densities="1x 2x"
+              :width="tileImageWidth"
+              densities="1x"
               format="webp"
               quality="55"
               decoding="async"

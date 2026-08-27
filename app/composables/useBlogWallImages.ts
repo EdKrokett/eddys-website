@@ -6,13 +6,17 @@ import type { WordPressBlogPost } from '#shared/types/wordpress'
  * Eigener Cache-Key statt Teilen mit `useBlog()`: unterschiedliche Fetch-Semantik
  * (hier lazy/client-only), der Server-Response ist über `withWpCache` ohnehin
  * 30 Minuten gecacht — die zweite Anfrage kostet keinen echten WordPress-Roundtrip.
- * Größe/Format der Bilder regelt NuxtImg im Template (IPX-Transform), nicht hier.
+ * Größe/Format der Bilder regelt NuxtImg im Template, nicht hier.
+ *
+ * `limit: 36` statt der 30, die die Wand auf Mobile (3 Spalten × 10) braucht: Beiträge
+ * ohne Beitragsbild und Dubletten fallen unten weg, ohne Marge bliebe die letzte
+ * Spalte sonst kürzer als die anderen.
  */
 export function useBlogWallImages() {
   const nuxtApp = useNuxtApp()
   const { data, status } = useFetch<WordPressBlogPost[]>('/api/blog', {
     key: 'blog-wall-images',
-    query: { limit: 24 },
+    query: { limit: 36 },
     lazy: true,
     server: false,
     default: () => [],

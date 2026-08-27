@@ -92,3 +92,43 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
   Nutzerkoordinatensystem — bei einer auf `0 0` zentrierten viewBox ist `center` falsch.
 - Verdeckt ein anderes Element den bewegten Teil? Eine Animation, die hinter einem Bild
   läuft, ist genauso kaputt wie eine, die gar nicht läuft.
+
+### Caching & Laufzeitumgebung (abgeleitet 2026-08-27)
+
+- Überlebt die Cache-Schicht den Prozess, der sie hält? Ein modul-globaler In-Memory-Cache
+  ist auf Serverless nach jedem Cold Start leer — er verdeckt das Problem im Test (warm)
+  und zeigt es im Betrieb (kalt). Prüfmethode: `x-vercel-cache` und die Streuung der TTFB
+  über mehrere Aufrufe ansehen, nicht den Mittelwert.
+- Ist der kalte Pfad **wirklich kalt** gemessen worden? Ein Cache-Buster als Query-Parameter
+  wirkt nur, wenn er auch im Cache-Key landet. Bei `withWpCache` besteht der Key aus
+  `limit`/`page` — jeder andere Parameter wird ignoriert und die Messung ist stillschweigend
+  warm. Prüfmethode: einen bis dahin unbenutzten Wert der schlüsselbildenden Parameter nehmen.
+- Wo läuft die Function geografisch, gemessen an ihrem Origin? `x-vercel-id: fra1::iad1::…`
+  heißt Edge in Frankfurt, Ausführung in US-Ost. Liegt die Datenquelle in Europa, kostet
+  jeder Cache-Miss zwei Atlantiküberquerungen.
+- Fordert der Fremd-API-Aufruf nur die Felder an, die danach auch gemappt werden? WordPress
+  liefert ohne `_fields` jedes `content.rendered` voll mit — bei 24 Posts 743 KB statt 226 KB.
+  Achtung: `_fields` filtert auch bei gesetztem `_embed`, `_embedded` muss also explizit in
+  der Liste stehen.
+- Lässt sich die Optik-Referenz aus einem anderen Repo überhaupt übertragen, oder hängt ihre
+  Performance an der Laufzeitumgebung (langlebiger Container vs. Serverless)? Erst die
+  Deployment-Form vergleichen, dann den Code.
+
+### Bilder & sich wiederholende Layouts (abgeleitet 2026-08-27)
+
+- Stimmt die tatsächlich geladene Bildbreite mit der Anzeigegröße überein — auf der
+  **Live-Plattform** gemessen, nicht lokal? Lokal läuft IPX und bedient jede Breite exakt;
+  auf Vercel rundet der Provider auf `image.screens` auf und liefert still zu große
+  Dateien. Prüfmethode: `naturalWidth` gegen `getBoundingClientRect().width` im Browser,
+  oder das `srcset` der Live-Seite ansehen.
+- Zeigen die Einträge eines `srcset` überhaupt auf verschiedene Dateien? Rundet der
+  Provider 1x und 2x auf denselben Wert auf, ist die zweite Dichte wirkungslos und
+  verdoppelt nur die Markup-Größe.
+- Bei einer per Verdopplung (`[...items, ...items]`) gebauten Endlosschleife: Passen mehr
+  Elemente gleichzeitig ins Sichtfenster, als es einzigartige gibt? Dann ist die
+  Wiederholung permanent sichtbar. Prüfmethode: Sichtfensterhöhe durch (Elementhöhe + gap).
+- Ist der Bedarf gegenläufig zur Elementgröße? Bei Kachelwänden braucht der KLEINE Screen
+  mehr Bilder, nicht weniger — feste Mobile-/Desktop-Werte treffen dann beides daneben.
+- Spiegelt eine JS-Konstante einen CSS-Wert (gap, inset, aspect-ratio, min-height)? Dann
+  gehört an beide Stellen ein Verweis auf die jeweils andere — sonst rechnet die Logik
+  nach der nächsten Layout-Änderung an der Realität vorbei.

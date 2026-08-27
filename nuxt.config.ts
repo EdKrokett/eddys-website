@@ -31,6 +31,44 @@ export default defineNuxtConfig({
     },
   },
 
+  /**
+   * Edge-Cache für die WordPress-Proxy-Routen — der eigentliche Hebel gegen die
+   * langsamen Kacheln.
+   *
+   * Warum der In-Memory-Cache in `wpCache.ts` allein nicht reicht: Auf Vercel Serverless
+   * lebt er nur so lange wie die Function-Instanz. Nach jedem Cold Start (und pro neuer
+   * paralleler Instanz) ist er leer, und dann kostet `/api/blog?limit=24` den vollen
+   * WordPress-Roundtrip — gemessen 1,6–3,0 s, warm dagegen 0,17 s. Genau diese Spanne
+   * ist das, was als "manchmal fünf Sekunden" auffällt. Auf trusted-blogs tritt das
+   * nicht auf, weil dort ein langlebiger Node-Prozess im Container läuft (Dockerfile),
+   * dessen Modul-Cache tagelang warm bleibt — das Muster ist nicht übertragbar,
+   * die Edge-Schicht davor ersetzt es.
+   *
+   * Bewusst `s-maxage`-Header statt Nitros `swr`/`isr`: Vercels ISR-Prerender-Functions
+   * müssten die Query-Parameter per `allowQuery` einzeln freigeben, sonst fallen
+   * `?limit=`/`?page=` unter den Tisch und alle Varianten teilen einen Eintrag. Der
+   * CDN-Cache über `s-maxage` schlüsselt dagegen von Haus aus auf die volle URL
+   * inklusive Query — genau das, was diese Routen brauchen.
+   *
+   * `max-age=0` hält den Browser-Cache außen vor (sonst sieht ein Besucher seine eigene
+   * Kopie noch, wenn längst neu veröffentlicht wurde), `s-maxage=1800` deckt sich mit
+   * der TTL in `wpCache.ts`, und `stale-while-revalidate` liefert 24 h lang sofort eine
+   * alte Antwort aus, während im Hintergrund neu geholt wird. Damit trifft praktisch
+   * kein Besucher mehr den kalten Pfad.
+   */
+  routeRules: {
+    '/api/blog': {
+      headers: {
+        'cache-control': 'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',
+      },
+    },
+    '/api/blog/**': {
+      headers: {
+        'cache-control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    },
+  },
+
   compatibilityDate: '2026-08-15',
 
   nitro: {
@@ -73,6 +111,41 @@ export default defineNuxtConfig({
   // Phase B), eduard-andrae.de/www.eduard-andrae.de übernimmt die neue Nuxt-Seite.
   image: {
     domains: ['blog.eduard-andrae.de'],
+
+    /**
+     * `screens` ist auf Vercel nicht nur ein Breakpoint-Alias, sondern die Liste der
+     * ERLAUBTEN Bildbreiten: @nuxt/image schreibt genau diese Werte als `images.sizes`
+     * in die Vercel-Build-Config, und der Vercel-Provider rundet jede angeforderte
+     * Breite auf den nächstgrößeren Eintrag AUF. Alles, was nicht in der Liste steht,
+     * beantwortet Vercel mit 400 (`INVALID_IMAGE_OPTIMIZE_REQUEST`).
+     *
+     * Der Default beginnt bei 640. Die Hero-Kacheln sind aber nur 240 CSS-px breit —
+     * `width="240"` (1x) UND 480 (2x) rundeten beide auf 640 auf, das Kachelbild kam
+     * also 2,7-fach zu groß und in beiden Dichten identisch: 26 KB statt 4 KB pro
+     * Kachel, bei 24 Kacheln rund 620 KB für eine dekorative Hintergrundwand.
+     *
+     * 240/320/480 ergänzen den Default nach unten: 320 ist die Desktop-Kachel (5 Spalten,
+     * ~290px breit), 240 die Mobile-Kachel, 480 deckt deren 2x-Variante sowie BlogCard
+     * und Porträt ab. Statt zweimal 640 lädt eine Desktop-Kachel jetzt 7 KB (1x) bzw.
+     * 26 KB (2x), eine Mobile-Kachel 4 KB bzw. 15 KB.
+     * Nebeneffekt, bewusst in Kauf genommen: BlogCard (420) und das Porträt (440)
+     * rutschen bei 1x von 640 auf 480 — das ist die korrekte Größe für ihren
+     * Anzeigeplatz, vorher wurde dort ebenfalls überliefert.
+     *
+     * Beim Ändern dieser Liste immer gegenprüfen, dass jede im Template genutzte
+     * `width` einen sinnvollen Zielwert findet — sonst rundet der Provider still
+     * weiter nach oben.
+     */
+    screens: {
+      'tile': 240,
+      'tileDesktop': 320,
+      'tile2x': 480,
+      'sm': 640,
+      'md': 768,
+      'lg': 1024,
+      'xl': 1280,
+      '2xl': 1536,
+    },
   },
 
   sitemap: {},

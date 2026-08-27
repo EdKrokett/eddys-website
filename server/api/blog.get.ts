@@ -20,6 +20,27 @@ interface WpPost {
 }
 
 /**
+ * Nur die Felder anfordern, die unten auch gemappt werden. WordPress liefert sonst
+ * `content.rendered` jedes Beitrags voll mit — bei 24 Posts sind das 743 KB statt
+ * 226 KB und 2,05 s statt 1,16 s Antwortzeit am Origin (gemessen 27.08.2026).
+ *
+ * `_embedded` muss explizit in der Liste stehen: `_fields` filtert die Antwort auch
+ * dann, wenn `_embed` gesetzt ist — ohne den Eintrag fielen Beitragsbild und
+ * Kategorien weg. Die beiden `_links.wp:*` sind das, woran WordPress erkennt, was
+ * es überhaupt einbetten soll; ohne sie bleibt `_embedded` leer.
+ */
+const WP_FIELDS = [
+  'id',
+  'slug',
+  'title',
+  'excerpt',
+  'date',
+  '_links.wp:featuredmedia',
+  '_links.wp:term',
+  '_embedded',
+].join(',')
+
+/**
  * Listet veröffentlichte WordPress-Posts (öffentliche, unauthentifizierte REST-API,
  * kein Kategorie-Filter — anders als tb26-code: dort ist WordPress eine Kategorie unter
  * vielen, hier ist es der gesamte Blog). `limit` steuert `per_page` — kleinere Werte für
@@ -44,7 +65,7 @@ export default defineEventHandler(async (event): Promise<WordPressBlogPost[]> =>
     let response: WpPost[]
     try {
       response = await backendFetch<WpPost[]>(
-        `${wpUrl}/wp-json/wp/v2/posts?per_page=${limit}&page=${page}&_embed`,
+        `${wpUrl}/wp-json/wp/v2/posts?per_page=${limit}&page=${page}&_embed&_fields=${WP_FIELDS}`,
       )
     } catch (error: unknown) {
       const status = (error as { status?: number, statusCode?: number })?.status

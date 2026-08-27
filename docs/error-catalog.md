@@ -357,3 +357,150 @@ gemessenen Zifferblattmittelpunkt halten. Wandert er, stimmt der Drehpunkt nicht
 
 **→ AUDIT-PERSPEKTIVE:** „Ist bei einer Rotation der Drehpunkt gemessen — oder nur
 das Standbild betrachtet worden?"
+
+---
+
+### In-Memory-Cache als einzige Schicht vor einem langsamen Fremd-Origin (Serverless)
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Unvollständig |
+| Gefunden | 2026-08-27 |
+| Schwere | Hoch |
+
+**FALSCH:**
+```ts
+// wpCache.ts: Modul-globale Map + Best-Effort-storage, sonst nichts davor.
+// nuxt.config.ts hat keine routeRules → Vercel liefert
+// `cache-control: public, max-age=0, must-revalidate`, x-vercel-cache: MISS.
+const memoryCache = new Map<string, CacheEntry<unknown>>()
+```
+
+**RICHTIG:**
+```ts
+// nuxt.config.ts — CDN-Schicht VOR die Function legen:
+routeRules: {
+  '/api/blog': {
+    headers: {
+      'cache-control': 'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',
+    },
+  },
+},
+```
+
+**WARUM:** Der Modul-globale Cache lebt nur so lange wie die Function-Instanz. Auf
+Vercel Serverless heißt das: nach jedem Cold Start und in jeder neu hochgefahrenen
+Parallel-Instanz ist er leer. Gemessen an `/api/blog?limit=24`: **1,6–3,0 s kalt gegen
+0,17 s warm.** Genau diese Spanne fiel als „manchmal fünf Sekunden" auf — der Cache
+funktionierte, er war nur zu oft leer.
+
+Verschärfend kam dazu, dass die Function in **iad1 (US-Ost)** lief, während WordPress
+bei IONOS in Deutschland steht (`x-vercel-id: fra1::iad1::…`) — jeder Cache-Miss ging
+zweimal über den Atlantik.
+
+Der Fehler war messtechnisch tückisch: Ein naiver Cache-Buster (`?_cb=…`) trifft **nicht**
+den kalten Pfad, weil der Cache-Key in `withWpCache` nur aus `limit` und `page` gebaut
+wird — der Zusatzparameter wird ignoriert und die Messung liefert fälschlich Warm-Werte.
+Erst je ein bis dahin unbenutzter `limit`-Wert (23, 22, 21 …) erzeugt echte Cache-Misses.
+
+Die naheliegende Referenz führte ebenfalls in die Irre: Auf trusted-blogs ist dieselbe
+Cache-Implementierung schnell — aber nur, weil dort ein langlebiger Node-Prozess im
+Container läuft (`frontend/Dockerfile`), dessen Modul-Cache tagelang warm bleibt.
+Das Muster ist nicht portierbar; auf Serverless braucht es eine Schicht, die die
+Instanz überlebt.
+
+**→ AUDIT-PERSPEKTIVE:** „Überlebt diese Cache-Schicht den Prozess, der sie hält — und
+ist der kalte Pfad wirklich kalt gemessen worden?"
+
+---
+
+### `image.screens` als stiller Aufrunder: Kachel lädt 2,7-fach zu groß
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Handwerklich |
+| Gefunden | 2026-08-27 |
+| Schwere | Mittel |
+
+**FALSCH:**
+```vue
+<!-- image.screens war nicht gesetzt, Default beginnt bei 640 -->
+<NuxtImg :src="img" width="240" densities="1x 2x" format="webp" quality="55" />
+<!-- erzeugt: w=640 1x, w=640 2x  →  dieselbe 26-KB-Datei zweimal im srcset -->
+```
+
+**RICHTIG:**
+```ts
+// nuxt.config.ts — kleine Breiten überhaupt erst erlauben
+image: {
+  screens: { tile: 240, tileDesktop: 320, tile2x: 480, sm: 640, md: 768, lg: 1024, xl: 1280, '2xl': 1536 },
+}
+```
+```vue
+<!-- Breite aus der gemessenen Kachelgeometrie, eine Dichte statt zweier Kandidaten -->
+<NuxtImg :src="img" :width="tileImageWidth" densities="1x" format="webp" quality="55" />
+```
+
+**WARUM:** Auf Vercel ist `image.screens` nicht nur ein Breakpoint-Alias, sondern die
+Liste der **erlaubten** Bildbreiten — @nuxt/image schreibt sie als `images.sizes` in
+die Build-Config. Der Provider rundet jede angeforderte Breite auf den nächsten
+Eintrag **auf**; alles andere quittiert Vercel mit 400
+(`INVALID_IMAGE_OPTIMIZE_REQUEST`). Der Default beginnt bei 640, die Kachel war 240px
+breit: 1x (240) und 2x (480) landeten beide auf 640, also 26 KB statt 4 KB — und die
+zweite Dichte war komplett wirkungslos, weil sie auf dieselbe Datei zeigte.
+
+Tückisch ist, dass nichts fehlschlägt: Die Bilder erscheinen, sehen gut aus, und im
+Template steht `width="240"` — die Aufrundung passiert unsichtbar im Provider. Lokal
+ist sie auch nicht reproduzierbar, weil dort IPX läuft und jede Breite exakt bedient.
+Sichtbar wird sie erst am `srcset` der Live-Seite oder über
+`naturalWidth` vs. `getBoundingClientRect().width` im Browser.
+
+**→ AUDIT-PERSPEKTIVE:** „Stimmt die tatsächlich geladene Bildbreite mit der
+Anzeigegröße überein — auf der Live-Plattform gemessen, nicht lokal?"
+
+---
+
+### Drift-Schleife mit weniger einzigartigen Bildern als sichtbaren Kacheln
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Unvollständig |
+| Gefunden | 2026-08-27 |
+| Schwere | Mittel |
+
+**FALSCH:**
+```ts
+// 6 Spalten, 4 Bilder je Spalte — die Spalte wird für die Endlosschleife verdoppelt
+const MIN_IMAGES_PER_COLUMN = 4
+const imgs = wallImages.value.slice(0, columnCount * MIN_IMAGES_PER_COLUMN)
+// Template: v-for="img in [...col, ...col]"
+```
+
+**RICHTIG:**
+```ts
+// Bedarf aus der Kachelgeometrie ableiten statt raten
+const imagesPerColumn = computed(() => {
+  const heroHeight = Math.min(viewportHeight.value * HERO_VH_FACTOR, HERO_MAX_HEIGHT)
+  const wallHeight = heroHeight * WALL_VERTICAL_OVERHANG
+  const tileHeight = tileCssWidth.value / TILE_ASPECT
+  const visibleTiles = wallHeight / (tileHeight + WALL_GAP)
+  return Math.max(MIN_IMAGES_PER_COLUMN, Math.ceil(visibleTiles * TILE_REPEAT_HEADROOM))
+})
+```
+
+**WARUM:** Wird eine Spalte per `[...col, ...col]` für die Endlosschleife verdoppelt,
+muss sie mehr einzigartige Bilder enthalten, als gleichzeitig ins Sichtfenster passen —
+sonst steht dasselbe Foto zweimal auf einem Screen. Gemessen: 4,24 sichtbare Kacheln
+bei 4 einzigartigen (1440px), auf dem Handy sogar 7,1 bei 4.
+
+Zwei feste Werte für „Mobile" und „Desktop" lösen das nicht, weil der Bedarf
+gegenläufig zur Kachelgröße ist: Je kleiner die Kachel, desto MEHR Bilder braucht die
+Spalte. Ein 360px-Handy braucht 10 pro Spalte, ein 1920px-Desktop nur 4. Die Intuition
+„kleiner Screen = weniger Bilder" führt hier in die falsche Richtung.
+
+trusted-blogs hatte denselben Fehler (dort Issue #45) und löste ihn über einen
+höheren Festwert (8). Der rechnet auf Tablets unnötig viel Transfer mit — die
+abgeleitete Variante trifft jeden Viewport.
+
+**→ AUDIT-PERSPEKTIVE:** „Bei einer verdoppelten Endlosschleife: Passen mehr Elemente
+ins Sichtfenster, als es einzigartige gibt?"
