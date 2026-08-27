@@ -9,19 +9,12 @@
  * einer statischen Cookie-Seite.
  */
 const mobileOpen = ref(false)
-const searchQuery = ref('')
 
 const links = [
   { to: '/ueber-mich', label: 'Über mich' },
   { to: '/blog', label: 'Blog' },
   { to: '/kontakt', label: 'Kontakt' },
 ]
-
-function onSearch() {
-  const q = searchQuery.value.trim()
-  navigateTo({ path: '/blog', query: q ? { q } : {} })
-  mobileOpen.value = false
-}
 
 // Menü schließen, wenn die Route wechselt (sonst bleibt es nach Klick offen stehen).
 watch(() => useRoute().fullPath, () => {
@@ -46,17 +39,6 @@ watch(() => useRoute().fullPath, () => {
         >
           {{ link.label }}
         </NuxtLink>
-
-        <form class="search" @submit.prevent="onSearch">
-          <Icon name="lucide:search" class="size-3.5 shrink-0 text-steel-500" />
-          <input
-            v-model="searchQuery"
-            type="search"
-            placeholder="Suchen"
-            aria-label="Beiträge durchsuchen"
-            class="search__input"
-          >
-        </form>
       </nav>
 
       <button
@@ -71,17 +53,6 @@ watch(() => useRoute().fullPath, () => {
     </UContainer>
 
     <div v-if="mobileOpen" class="mobile">
-      <form class="search search--mobile" @submit.prevent="onSearch">
-        <Icon name="lucide:search" class="size-4 shrink-0 text-steel-500" />
-        <input
-          v-model="searchQuery"
-          type="search"
-          placeholder="Beiträge durchsuchen"
-          aria-label="Beiträge durchsuchen"
-          class="search__input"
-        >
-      </form>
-
       <NuxtLink
         v-for="link in links"
         :key="link.to"
@@ -160,45 +131,6 @@ watch(() => useRoute().fullPath, () => {
 }
 .navlink.router-link-active {
   color: var(--color-steel-100);
-}
-
-/* ── Suche ──────────────────────────────────────────────────────────────── */
-.search {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid var(--color-graphite-700);
-  padding: 0.4rem 0.75rem;
-  transition: border-color 200ms ease;
-}
-.search:focus-within {
-  border-color: var(--color-graphite-500);
-}
-
-.search__input {
-  width: 7rem;
-  background: transparent;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--color-steel-100);
-  transition: width 250ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.search__input::placeholder {
-  color: var(--color-steel-600);
-}
-.search__input:focus {
-  outline: none;
-  width: 10rem;
-}
-
-.search--mobile {
-  margin-bottom: 0.5rem;
-}
-.search--mobile .search__input {
-  width: 100%;
-}
-.search--mobile .search__input:focus {
-  width: 100%;
 }
 
 /* ── Mobile ─────────────────────────────────────────────────────────────── */

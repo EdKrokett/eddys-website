@@ -12,7 +12,9 @@ const {
 
 const route = useRoute()
 
-// Suchbegriff aus der URL übernehmen (Header-Suche verlinkt hierher).
+// Suchbegriff aus der URL übernehmen, damit sich ein Suchergebnis teilen und
+// verlinken lässt (`/blog?q=marathon`). Wird nur beim Setup gelesen — innerhalb
+// der Seite läuft die Suche über das Feld im Filterbereich.
 const initialQuery = route.query.q
 if (typeof initialQuery === 'string') {
   searchQuery.value = initialQuery
