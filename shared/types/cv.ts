@@ -48,7 +48,21 @@ export interface CvProject {
   period: string
   role: string
   description: string
+  /** Projekt ist unter dieser Adresse erreichbar — speist die Kennzahl "davon online". */
   url?: string
+  /**
+   * Weiterführender Beitrag im eigenen Blog, als interne Route.
+   *
+   * Bewusst NICHT über `url` gelöst: `url` heißt "läuft noch und ist dort erreichbar"
+   * und wird extern im neuen Tab geöffnet. Ein geschlossenes Projekt darf in der
+   * Kennzahl "davon online" nicht mitzählen, hat aber trotzdem eine Geschichte.
+   */
+  story?: {
+    /** Interne Route, z. B. "/blog/mein-beitrag". */
+    to: string
+    /** Linktext — der Titel des Beitrags, nicht "hier klicken". */
+    label: string
+  }
 }
 
 export interface CvLanguage {

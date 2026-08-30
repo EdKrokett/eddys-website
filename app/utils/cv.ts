@@ -178,10 +178,14 @@ export const CV_PROJECTS: CvProject[] = [
   },
   {
     name: 'nasenspraysucht.info',
-    period: 'seit 2008',
+    period: '2008—2024',
     role: 'Gründer',
     description:
-      'Hilfsforum für Betroffene — aus eigener Erfahrung entstanden, seither eine Anlaufstelle.',
+      'Hilfsforum für Betroffene — aus eigener Erfahrung entstanden und 16 Jahre lang eine Anlaufstelle. Im Dezember 2024 habe ich es geschlossen.',
+    story: {
+      to: '/blog/nasenspray-sucht-bericht-eins-junkies',
+      label: 'Nasenspray-Sucht: Bericht eines Junkies',
+    },
   },
   {
     name: '1Apreis.de',

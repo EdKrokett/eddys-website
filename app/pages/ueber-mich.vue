@@ -409,6 +409,14 @@ useSeoMeta({
               <p class="project__description">
                 {{ project.description }}
               </p>
+              <NuxtLink
+                v-if="project.story"
+                :to="project.story.to"
+                class="project__story"
+              >
+                <span class="project__story-label">{{ project.story.label }}</span>
+                <Icon name="lucide:arrow-right" class="project__story-icon size-3.5" />
+              </NuxtLink>
             </div>
 
             <div class="project__meta">
@@ -853,6 +861,39 @@ useSeoMeta({
   font-size: var(--text-base);
   line-height: 1.65;
   color: var(--color-steel-400);
+}
+
+/*
+ * Beitrag zum Projekt — bewusst leiser als .project__link: Mono, klein, gesperrt.
+ * Der Projektname bleibt die erste Ebene, die Geschichte ist die Fußnote dazu.
+ */
+.project__story {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--color-steel-500);
+  transition: color 200ms ease;
+}
+.project__story-label {
+  border-bottom: 1px solid var(--color-graphite-700);
+  padding-bottom: 0.15rem;
+  transition: border-color 200ms ease;
+}
+.project__story-icon {
+  transition: translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.project__story:hover {
+  color: var(--color-accent-400);
+}
+.project__story:hover .project__story-label {
+  border-color: var(--color-accent-400);
+}
+.project__story:hover .project__story-icon {
+  translate: 0.2rem 0;
 }
 
 .project__meta {

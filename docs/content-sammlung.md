@@ -167,7 +167,10 @@ Quelle: [blog.eduard-andrae.de/persoenliches](https://blog.eduard-andrae.de/pers
   Raucher zum Läufer.
 - **YouTube-Videos**: filmt Laufevents (GoPro + Panasonic-Kamera), Ziel: "die tolle Stimmung
   beim Laufen einzufangen".
-- **nasenspraysucht.info**: selbst gegründetes Hilfsforum (Thema Nasenspray-Sucht).
+- **nasenspraysucht.info** (2008–Dez. 2024): selbst gegründetes Hilfsforum (Thema
+  Nasenspray-Sucht), im Dezember 2024 geschlossen. Der eigene Erfahrungsbericht dazu:
+  [Nasenspray-Sucht: Bericht eines Junkies](https://blog.eduard-andrae.de/nasenspray-sucht-bericht-eins-junkies/)
+  (Angabe von Eddy, 30.08.2026).
 - **1Apreis.de** (1999–2006, siehe berufliche Stationen): erstes Startup, als Konzept vom
   Otto-Konzern als Discount24.de nachgebaut — Gedenkseite existiert noch unter 1apreis.de.
 
