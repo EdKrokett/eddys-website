@@ -223,12 +223,12 @@ const columns = computed<string[][]>(() => {
         </p>
 
         <div class="hero__actions">
-          <NuxtLink to="/ueber-mich" class="hero__cta hero__cta--primary">
-            Über mich
+          <NuxtLink to="/blog" class="hero__cta hero__cta--primary">
+            Zum Blog
             <Icon name="lucide:arrow-right" class="hero__cta-icon size-4" />
           </NuxtLink>
-          <NuxtLink to="/blog" class="hero__cta">
-            Zum Blog
+          <NuxtLink to="/ueber-mich" class="hero__cta">
+            Über mich
             <Icon name="lucide:arrow-right" class="hero__cta-icon size-4" />
           </NuxtLink>
         </div>
