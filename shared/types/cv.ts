@@ -3,6 +3,15 @@ export interface CvStation {
   period: string
   /** Für die Sortierung/Gruppierung; Jahr des Beginns. */
   startYear: number
+  /**
+   * Jahr des Endes; `undefined` heißt "läuft noch".
+   *
+   * Steht ausdrücklich im Datenmodell, statt aus der Folgestation abgeleitet zu werden:
+   * Die Stationen ÜBERLAPPEN (trusted blogs seit 2016 und team neusta seit 2018 laufen
+   * parallel), eine Ableitung wäre also schlicht falsch. Einzige Quelle für die
+   * Balkenlänge auf der Jahresachse und für die Dauerangabe in der Timeline.
+   */
+  endYear?: number
   role: string
   company: string
   location?: string
@@ -52,4 +61,26 @@ export interface CvLanguage {
 export interface CvFact {
   value: string
   label: string
+}
+
+/**
+ * Ein Kapitel der "Über mich"-Seite — dieselbe Datenquelle für die Übersicht oben
+ * (CvChapters) und die Sticky-Leiste beim Scrollen (CvChapterBar).
+ */
+export interface CvChapter {
+  /** Muss der `id` der zugehörigen <section> entsprechen; Ziel des Ankersprungs. */
+  id: string
+  /** Laufende Nummer als Anzeigeform, z. B. "01". */
+  num: string
+  /** Kurzform für die schmale Sticky-Leiste. */
+  label: string
+  /** Volle Überschrift für die Übersicht. */
+  title: string
+  /** Ein Satz dazu, was das Kapitel enthält. */
+  teaser: string
+  /**
+   * Kennzahlen wie "8 Stationen". Werden IMMER aus den Datenlängen berechnet, nie von
+   * Hand gezählt — sonst veralten sie beim nächsten Eintrag in app/utils/cv.ts still.
+   */
+  metrics: string[]
 }

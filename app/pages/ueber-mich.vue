@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { CvChapter } from '#shared/types/cv'
+
 /**
  * Das Zifferblatt-Motiv und die Fakten-Leiste standen zunächst auf der Startseite
  * und sind auf Eddys Wunsch hierher gewandert (26.08.2026) — inhaltlich gehören
@@ -7,6 +9,13 @@
  *
  * Der Bezel ist reines SVG (kein Bild, kein Canvas): skaliert verlustfrei,
  * kostet keinen Netzwerk-Request und ist SSR-fest.
+ *
+ * ── Navigierbar seit 30.08.2026 ────────────────────────────────────────────
+ * Die Seite war "eine lange Tapete" (Eddy): ein Scroll ohne Orientierung. Sie ist
+ * jetzt in VIER Kapitel geteilt, die zweimal auftauchen — als Übersicht nach dem
+ * Intro (CvChapters, "was kommt noch?") und als Sticky-Leiste beim Scrollen
+ * (CvChapterBar, "wo bin ich?"). Dazu die Jahresachse über dem Werdegang und
+ * aufklappbare Stationen. Konzept und Begründungen: docs/ueber-mich-navigation.md.
  */
 
 /** 60 Indexstriche wie auf einem Zifferblatt; jeder 5. ist ein betonter Hauptindex. */
@@ -30,6 +39,106 @@ const TICKS = Array.from({ length: 60 }, (_, i) => ({
  * Er dreht gleitend statt im Quarz-Sekundentakt, wie ein mechanisches Werk —
  * 60 s pro Umlauf, reine CSS-Animation, kein JavaScript und kein Timer.
  */
+
+/**
+ * Referenzjahr für Dauerangaben ("10 Jahre") und das Ende der Jahresachse.
+ *
+ * Über `useState`, NICHT über ein direktes `new Date()` im Template: useState
+ * serialisiert den Serverwert in den Payload, der Client übernimmt ihn. Sonst
+ * liefen Server- und Client-Render über den Jahreswechsel auseinander — genau der
+ * Hydration-Mismatch, an dem auf dieser Seite schon die Uhrzeiger gescheitert sind.
+ */
+const nowYear = useState('cv-year', () => new Date().getFullYear())
+
+// ── Kapitel ────────────────────────────────────────────────────────────────
+/**
+ * Eine Quelle für Übersicht und Sticky-Leiste. Die Kennzahlen werden IMMER aus den
+ * Datenlängen gerechnet — von Hand gezählte Zahlen veralten beim nächsten Eintrag
+ * in app/utils/cv.ts still.
+ */
+const chapters = computed<CvChapter[]>(() => {
+  const firstYear = Math.min(...CV_STATIONS.map(station => station.startYear))
+  const skillCount = CV_SKILL_GROUPS.reduce((sum, group) => sum + group.skills.length, 0)
+  const onlineProjects = CV_PROJECTS.filter(project => project.url).length
+
+  return [
+    {
+      id: 'werdegang',
+      num: '01',
+      label: 'Werdegang',
+      title: 'Werdegang',
+      teaser: 'Vom Uhrmacherhandwerk über zwei eigene Startups zum Agile Coach.',
+      metrics: [`${CV_STATIONS.length} Stationen`, `${firstYear}—heute`],
+    },
+    {
+      id: 'kompetenzen',
+      num: '02',
+      label: 'Was ich kann',
+      title: 'Was ich kann',
+      teaser: 'Schwerpunkte aus dem Kompetenzprofil, mit ehrlicher Stärke-Skala.',
+      metrics: [`${skillCount} Kompetenzen`, `${CV_SKILL_GROUPS.length} Felder`],
+    },
+    {
+      id: 'datenblatt',
+      num: '03',
+      label: 'Datenblatt',
+      title: 'Datenblatt',
+      teaser: 'Zertifikate, Ausbildung und Sprachen — die Nachweise dahinter.',
+      metrics: [
+        `${CV_CERTIFICATES.length} Zertifikate`,
+        `${CV_EDUCATION.length} Abschlüsse`,
+        `${CV_LANGUAGES.length} Sprachen`,
+      ],
+    },
+    {
+      id: 'projekte',
+      num: '04',
+      label: 'Projekte',
+      title: 'Was ich gebaut habe',
+      teaser: 'Eigene Gründungen und Projekte, an denen ich mitgebaut habe.',
+      metrics: [`${CV_PROJECTS.length} Projekte`, `${onlineProjects} davon online`],
+    },
+  ]
+})
+
+const chapterIds = computed(() => chapters.value.map(chapter => chapter.id))
+const { activeId } = useScrollSpy(chapterIds)
+
+// ── Aufklappbare Stationen ─────────────────────────────────────────────────
+/**
+ * Vorbelegt sind die laufenden Stationen: Wer die Seite öffnet, liest sofort, was
+ * Eddy HEUTE macht, und klappt den Rest bei Interesse auf.
+ */
+const openKeys = ref<string[]>(
+  CV_STATIONS.filter(station => station.current).map(stationKey),
+)
+
+const allOpen = computed(() => openKeys.value.length === CV_STATIONS.length)
+
+function toggleStation(key: string) {
+  openKeys.value = openKeys.value.includes(key)
+    ? openKeys.value.filter(open => open !== key)
+    : [...openKeys.value, key]
+}
+
+function toggleAll() {
+  openKeys.value = allOpen.value ? [] : CV_STATIONS.map(stationKey)
+}
+
+/**
+ * Klick auf einen Balken der Jahresachse: Station aufklappen und hinspringen.
+ *
+ * `scrollIntoView` bewusst OHNE `behavior: 'smooth'` — so gilt `scroll-behavior`
+ * aus main.css, und der Block für `prefers-reduced-motion` schaltet den weichen
+ * Sprung dort zentral ab. Ein hart gesetztes `smooth` würde ihn überstimmen.
+ */
+async function focusStation(key: string) {
+  if (!openKeys.value.includes(key)) openKeys.value = [...openKeys.value, key]
+
+  // Erst rendern lassen: das Panel ändert beim Aufklappen die Höhe.
+  await nextTick()
+  document.getElementById(`station-${key}`)?.scrollIntoView({ block: 'start' })
+}
 
 useSeoMeta({
   title: 'Über mich — Eduard Andrae',
@@ -135,11 +244,23 @@ useSeoMeta({
             </dd>
           </div>
         </dl>
+
+        <!-- Inhaltsverzeichnis: beantwortet "was kommt noch?", bevor jemand scrollt. -->
+        <div class="intro__chapters">
+          <CvChapters :chapters="chapters" />
+        </div>
       </UContainer>
     </section>
 
-    <!-- ═══════════════ WERDEGANG ═══════════════ -->
-    <section class="section section--bordered reveal">
+    <!--
+      Sticky-Leiste. Steht direkt hinter dem Intro und klebt ab dort unter dem
+      Header; sie ist 0 px hoch und überlagert den Inhalt, statt Platz zu belegen.
+      Eingeblendet wird sie erst, wenn das Scrollspy ein Kapitel meldet.
+    -->
+    <CvChapterBar :chapters="chapters" :active-id="activeId" />
+
+    <!-- ═══════════════ 01 WERDEGANG ═══════════════ -->
+    <section id="werdegang" class="section section--bordered reveal">
       <UContainer>
         <SectionHead
           kicker="Stationen"
@@ -148,13 +269,35 @@ useSeoMeta({
         />
 
         <div class="section__body">
-          <CvTimeline :stations="CV_STATIONS" />
+          <!-- 35 Jahre auf einen Blick, bevor man eine einzige Station liest. -->
+          <CvYearAxis
+            :stations="CV_STATIONS"
+            :now-year="nowYear"
+            :open-keys="openKeys"
+            @select="focusStation"
+          />
+
+          <div class="stations__bar">
+            <p class="stations__note">
+              Stationen öffnen für Details
+            </p>
+            <button type="button" class="stations__all" @click="toggleAll">
+              {{ allOpen ? 'Alle zuklappen' : 'Alle aufklappen' }}
+            </button>
+          </div>
+
+          <CvTimeline
+            :stations="CV_STATIONS"
+            :open-keys="openKeys"
+            :now-year="nowYear"
+            @toggle="toggleStation"
+          />
         </div>
       </UContainer>
     </section>
 
-    <!-- ═══════════════ SKILLS ═══════════════ -->
-    <section class="section section--bordered section--muted reveal">
+    <!-- ═══════════════ 02 KOMPETENZEN ═══════════════ -->
+    <section id="kompetenzen" class="section section--bordered section--muted reveal">
       <UContainer>
         <SectionHead
           kicker="Kompetenzen"
@@ -165,8 +308,24 @@ useSeoMeta({
         <div class="section__body">
           <SkillMeters :groups="CV_SKILL_GROUPS" />
         </div>
+      </UContainer>
+    </section>
 
-        <!-- Zertifikate & Sprachen als Datenblatt -->
+    <!-- ═══════════════ 03 DATENBLATT ═══════════════ -->
+    <!--
+      Zertifikate, Ausbildung und Sprachen saßen bis 30.08.2026 INNERHALB der
+      Kompetenzen-Sektion. Sie stehen jetzt eigenständig: Ohne eigene Sektion
+      können sie kein eigenes Kapitel sein — und inhaltlich sind es Nachweise,
+      keine Selbsteinschätzungen.
+    -->
+    <section id="datenblatt" class="section section--bordered reveal">
+      <UContainer>
+        <SectionHead
+          kicker="Nachweise"
+          title="Datenblatt"
+          lead="Was auf Papier steht: Zertifikate, Ausbildung und Sprachen."
+        />
+
         <div class="datasheet">
           <div class="datasheet__col">
             <h3 class="datasheet__title">
@@ -221,8 +380,8 @@ useSeoMeta({
       </UContainer>
     </section>
 
-    <!-- ═══════════════ PROJEKTE ═══════════════ -->
-    <section class="section section--bordered reveal">
+    <!-- ═══════════════ 04 PROJEKTE ═══════════════ -->
+    <section id="projekte" class="section section--bordered section--muted reveal">
       <UContainer>
         <SectionHead
           kicker="Projekte"
@@ -507,13 +666,75 @@ useSeoMeta({
   margin-top: clamp(2.5rem, 5vw, 3.5rem);
 }
 
+/* ── Kapitelübersicht ───────────────────────────────────────────────────── */
+.intro__chapters {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(2rem, 4vw, 2.75rem);
+}
+
+/* ── Sektionen als Sprungziele ──────────────────────────────────────────── */
+/*
+ * Header (4rem) + Sticky-Leiste (3rem) + Luft. Ohne das verschwindet die
+ * Überschrift beim Ankersprung unter der Leiste. Ändert sich eine der beiden
+ * Höhen, gehört dieser Wert mitgezogen — ebenso HEADER_PX/BAR_PX in
+ * app/composables/useScrollSpy.ts.
+ */
+.section[id] {
+  scroll-margin-top: 8rem;
+}
+
+/* ── Werkzeugleiste über den Stationen ──────────────────────────────────── */
+.stations__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--color-graphite-700);
+}
+/* Nebeneinander kollidierten Hinweis und Schalter bei 375 px: Der Hinweis brach
+   zweizeilig um und schob sich unter den Schalter. Untereinander ist beides ruhig. */
+@media (max-width: 560px) {
+  .stations__bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.stations__note {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-steel-600);
+}
+
+.stations__all {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-steel-300);
+  border-bottom: 1px solid var(--color-graphite-600);
+  padding-bottom: 0.15rem;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.stations__all:hover {
+  color: var(--color-accent-300);
+  border-bottom-color: var(--color-accent-500);
+}
+
 /* ── Datenblatt ─────────────────────────────────────────────────────────── */
+/* Seit dem 30.08.2026 eine eigene Sektion: der frühere `border-top` war der
+   Übergang INNERHALB der Kompetenzen — jetzt trennt die Sektionsgrenze selbst,
+   und der Abstand folgt dem Rhythmus von .section__body. */
 .datasheet {
   display: grid;
   gap: 2.5rem;
-  margin-top: clamp(3rem, 6vw, 4.5rem);
-  padding-top: clamp(2rem, 4vw, 3rem);
-  border-top: 1px solid var(--color-graphite-700);
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
 }
 @media (min-width: 768px) {
   .datasheet {

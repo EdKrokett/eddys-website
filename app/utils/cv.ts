@@ -48,6 +48,7 @@ export const CV_STATIONS: CvStation[] = [
   {
     period: '2015—2016',
     startYear: 2015,
+    endYear: 2016,
     role: 'Product Owner trusted-blogs.com',
     company: 'team neusta',
     location: 'Bremen',
@@ -57,6 +58,7 @@ export const CV_STATIONS: CvStation[] = [
   {
     period: '2010—2014',
     startYear: 2010,
+    endYear: 2014,
     role: 'Project Manager',
     company: 'hmmh multimediahaus AG',
     location: 'Bremen',
@@ -66,6 +68,7 @@ export const CV_STATIONS: CvStation[] = [
   {
     period: '2008—2010',
     startYear: 2008,
+    endYear: 2010,
     role: 'Projektleiter',
     company: 'Ströer Digital Media',
     location: 'Hamburg',
@@ -75,6 +78,7 @@ export const CV_STATIONS: CvStation[] = [
   {
     period: '2006—2008',
     startYear: 2006,
+    endYear: 2008,
     role: 'Projektleiter E-Commerce',
     company: 'Haltermann & Schulte GmbH',
     location: 'Asendorf',
@@ -84,6 +88,7 @@ export const CV_STATIONS: CvStation[] = [
   {
     period: '1999—2006',
     startYear: 1999,
+    endYear: 2006,
     role: 'Gründer & Geschäftsführer',
     company: '1Apreis.de GmbH',
     location: 'Gütersloh',
@@ -93,6 +98,7 @@ export const CV_STATIONS: CvStation[] = [
   {
     period: '1991—1999',
     startYear: 1991,
+    endYear: 1999,
     role: 'Uhrmachermeister & Inhaber',
     company: 'Juwelier Andrae',
     location: 'Nettetal',

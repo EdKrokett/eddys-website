@@ -132,3 +132,28 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Spiegelt eine JS-Konstante einen CSS-Wert (gap, inset, aspect-ratio, min-height)? Dann
   gehört an beide Stellen ein Verweis auf die jeweils andere — sonst rechnet die Logik
   nach der nächsten Layout-Änderung an der Realität vorbei.
+
+### SSR-Konsistenz & aufklappbare Inhalte (abgeleitet 2026-08-30)
+
+- Hängt ein gerenderter Wert an `Date`, `Math.random` oder `window`? Dann läuft er zwischen
+  Server- und Client-Render auseinander, sobald sich die Quelle dazwischen ändert — bei
+  Jahreszahlen einmal pro Jahreswechsel, also selten genug, um jeden Test zu überleben.
+  Prüfmethode: nach `new Date(`, `Date.now(`, `Math.random(` in `app/` greppen und für jeden
+  Treffer fragen, ob er im Template landet. Fix ist nicht „im Client neu rechnen", sondern
+  den Serverwert per `useState` in den Payload serialisieren.
+- Ist ein eingeklappter Inhalt wirklich nur eingeklappt — oder gar nicht im DOM? `v-if`
+  entfernt ihn für Suchmaschinen, Vorlesesoftware, „Auf Seite suchen" und den Drucker.
+  Für Inhalte, die zum Seitenzweck gehören (ein Lebenslauf ist keine Zusatzinfo), gehört
+  die Höhe per CSS auf 0, nicht der Knoten aus dem Baum.
+- Deckt die Druckansicht auch die **neuen** Zuklapp-Zustände ab? Der Print-Block muss jeden
+  Mechanismus einzeln aufheben (`opacity`, `transform`, `grid-template-rows`, `max-height`).
+  Ein bestehender Block ist kein Beweis, dass er den zuletzt gebauten Mechanismus kennt.
+  Prüfmethode: Cmd+P, nicht Code lesen.
+- Beobachtet eine Scroll-/Sichtbarkeitslogik mehrere Elemente? Dann ist die Reihenfolge der
+  Callbacks **nicht** die Dokumentreihenfolge — wer „zuletzt gemeldet" als „aktuell" nimmt,
+  bekommt beim schnellen Scrollen die falsche Markierung. Und für „nichts sichtbar" braucht
+  es eine ausdrückliche Regel, sonst flackert die Anzeige an jeder Grenze.
+- Zeichnet eine Zeitachse Einträge, die sich überlappen können? Überlappung ist bei
+  Lebensläufen der Normalfall (Nebentätigkeit, Übergabephase), nicht die Ausnahme. Eine
+  einzeilige Achse überzeichnet sie still. Prüfmethode: das Datenmodell nach zwei Einträgen
+  ohne Endwert durchsuchen.

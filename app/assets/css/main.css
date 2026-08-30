@@ -376,6 +376,38 @@
     display: none;
   }
 
+  /*
+   * Aufklappbare Stationen im Werdegang (CvTimeline.vue) IMMER ausgeschrieben.
+   *
+   * `opacity: 1` oben allein reicht dafür nicht: Das Panel klappt über
+   * `grid-template-rows: 0fr` zu, und ein 0fr-Track schneidet den Inhalt auf
+   * Höhe 0 — der Lebenslauf käme ohne jede Beschreibung aus dem Drucker.
+   * Jeder Zuklapp-Mechanismus braucht hier seine eigene Aufhebung.
+   */
+  [class*='__panel'] {
+    display: block !important;
+    grid-template-rows: 1fr !important;
+  }
+  [class*='__panel-inner'] {
+    overflow: visible !important;
+  }
+
+  /*
+   * Bedienelemente, kein Inhalt: Auf-/Zuklapp-Zeichen, Jahresachse, die
+   * Werkzeugleiste über den Stationen und die Sticky-Kapitelleiste.
+   *
+   * Die Leiste braucht ihre EIGENE Regel: Das `nav`-Ausblenden oben trifft nur
+   * `.bar__nav`, ihre Hülle blieb als leerer 3rem-Streifen mit Trennlinie im
+   * Ausdruck stehen (real gemessen) — und `opacity: 1 !important` weiter oben
+   * macht sie dabei auch noch sichtbar.
+   */
+  [class*='__sign'],
+  [class*='axis'],
+  [class*='stations__'],
+  [class*='bar__inner'] {
+    display: none !important;
+  }
+
   a[href^='http']::after {
     content: ' (' attr(href) ')';
     font-size: 0.85em;
