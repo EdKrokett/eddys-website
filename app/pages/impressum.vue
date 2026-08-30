@@ -8,6 +8,11 @@
  *
  * Zitiert wird § 5 DDG, nicht § 5 TMG: Das Digitale-Dienste-Gesetz hat das
  * Telemediengesetz am 14.05.2024 abgelöst, die Impressumspflicht steht seitdem dort.
+ *
+ * Der frühere Link auf die Disclaimer-Seite des Blogs ist bewusst ENTFERNT (30.08.2026):
+ * Jene Seite nennt Google Analytics, Matomo und Social-Plugins, die auf dieser Seite nicht
+ * laufen — von hier aus darauf zu verlinken, hätte der eigenen Datenschutzerklärung
+ * widersprochen. Nicht "als Service" wieder eintragen.
  */
 useSeoMeta({
   title: 'Impressum — Eduard Andrae',
@@ -63,8 +68,7 @@ useSeoMeta({
             Weiteres
           </h2>
           <p class="block__text">
-            <NuxtLink to="/datenschutz">Datenschutzerklärung</NuxtLink><br>
-            <a href="https://blog.eduard-andrae.de/disclaimer/">Haftung & Disclaimer (Blog)</a>
+            <NuxtLink to="/datenschutz">Datenschutzerklärung</NuxtLink>
           </p>
         </section>
       </div>

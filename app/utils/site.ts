@@ -1,9 +1,9 @@
 /**
- * Zentrale Kontakt- und Profil-Daten.
+ * Zentrale Kontakt- und Profil-Daten. Stand 30.08.2026 vollständig gepflegt.
  *
- * OFFEN (von Eddy zu liefern): `CALENDLY_URL` und die noch leeren Social-Profile.
- * Bewusst leer statt geraten — die UI blendet nicht gepflegte Einträge aus, damit
- * nirgends ein toter Link steht.
+ * `url: null` bleibt als Möglichkeit erhalten (siehe `activeSocialProfiles`), auch wenn
+ * aktuell kein Eintrag sie nutzt: Ein Profil, dessen URL noch nicht bestätigt ist, soll
+ * eintragbar sein, ohne dass ein toter Link auf der Seite landet.
  */
 
 export const CONTACT_EMAIL = 'info@eduard-andrae.de'
@@ -28,8 +28,6 @@ export const SOCIAL_PROFILES: SocialProfile[] = [
   { name: 'LinkedIn', url: 'https://www.linkedin.com/in/eduard-andrae/', icon: 'lucide:linkedin' },
   { name: 'Facebook', url: 'https://www.facebook.com/schweinehundbesieger', icon: 'lucide:facebook' },
   { name: 'trusted blogs', url: 'https://www.trusted-blogs.com/hilfe/das-team', icon: 'lucide:globe' },
-  { name: 'YouTube', url: null, icon: 'lucide:youtube' },
-  { name: 'Instagram', url: null, icon: 'lucide:instagram' },
 ]
 
 /** Nur Profile mit bestätigter URL — verhindert tote Links im Footer. */

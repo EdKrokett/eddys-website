@@ -199,9 +199,9 @@ Kategorien: Laufen, Wandern, Diverses (Allgemeines). Content liegt in WordPress
 
 ## Social-Media-Profile
 
-✅ LinkedIn, Facebook und trusted blogs gepflegt in `SOCIAL_PROFILES` (`app/utils/site.ts`).
-Offen und bewusst auf `null`: YouTube und Instagram — solange keine bestätigte URL
-vorliegt, werden die Einträge ausgeblendet statt zu raten.
+✅ Abgeschlossen: LinkedIn, Facebook und trusted blogs in `SOCIAL_PROFILES` (`app/utils/site.ts`).
+YouTube und Instagram sind am 30.08.2026 auf Eddys Wunsch ganz entfernt worden — nicht
+vergessen, sondern bewusst nicht Teil der Seite.
 
 ## Impressum + Datenschutz
 
@@ -212,3 +212,7 @@ vorliegt, werden die Einträge ausgeblendet statt zu raten.
   übernommen — die alte Erklärung nennt Analytics und Social-Plugins, die hier nicht laufen.
 - **Keine Umsatzsteuer-ID**, weil es eine private Seite ist. Der Block fehlt deshalb bewusst.
 - Impressumspflicht zitiert als § 5 DDG (das TMG ist seit 14.05.2024 abgelöst).
+- Der Link auf blog.eduard-andrae.de/disclaimer/ ist aus dem Impressum entfernt: Die Seite
+  beschreibt Analytics und Social-Plugins, die hier nicht laufen. **Die Seite selbst steht
+  weiterhin im WordPress und ist öffentlich erreichbar** — dort müsste Eddy sie löschen
+  oder anpassen, das geht nicht aus diesem Repo heraus.
