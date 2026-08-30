@@ -44,9 +44,16 @@ else
 fi
 
 # ============================================================
-# FRONTEND — check-Kette aus .github/workflows/check.yml, ohne Build.
-# Der Build bleibt CI-only: teuerster Schritt, seine Fehler werden fast
-# immer schon von Lint/Typecheck erkannt.
+# FRONTEND — vollständige check-Kette aus .github/workflows/check.yml.
+#
+# Der Build war lange CI-only ("teuerster Schritt, Fehler fallen fast immer
+# schon bei Lint/Typecheck auf"). "Fast immer" reicht hier aber nicht: Was
+# der Build zusätzlich prüft — Auflösung der Auto-Imports im Nitro-Bundle,
+# Prerendering, Vercel-Ausgabe — sieht der Typecheck nicht, und ein Fehler
+# darin fällt sonst erst nach dem Push auf, wenn das Deploy schon läuft.
+#
+# Damit das keinen Doku-Push ausbremst, läuft der Build nur, wenn die
+# gepushten Commits etwas anderes als Markdown anfassen.
 # ============================================================
 if [ ! -d "$REPO_ROOT/node_modules" ]; then
   echo "⚠ node_modules fehlt — Checks werden ÜBERSPRUNGEN, die CI prüft trotzdem."
@@ -62,6 +69,31 @@ else
 
   echo "▸ npm run test"
   npm run test --silent
+
+  # Alle in der Push-Range geänderten Dateien einsammeln. Ein Commit ohne
+  # Vergleichspunkt (Range ohne "..") wird über --root aufgelöst.
+  changed=""
+  for range in "${ranges[@]}"; do
+    if [[ "$range" == *".."* ]]; then
+      changed+="$(git diff --name-only "$range")"$'\n'
+    else
+      changed+="$(git show --pretty=format: --name-only --root "$range")"$'\n'
+    fi
+  done
+  # Leerzeilen raus, damit "nur Markdown" nicht an einer leeren Zeile scheitert.
+  changed="$(printf '%s' "$changed" | grep -v '^$' || true)"
+  # Bewusst über die AUSGABE geprüft, nicht über den Exit-Code von `grep -qv`:
+  # ugrep (bei manchen als `grep` im PATH) liefert für -q kombiniert mit -v einen
+  # anderen Status als GNU/BSD-grep, und ein falsches Ergebnis hieße hier, den
+  # Build stillschweigend zu überspringen.
+  non_md="$(printf '%s\n' "$changed" | grep -vE '\.md$' || true)"
+
+  if [ -n "$changed" ] && [ -z "$non_md" ]; then
+    echo "▸ npm run build übersprungen (nur Markdown geändert)"
+  else
+    echo "▸ npm run build"
+    npm run build --silent
+  fi
 fi
 
 echo "✔ Alle Pre-Push-Checks bestanden"
