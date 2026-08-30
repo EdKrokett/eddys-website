@@ -1,6 +1,9 @@
 const CACHE_TTLS: Record<string, number> = {
   'blog-list': 1800,
   'blog-post': 3600,
+  // Kommentare ändern sich seltener als Beiträge, aber ein neuer Kommentar soll
+  // nicht stundenlang unsichtbar bleiben.
+  'blog-comments': 900,
 }
 
 const TOGGLE_KEY = 'wp-cache:enabled'

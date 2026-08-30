@@ -86,6 +86,42 @@ Nutzern) oder die Beitragszahl deutlich über 242 wächst. Fix: `search`- und
 `categories`-Parameter an `server/api/blog.get.ts` durchreichen und die clientseitige
 Filterung auf reine Anzeige reduzieren.
 
+## KD-005 — Kommentare sind nur lesend; ein Schreibpfad fehlt
+
+**Status:** offen, bewusst zurückgestellt · **Erfasst:** 2026-08-30 · **Schweregrad:** niedrig
+
+Der Kommentarbereich (`app/components/BlogComments.vue`) zeigt die 5.190 WordPress-
+Kommentare an, nimmt aber keine neuen entgegen. Der Leser wird stattdessen zum nativen
+Formular im WordPress-Beitrag geführt (`<slug>/#respond`).
+
+**Was blockiert:** WordPress verbietet anonymes Kommentieren über die REST-API. Gemessen
+am 30.08.2026:
+
+```
+POST /wp-json/wp/v2/comments  →  401 rest_comment_login_required
+```
+
+Ein Formular auf dieser Seite würde also nicht funktionieren, egal wie es gebaut ist.
+
+**Zwei mögliche Wege, beide mit offenen Fragen:**
+
+1. **Serverseitig authentifiziert** — eine Nitro-Route nimmt den Kommentar an und reicht
+   ihn mit einem WordPress-Application-Password weiter (Zugangsdaten in `.env`, nie im
+   Browser). Braucht zwingend Spam-Schutz: der Endpunkt steht sonst offen im Netz, und
+   die Bots, die WordPress-Kommentarformulare abklappern, finden ihn.
+2. **`rest_allow_anonymous_comments` in WordPress freischalten** — ein Filter in einem
+   mu-plugin. Weniger Code hier, macht aber den WP-Endpunkt für die ganze Welt schreibbar.
+   Nur sinnvoll mit Akismet davor.
+
+**In beiden Fällen zusätzlich zu klären:** WordPress speichert bei Kommentaren IP-Adresse
+und User-Agent. Das gehört in die Datenschutzerklärung, bevor der erste Kommentar über
+diese Seite entgegengenommen wird — die Rechtstexte sind seit 30.08.2026 freigegeben und
+kennen diesen Fall noch nicht.
+
+**Wann fällig:** Sobald Eddy Kommentare direkt auf eduard-andrae.de entgegennehmen will.
+Bis dahin ist der Weg über WordPress kein Notbehelf, sondern ein funktionierendes Formular
+mit bestehender Moderation und Spam-Filterung.
+
 ## OG-Bild der Startseite wird lokal gebaut, nicht im Build
 
 `public/images/og-startseite.jpg` entsteht über `npm run og:build`

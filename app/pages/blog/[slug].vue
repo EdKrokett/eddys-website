@@ -75,6 +75,8 @@ useSeoMeta({
           </span>
         </div>
       </div>
+
+      <BlogComments :slug="post.slug" />
     </UContainer>
 
     <!-- ═══════════════ ABSCHLUSS ═══════════════ -->
