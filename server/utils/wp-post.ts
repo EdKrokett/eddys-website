@@ -30,7 +30,12 @@ interface WpPost {
  * WordPress-Roundtrip.
  */
 export async function fetchWpPostBySlug(slug: string): Promise<WordPressBlogPostDetail> {
-  return withWpCache(slug, 'blog-post', async () => {
+  // EXTERN: `slug` kommt aus der URL. unstorage bildet `:` im Cache-Key auf
+  // Verzeichnisebenen ab — ein aufgerufenes `/blog/a:b` legte den Eintrag unter
+  // `blog-post/a/b` ab und scheiterte still, sobald `blog-post/a` schon als Datei
+  // existiert. Kodieren hält den Key einstufig; normale Slugs (a–z, 0–9, `-`)
+  // bleiben dabei unverändert lesbar. Gleiche Fehlerklasse wie in blog.get.ts.
+  return withWpCache(encodeURIComponent(slug), 'blog-post', async () => {
     const config = useRuntimeConfig()
     const wpUrl = config.public.wordpressUrl
 

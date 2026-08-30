@@ -157,3 +157,31 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
   Lebensläufen der Normalfall (Nebentätigkeit, Übergabephase), nicht die Ausnahme. Eine
   einzeilige Achse überzeichnet sie still. Prüfmethode: das Datenmodell nach zwei Einträgen
   ohne Endwert durchsuchen.
+
+### Suche, Filter & Cache-Schlüssel (abgeleitet 2026-08-30)
+
+- Gibt es einen zweiten Filter derselben Bauart daneben? Suche und Kategorie hatten
+  denselben Fehler, aber nur die Suche fiel auf — der Chip zeigte plausible 2 Treffer
+  statt der 5 aus dem Archiv. Ein Filter, der zu wenig zeigt, sieht nie kaputt aus.
+- Entscheidet eine Liste anhand der geladenen Daten, welche **Bedienelemente** überhaupt
+  erscheinen? Dann verschwindet ein Chip, sobald der geladene Ausschnitt gerade nichts
+  dazu enthält. Für eine kuratierte Liste ist das eine Prüfung am falschen Ort.
+
+- Kennt der Filter die Grundgesamtheit, über die er urteilt? Ein clientseitiger Filter über
+  eine paginierte Liste beurteilt nur den nachgeladenen Ausschnitt und meldet für den Rest
+  „keine Treffer" — bei 30 von 242 Beiträgen also für 88 % des Archivs. Prüfmethode: nach
+  einem Begriff suchen, der nachweislich nur im ältesten Teil des Archivs vorkommt.
+- Wird ein Serverergebnis danach noch einmal clientseitig gefiltert? Wenn die Serversuche
+  mehr Felder kennt (WordPress durchsucht den Volltext), wirft der zweite Filter genau die
+  Treffer weg, für die man auf den Server gegangen ist — und stellt den Bug still wieder her.
+- Geht ein Wert von außen in einen Cache-Key, Dateinamen oder Storage-Pfad? `:` wird von
+  unstorage zu einer Verzeichnisebene, `/` erst recht. Ein variables Segment gehört an eine
+  feste Position und kodiert oder gehasht dorthin, sonst bestimmt der Besucher die
+  Pfadstruktur. Prüfmethode: nach `withWpCache(` greppen und je Aufruf fragen, welcher Teil
+  des Keys vom Besucher stammt.
+- Wird ein Schreibfehler nur geloggt? Dann fällt sein Ausfall im Betrieb niemandem auf.
+  Nach jeder Änderung an Cache-Keys einmal ins Dev-Log sehen, statt auf einen roten Test zu
+  warten, den es für „hat leider nichts gespeichert" nicht gibt.
+- Liest eine per ISR gecachte Seite Query-Parameter? Dann teilen sich alle Varianten einen
+  Edge-Eintrag und der nächste Besucher bekommt das Ergebnis des vorigen. Suche und Filter
+  gehören hinter die Hydration.

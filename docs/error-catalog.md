@@ -504,3 +504,112 @@ abgeleitete Variante trifft jeden Viewport.
 
 **→ AUDIT-PERSPEKTIVE:** „Bei einer verdoppelten Endlosschleife: Passen mehr Elemente
 ins Sichtfenster, als es einzigartige gibt?"
+
+---
+
+### Suche und Kategorie filtern nur, was zufällig schon geladen war
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Unvollständig |
+| Gefunden | 2026-08-30 |
+| Schwere | Hoch |
+
+**FALSCH:**
+```ts
+// useBlog.ts — `allPosts` sind die 30 Beiträge der ersten Seite
+const filteredPosts = computed(() =>
+  filterPosts(allPosts.value, searchQuery.value, activeCategory.value),
+)
+```
+
+**RICHTIG:**
+```ts
+// Den Suchbegriff an WordPress durchreichen (server/api/blog.get.ts) und das
+// Ergebnis NICHT noch einmal clientseitig nach Text filtern.
+const searchParam = search ? `&search=${encodeURIComponent(search)}` : ''
+```
+
+**WARUM:** Die Liste hielt 30 von 242 Beiträgen. Der Filter sah also 12 % des Archivs
+und meldete für alles andere „keine Treffer" — eine Suche, die nicht sagt, dass sie
+nur einen Ausschnitt kennt, ist schlimmer als keine. Aufgefallen an einem Beitrag von
+2010, den WordPress sofort findet.
+
+Dieselbe Klasse traf zwei weitere Stellen, die zuerst übersehen wurden:
+
+- Die **Kategorie-Chips**. „Wandern" zeigte 2 Beiträge, das Archiv enthält 5.
+  Deshalb geht auch die Kategorie als `categories=<ID>` an WordPress — beide Filter
+  teilen sich EINE Anfrage und einen Zustand (`blogFilterKey`). Getrennt gebaut hätte
+  eine der beiden Dimensionen wieder clientseitig nachfiltern müssen.
+- Die Liste der **angezeigten** Chips (`availableCategories`) blendete Kategorien aus,
+  zu denen die geladenen 30 Beiträge nichts hatten. Ein Chip wäre also verschwunden,
+  obwohl das Archiv Beiträge dazu enthält. Jetzt werden alle kuratierten Kategorien
+  gezeigt.
+
+Drei Details, an denen die Umstellung sonst scheitert:
+
+1. **Nicht doppelt filtern.** WordPress durchsucht auch den Volltext. Von den vier
+   Treffern für „nasenspray" haben drei das Wort weder im Titel noch im Anriss — ein
+   zweiter Filter über `title`/`excerpt` warf genau die wieder raus und stellte den
+   Bug still wieder her. Deshalb `pickVisiblePosts()` mit eigenem Test.
+2. **Auch das Kategorie-Ergebnis nicht nachfiltern.** Der Server hat bereits gefiltert;
+   ein zweiter Durchlauf über `post.categories` verwürfe alles, sobald `_embedded`
+   einmal fehlt. `pickVisiblePosts()` gibt das Serverergebnis deshalb unverändert
+   zurück, sobald sein Filter-Schlüssel zum aktuellen passt.
+3. **Nur im Client filtern.** `/blog` liegt per ISR am Edge, alle Query-Varianten
+   teilen sich einen Eintrag (siehe performance.md, Schicht 4). Serverseitig gerendert
+   bekäme der nächste Besucher das Suchergebnis des vorigen.
+
+Kosten: eine zusätzliche Anfrage je Filterwechsel, beim Tippen 300 ms entprellt, beim
+Kategorie-Klick sofort. Kalt 1,58 s, warm 0,004 s — und am CDN gecacht, weil `s-maxage`
+auf `/api/blog` die volle URL inklusive `?search=`/`?category=` schlüsselt.
+
+**→ AUDIT-PERSPEKTIVE:** „Kennt der Filter die Grundgesamtheit, über die er urteilt —
+oder nur den nachgeladenen Ausschnitt?"
+
+---
+
+### Externer Wert im Cache-Key erzeugt Verzeichnisse
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Still fehlgeschlagen |
+| Gefunden | 2026-08-30 |
+| Schwere | Mittel |
+
+**FALSCH:**
+```ts
+withWpCache(`all-posts:${limit}:${page}:${search}`, 'blog-list', …)
+// → ENOTDIR: not a directory, open '.data/kv/…/all-posts/30/1/nasenspray'
+```
+
+
+**RICHTIG:**
+```ts
+// Fester Platz, feste Länge, dateisystemsichere Zeichen
+const searchToken = search
+  ? createHash('sha256').update(search).digest('hex').slice(0, 16)
+  : 'all'
+withWpCache(`all-posts:${searchToken}:${limit}:${page}`, 'blog-list', …)
+```
+
+**WARUM:** unstorage bildet `:` im Key auf Verzeichnisebenen ab. `all-posts/30/1`
+existierte bereits als **Datei** — der neue Eintrag hätte daraus einen Ordner machen
+müssen. Der Schreibfehler wird in `wpCache.ts` bewusst nur geloggt, also blieb die
+Seite funktionsfähig und die Storage-Schicht fiel lautlos aus. Ein `/` im Suchbegriff
+hätte zusätzlich beliebige Unterordner angelegt.
+
+Zwei Regeln daraus: Ein variables Segment gehört an eine **feste Position** im Key
+(sonst kollidiert Tiefe mit Tiefe), und ein externer Wert gehört **kodiert oder
+gehasht** (sonst bestimmt der Besucher die Pfadstruktur). Der Key trägt inzwischen vier
+variable Stellen (`all-posts:<such-hash>:<kategorie-id>:<limit>:<seite>`) — alle mit
+einem `all`-Platzhalter, damit die Tiefe konstant bleibt, auch wenn nichts gesetzt ist.
+Der Kategorie-Slug geht dabei nie roh in den Key: gespeichert wird die aufgelöste ID
+aus einer festen Liste.
+
+Analogie-Suche ergab denselben Fehler in `server/utils/wp-post.ts`: dort ging der Slug
+aus der URL roh als Key durch — `/blog/a:b` hätte `blog-post/a/b` angelegt. Dort jetzt
+`encodeURIComponent(slug)`.
+
+**→ AUDIT-PERSPEKTIVE:** „Geht ein Wert von außen in einen Cache-Key, Dateinamen oder
+Storage-Pfad — und kann er dort die Struktur verändern statt nur zu benennen?"

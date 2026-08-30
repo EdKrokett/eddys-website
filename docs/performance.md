@@ -50,6 +50,35 @@ ohne diese Einträge fehlen Beitragsbild und Kategorien kommentarlos.
 Die Route `server/api/blog/[slug].get.ts` bekommt bewusst kein `_fields`: sie braucht
 `content.rendered` und holt ohnehin nur einen Beitrag.
 
+## Der Archiv-Filter (30.08.2026)
+
+`/api/blog?search=…&category=…` reicht Suchbegriff und Kategorie an WordPress durch,
+statt die geladene Liste im Browser zu filtern — nur so erfassen beide das ganze Archiv
+(Begründung und Fallstricke: `error-catalog.md`).
+
+Was das kostet: eine zusätzliche Anfrage je Filterwechsel. Beim Tippen um 300 ms
+entprellt, damit ein getipptes Wort nicht als sechs Anfragen ankommt; ein Kategorie-Klick
+geht sofort raus, weil dort nichts zu entprellen ist. Gemessen kalt 1,58 s, warm 0,004 s.
+
+Warum das trotzdem billig bleibt — alle drei Cache-Schichten greifen unverändert:
+
+- Der CDN-Header auf `/api/blog` schlüsselt auf die volle URL inklusive `?search=` und
+  `?category=`. Häufige Filter werden also am Edge beantwortet, ohne WordPress zu fragen.
+- `withWpCache` deckt dasselbe pro Function-Instanz ab. Der Suchbegriff geht als **Hash**,
+  die Kategorie als **aufgelöste ID** an **fester Position** in den Key
+  (`all-posts:<such-hash>:<kategorie-id>:<limit>:<page>`, jeweils `all` wenn ungesetzt) —
+  roh angehängt zerlegte unstorage sie in Verzeichnisse, siehe `error-catalog.md`.
+- `_fields` gilt für gefilterte Anfragen genauso: eine Trefferseite ist so schlank wie
+  eine Listenseite, weil kein `content.rendered` mitkommt.
+
+Die Kategorie-IDs stehen fest in `shared/utils/blog-categories.ts`, statt sie über
+`/wp/v2/categories?slug=…` aufzulösen — das spart pro Filterklick einen Roundtrip, und
+WordPress-Term-IDs ändern sich nicht.
+
+Der Filter läuft ausschließlich im Client. `/blog` liegt per ISR am Edge (Schicht 4) und
+alle Query-Varianten teilen sich dort einen Eintrag — serverseitig gefiltert bekäme der
+nächste Besucher das Ergebnis des vorigen.
+
 ## Function-Region (`vercel.json`)
 
 `vercel.json` ist JSON und kann keine Kommentare tragen, deshalb hier:

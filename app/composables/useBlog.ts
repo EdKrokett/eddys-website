@@ -84,20 +84,179 @@ export function useBlog(options: UseBlogOptions = {}) {
   const searchQuery = ref('')
   const activeCategory = ref<string | null>(null)
 
-  const filteredPosts = computed(() =>
-    filterPosts(allPosts.value, searchQuery.value, activeCategory.value),
+  /* ── Archiv-Filter ────────────────────────────────────────────────────────
+   * Die Liste oben hält nur, was nachgeladen wurde. Ein Filter darüber beurteilt
+   * also bloß einen Ausschnitt und meldet für den Rest "keine Treffer" — deshalb
+   * fragen Suche UND Kategorie WordPress selbst, das alle ~240 Beiträge kennt und
+   * beim Suchbegriff zusätzlich den Volltext durchsucht.
+   *
+   * Beide teilen sich bewusst EINEN Mechanismus: Sie sind zusammen eine einzige
+   * WordPress-Anfrage, sonst müsste eine der beiden Dimensionen wieder clientseitig
+   * nachfiltern — und genau das war der Fehler.
+   *
+   * Bewusst nur im Client: `/blog` liegt per ISR am Edge, und alle Query-Varianten
+   * teilen sich dort einen Cache-Eintrag (siehe docs/performance.md, Schicht 4).
+   * Serverseitig gefilterte Ergebnisse würden dem nächsten Besucher ausgeliefert.
+   */
+  const serverPosts = ref<WordPressBlogPost[]>([])
+  /** Filter, zu dem `serverPosts` gehören. Leer = es liegt noch nichts vor. */
+  const resolvedKey = ref('')
+  const isFiltering = ref(false)
+  const filterPage = ref(1)
+  const filterReachedEnd = ref(false)
+
+  /** Zählt jede ausgelöste Abfrage; nur die jüngste darf ihr Ergebnis übernehmen.
+   *  Ohne das überschreibt eine langsame frühere Anfrage eine schnellere spätere. */
+  let filterRun = 0
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined
+  /** Merkt den zuletzt abgeschickten Suchbegriff, um einen reinen Kategorie-Klick
+   *  ohne Tipp-Verzögerung durchzulassen. */
+  let lastNeedle = ''
+
+  const isFiltered = computed(() =>
+    searchQuery.value.trim().length > 0 || activeCategory.value !== null,
   )
+
+  function fetchFiltered(needle: string, category: string | null, page: number) {
+    return $fetch<WordPressBlogPost[]>('/api/blog', {
+      query: { limit, page, search: needle, category: category ?? '' },
+    })
+  }
+
+  function resetFilterState() {
+    // Laufende Anfragen entwerten, sonst überschreiben sie später den
+    // zurückgesetzten Zustand.
+    filterRun++
+    serverPosts.value = []
+    resolvedKey.value = ''
+    isFiltering.value = false
+    filterReachedEnd.value = false
+    filterPage.value = 1
+  }
+
+  async function runFilter(needle: string, category: string | null) {
+    const run = ++filterRun
+    isFiltering.value = true
+
+    try {
+      const results = await fetchFiltered(needle, category, 1)
+      if (run !== filterRun) return
+
+      serverPosts.value = results
+      resolvedKey.value = blogFilterKey(needle, category)
+      filterPage.value = 1
+      filterReachedEnd.value = results.length < limit
+    } catch {
+      if (run !== filterRun) return
+      // Kein Ergebnis übernehmen: `resolvedKey` bleibt alt, damit weiter der
+      // clientseitige Filter über die geladenen Beiträge greift statt einer
+      // fälschlich leeren Trefferliste.
+      filterReachedEnd.value = true
+    } finally {
+      if (run === filterRun) isFiltering.value = false
+    }
+  }
+
+  /** 300 ms: kurz genug, dass es sofort wirkt, lang genug, dass ein getipptes Wort
+   *  nicht als sechs Anfragen an WordPress geht. */
+  const SEARCH_DEBOUNCE_MS = 300
+
+  watch([searchQuery, activeCategory], ([value, category]) => {
+    if (import.meta.server) return
+
+    clearTimeout(debounceTimer)
+    const needle = value.trim()
+
+    if (!needle && !category) {
+      lastNeedle = ''
+      resetFilterState()
+      return
+    }
+
+    // Ein Klick auf einen Kategorie-Chip soll nicht warten — entprellt wird nur
+    // das Tippen im Suchfeld.
+    const delay = needle === lastNeedle ? 0 : SEARCH_DEBOUNCE_MS
+    lastNeedle = needle
+    debounceTimer = setTimeout(() => void runFilter(needle, category), delay)
+  })
+
+  onScopeDispose(() => clearTimeout(debounceTimer))
+
+  async function loadMoreFiltered() {
+    if (!resolvedKey.value || isFiltering.value) return
+
+    const needle = searchQuery.value.trim()
+    const category = activeCategory.value
+    // Nur weiterblättern, wenn das vorliegende Ergebnis zum aktuellen Filter gehört.
+    if (blogFilterKey(needle, category) !== resolvedKey.value) return
+
+    isFiltering.value = true
+    const run = ++filterRun
+
+    try {
+      const next = await fetchFiltered(needle, category, filterPage.value + 1)
+      if (run !== filterRun) return
+
+      if (next.length === 0) {
+        filterReachedEnd.value = true
+        return
+      }
+
+      filterPage.value += 1
+      serverPosts.value = [...serverPosts.value, ...next]
+      if (next.length < limit) filterReachedEnd.value = true
+    } catch {
+      if (run !== filterRun) return
+      filterReachedEnd.value = true
+    } finally {
+      if (run === filterRun) isFiltering.value = false
+    }
+  }
+
+  const filteredPosts = computed(() =>
+    pickVisiblePosts({
+      basePosts: allPosts.value,
+      serverPosts: serverPosts.value,
+      query: searchQuery.value,
+      categorySlug: activeCategory.value,
+      resolvedKey: resolvedKey.value,
+    }),
+  )
+
+  /** True, sobald die angezeigte Liste vom Server kommt und damit das ganze
+   *  Archiv abdeckt — die Seite formuliert danach ihre Zähl- und Leertexte. */
+  const hasArchiveResults = computed(() =>
+    isFiltered.value
+    && resolvedKey.value !== ''
+    && blogFilterKey(searchQuery.value, activeCategory.value) === resolvedKey.value,
+  )
+
+  /** Im Filtermodus lädt "Mehr laden" weitere Treffer, sonst ältere Beiträge. */
+  const canLoadMore = computed(() => {
+    if (!isFiltered.value) return hasMore.value
+    return hasArchiveResults.value
+      && !filterReachedEnd.value
+      && serverPosts.value.length >= limit
+  })
+
+  function loadMoreVisible() {
+    return isFiltered.value ? loadMoreFiltered() : loadMore()
+  }
 
   return {
     posts: allPosts,
     filteredPosts,
     searchQuery,
     activeCategory,
+    isFiltered,
+    isFiltering,
+    hasArchiveResults,
+    hasSearchTerm: computed(() => searchQuery.value.trim().length > 0),
     status,
     error,
     refresh,
-    loadMore,
-    hasMore,
-    isLoadingMore,
+    loadMore: loadMoreVisible,
+    hasMore: canLoadMore,
+    isLoadingMore: computed(() => (isFiltered.value ? isFiltering.value : isLoadingMore.value)),
   }
 }

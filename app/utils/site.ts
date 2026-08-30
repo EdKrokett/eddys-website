@@ -38,9 +38,6 @@ export function activeSocialProfiles(): Array<SocialProfile & { url: string }> {
   )
 }
 
-/** Blog-Kategorien für die Filterleiste — Reihenfolge bewusst, nicht alphabetisch. */
-export const BLOG_CATEGORIES = [
-  { slug: 'laufen', label: 'Laufen' },
-  { slug: 'wandern', label: 'Wandern' },
-  { slug: 'bloggen', label: 'Bloggen' },
-] as const
+// BLOG_CATEGORIES liegt in shared/utils/blog-categories.ts — die Server-Route
+// braucht die WordPress-IDs für den Kategorie-Filter, shared/ ist auf beiden Seiten
+// auto-importiert.

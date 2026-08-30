@@ -4,6 +4,10 @@ const {
   posts,
   searchQuery,
   activeCategory,
+  isFiltered,
+  isFiltering,
+  hasArchiveResults,
+  hasSearchTerm,
   status,
   loadMore,
   hasMore,
@@ -30,12 +34,12 @@ onMounted(() => {
   }
 })
 
-/** Nur Kategorien anzeigen, zu denen es auch wirklich Beiträge gibt. */
-const availableCategories = computed(() =>
-  BLOG_CATEGORIES.filter(cat =>
-    posts.value.some(post => post.categories.some(c => c.slug === cat.slug)),
-  ),
-)
+// Alle Chips werden gezeigt, ohne Abgleich mit der geladenen Liste. Der frühere
+// Filter ("nur Kategorien, zu denen es Beiträge gibt") prüfte gegen die ersten 30
+// Beiträge und hätte "Wandern" ausgeblendet, sobald oben gerade keiner davon steht —
+// obwohl das Archiv fünf enthält. Dieselbe Fehlerklasse wie bei der Suche.
+// BLOG_CATEGORIES ist eine kuratierte Liste mit festen WordPress-IDs; ein toter Chip
+// wäre ein Fehler in dieser Liste, kein Laufzeitzustand.
 
 function toggleCategory(slug: string) {
   activeCategory.value = activeCategory.value === slug ? null : slug
@@ -46,9 +50,12 @@ function resetFilters() {
   activeCategory.value = null
 }
 
-const hasActiveFilter = computed(() =>
-  searchQuery.value.trim().length > 0 || activeCategory.value !== null,
-)
+const hasActiveFilter = isFiltered
+
+const moreLabel = computed(() => {
+  if (!isFiltered.value) return 'Ältere Beiträge laden'
+  return hasSearchTerm.value ? 'Weitere Treffer laden' : 'Weitere Beiträge laden'
+})
 
 useSeoMeta({
   title: 'Blog — Eduard Andrae',
@@ -91,7 +98,7 @@ useSeoMeta({
               Alle
             </button>
             <button
-              v-for="cat in availableCategories"
+              v-for="cat in BLOG_CATEGORIES"
               :key="cat.slug"
               type="button"
               class="chip"
@@ -103,12 +110,16 @@ useSeoMeta({
           </div>
 
           <div class="filters__search">
-            <Icon name="lucide:search" class="size-4 shrink-0 text-steel-500" />
+            <Icon
+              :name="isFiltering && hasSearchTerm ? 'lucide:loader-circle' : 'lucide:search'"
+              class="size-4 shrink-0 text-steel-500"
+              :class="{ filters__spinner: isFiltering && hasSearchTerm }"
+            />
             <input
               v-model="searchQuery"
               type="search"
-              placeholder="Beiträge durchsuchen"
-              aria-label="Beiträge durchsuchen"
+              placeholder="Archiv durchsuchen"
+              aria-label="Archiv durchsuchen"
               class="filters__input"
             >
           </div>
@@ -117,7 +128,7 @@ useSeoMeta({
     </section>
 
     <!-- ═══════════════ LISTE ═══════════════ -->
-    <section class="list">
+    <section class="list" :class="{ 'list--busy': isFiltering }">
       <UContainer>
         <div v-if="status === 'pending' || status === 'idle'" class="state">
           Lade Beiträge …
@@ -132,7 +143,13 @@ useSeoMeta({
         </div>
 
         <div v-else-if="filteredPosts.length === 0" class="state">
-          <p v-if="hasActiveFilter">
+          <p v-if="isFiltering">
+            Durchsuche das Archiv …
+          </p>
+          <p v-else-if="hasArchiveResults">
+            Keine Treffer im gesamten Archiv.
+          </p>
+          <p v-else-if="hasActiveFilter">
             Keine Treffer unter den {{ posts.length }} geladenen Beiträgen.
           </p>
           <p v-else>
@@ -150,7 +167,7 @@ useSeoMeta({
               :disabled="isLoadingMore"
               @click="loadMore"
             >
-              {{ isLoadingMore ? 'Lade …' : 'Ältere Beiträge laden' }}
+              {{ isLoadingMore ? 'Lade …' : moreLabel }}
             </button>
           </div>
         </div>
@@ -158,8 +175,12 @@ useSeoMeta({
         <template v-else>
           <p class="list__count">
             {{ filteredPosts.length }} {{ filteredPosts.length === 1 ? 'Beitrag' : 'Beiträge' }}
-            <!-- Klarstellen, dass gefiltert nur wird, was auch geladen ist. -->
-            <span v-if="hasActiveFilter && hasMore" class="list__count-hint">
+            <!-- Bei der Archivsuche kommt die Trefferliste von WordPress und umfasst
+                 alle Beiträge; ohne Suchbegriff wird nur gefiltert, was geladen ist. -->
+            <span v-if="hasArchiveResults" class="list__count-hint">
+              aus dem Archiv
+            </span>
+            <span v-else-if="isFiltered && hasMore" class="list__count-hint">
               von {{ posts.length }} geladenen
             </span>
           </p>
@@ -180,7 +201,7 @@ useSeoMeta({
                 Lade …
               </template>
               <template v-else>
-                Ältere Beiträge laden
+                {{ moreLabel }}
                 <Icon name="lucide:arrow-down" class="size-4" />
               </template>
             </button>
@@ -292,6 +313,34 @@ useSeoMeta({
 }
 .filters__input:focus {
   outline: none;
+}
+
+/* Zeigen, dass gerade das ganze Archiv befragt wird und nicht nur die geladene Liste
+   gefiltert. Ohne das wirkte die kurze Wartezeit wie ein Hänger — beim Kategorie-Klick
+   trägt das Suchfeld-Icon die Meldung nicht, deshalb blendet zusätzlich die Liste ab. */
+.list--busy {
+  opacity: 0.55;
+  transition: opacity 150ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .list--busy {
+    transition: none;
+  }
+}
+
+.filters__spinner {
+  animation: filters-spin 900ms linear infinite;
+  color: var(--color-accent-500);
+}
+@keyframes filters-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filters__spinner {
+    animation: none;
+  }
 }
 
 /* ── Liste ──────────────────────────────────────────────────────────────── */

@@ -114,9 +114,11 @@ export default defineNuxtConfig({
   icon: {
     // Die Social-Icons werden nur dynamisch per Variable referenziert
     // (SiteFooter/kontakt.vue über SOCIAL_PROFILES) — der Static-Scan von Nuxt Icons
-    // findet sie so nicht, deshalb explizit bündeln.
+    // findet sie so nicht, deshalb explizit bündeln. Gleiches gilt für den
+    // Such-Spinner auf /blog, der per Ausdruck zwischen zwei Icons umschaltet.
     clientBundle: {
       icons: [
+        'lucide:loader-circle',
         'lucide:linkedin',
         'lucide:facebook',
         'lucide:globe',
