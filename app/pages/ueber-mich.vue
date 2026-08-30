@@ -513,6 +513,23 @@ useSeoMeta({
   }
 }
 
+/*
+ * Auf dem Smartphone entfällt die Uhr ganz (Eddys Wunsch, 30.08.2026): Auf
+ * Telefonbreite deckt das 115vw große Zifferblatt den kompletten Intro-Text ab,
+ * statt ihn nur zu hinterlegen — als Hintergrundmotiv taugt es dort nicht mehr.
+ *
+ * `display: none` statt `opacity: 0` oder `visibility: hidden`: Nur so hört auch
+ * die Sekundenzeiger-Animation auf zu laufen, statt unsichtbar weiter jede
+ * Frame-Zeit und Akku zu kosten. Die Uhr ist rein dekorativ (`aria-hidden`),
+ * es geht also kein Inhalt verloren, und `.intro__visual` ist absolut
+ * positioniert — das Ausblenden verschiebt nichts im Textfluss.
+ */
+@media (max-width: 767px) {
+  .intro__visual {
+    display: none;
+  }
+}
+
 /* ── Zifferblatt-Details ────────────────────────────────────────────────── */
 .intro__dial-ring {
   fill: none;
