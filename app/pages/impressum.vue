@@ -65,7 +65,7 @@ useSeoMeta({
 
         <section class="block">
           <h2 class="block__title">
-            Weiteres
+            Datenschutz
           </h2>
           <p class="block__text">
             <NuxtLink to="/datenschutz">Datenschutzerklärung</NuxtLink>
