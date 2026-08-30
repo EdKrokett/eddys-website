@@ -181,3 +181,38 @@ for l in 23 22 21; do
   curl -s -o /dev/null -w "limit=$l: ttfb=%{time_starttransfer}\n" "$B/api/blog?limit=$l"
 done
 ```
+
+## Schicht 4: ISR auf den Blog-Seiten (30.08.2026)
+
+Die drei Schichten oben cachen nur `/api/blog*`. Die **Seiten** blieben ungecacht —
+`/blog/<beitrag>` antwortete mit `x-vercel-cache: MISS` und `max-age=0, must-revalidate`.
+
+Der entscheidende Punkt, der leicht übersehen wird: Beim SSR ruft `useFetch('/api/blog')`
+die Nitro-Route **direkt** auf, nicht über das CDN. Der Edge-Cache aus Schicht 2 wird beim
+Rendern der Seite also komplett umgangen; es bleibt nur der In-Memory-Cache, der nach
+jedem Cold Start leer ist. Gemessen am Live-Deployment (30.08.2026):
+
+| Seite | kalt | warm |
+|---|---|---|
+| Startseite | 0,38 s | 0,09 s |
+| `/blog` | 1,44 s | 0,13 s |
+| `/blog/<beitrag>` | 0,69 s | 0,10 s |
+
+`routeRules` mit `isr` schließt die Lücke: die fertige HTML-Seite liegt am Edge, der
+Besucher wartet nie auf WordPress.
+
+### Voraussetzung, die erst geschaffen werden musste
+
+`/blog` las den Suchbegriff `?q=` über `route.query.q` **während des SSR**. Mit ISR wäre
+das ein echter Fehler gewesen: Laut der in Schicht 2 dokumentierten Vercel-Eigenheit
+teilen sich alle Query-Varianten einen Cache-Eintrag, solange `allowQuery` sie nicht
+einzeln freigibt — ein Besucher hätte die vorgefilterte Seite eines anderen bekommen.
+
+Gelöst nicht über `allowQuery`, sondern indem `/blog` **query-unabhängig gerendert** wird:
+`app/pages/blog/index.vue` liest `?q=` jetzt in `onMounted`, also nach der Hydration. Die
+SSR-Ausgabe ist damit für jede Query identisch und beliebig cachefähig, `/blog?q=marathon`
+funktioniert unverändert. `onMounted` statt Setup ist Absicht — im Setup gelesen, würde der
+Client sofort anders rendern als das gecachte HTML (Hydration-Mismatch).
+
+**Regel für neue Seiten:** Eine Seite mit `isr`/`swr` darf im SSR-Pfad keine
+Query-Parameter lesen. Wer das braucht, liest sie nach der Hydration oder verzichtet auf ISR.

@@ -57,6 +57,27 @@ export default defineNuxtConfig({
    * kein Besucher mehr den kalten Pfad.
    */
   routeRules: {
+    /**
+     * Die Seiten selbst — die Lücke, die die drei Cache-Schichten oben offen ließen.
+     *
+     * Beim SSR ruft `useFetch('/api/blog')` die Nitro-Route DIREKT auf, nicht über das
+     * CDN: der `s-maxage`-Cache unten greift also nur für Client-Anfragen, nie für das
+     * Rendern der Seite. Auf einer kalten Function-Instanz kostete jede Blogseite
+     * deshalb den vollen WordPress-Roundtrip — gemessen 1,44 s für `/blog` und 0,69 s
+     * für einen Beitrag, warm dagegen 0,13 s bzw. 0,10 s (30.08.2026).
+     *
+     * `isr` legt die fertige HTML-Seite an den Edge. Kein Besucher wartet mehr auf
+     * WordPress; nur die Regeneration nach Ablauf tut es, im Hintergrund.
+     *
+     * VORAUSSETZUNG, die dafür geschaffen wurde: `/blog` las `?q=` im Setup und
+     * renderte serverseitig gefiltert. Da alle Query-Varianten sich einen Cache-Eintrag
+     * teilen (siehe `allowQuery`-Hinweis unten), hätte das fremde Suchergebnisse
+     * ausgeliefert. `app/pages/blog/index.vue` liest den Parameter jetzt in `onMounted`.
+     * Neue Seiten mit `isr`/`swr` dürfen im SSR-Pfad keine Query-Parameter lesen.
+     */
+    '/blog': { isr: 1800 },
+    '/blog/**': { isr: 3600 },
+
     '/api/blog': {
       headers: {
         'cache-control': 'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',

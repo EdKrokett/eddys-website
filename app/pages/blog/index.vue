@@ -13,12 +13,22 @@ const {
 const route = useRoute()
 
 // Suchbegriff aus der URL übernehmen, damit sich ein Suchergebnis teilen und
-// verlinken lässt (`/blog?q=marathon`). Wird nur beim Setup gelesen — innerhalb
-// der Seite läuft die Suche über das Feld im Filterbereich.
-const initialQuery = route.query.q
-if (typeof initialQuery === 'string') {
-  searchQuery.value = initialQuery
-}
+// verlinken lässt (`/blog?q=marathon`). Innerhalb der Seite läuft die Suche über
+// das Feld im Filterbereich.
+//
+// Bewusst in `onMounted` und NICHT im Setup: Diese Seite wird per ISR am Edge
+// gecacht (routeRules in nuxt.config.ts), und alle Query-Varianten teilen sich dort
+// einen Eintrag. Würde der Server bereits gefiltert rendern, bekäme der nächste
+// Besucher das Suchergebnis eines fremden Besuchers ausgeliefert. Serverseitig
+// entsteht deshalb immer die ungefilterte Liste; der Filter greift erst nach der
+// Hydration. Im Setup gelesen, würde der Client sofort anders rendern als das
+// gecachte HTML — ein Hydration-Mismatch. Siehe docs/performance.md, Schicht 4.
+onMounted(() => {
+  const initialQuery = route.query.q
+  if (typeof initialQuery === 'string') {
+    searchQuery.value = initialQuery
+  }
+})
 
 /** Nur Kategorien anzeigen, zu denen es auch wirklich Beiträge gibt. */
 const availableCategories = computed(() =>
