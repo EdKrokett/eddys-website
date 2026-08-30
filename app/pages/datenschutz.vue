@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /**
- * ⚠️ ENTWURF — VOR LIVE-SCHALTUNG PRÜFEN LASSEN.
+ * Von Eddy freigegeben am 30.08.2026 — der frühere sichtbare Entwurfs-Hinweis ist
+ * damit entfernt. Bei technischen Änderungen an der Seite (Tracking, eingebettete
+ * Drittanbieter-Widgets, anderer Hoster) muss dieser Text mitgezogen werden.
  *
  * Die alte Erklärung (blog.eduard-andrae.de/disclaimer/) ist hier NICHT übernommen:
  * Sie nennt Google Analytics, Matomo, Facebook-, Instagram- und Twitter-Einbindungen,
@@ -14,9 +16,6 @@
  * - Schriften selbst gehostet über @nuxt/fonts (kein Google-Fonts-Request)
  * - Hosting bei Vercel, Serverless-Region iad1 (USA) — deshalb der Drittland-Absatz
  * - Bilder und Blogtexte werden von blog.eduard-andrae.de nachgeladen (IONOS)
- *
- * Der sichtbare Entwurfs-Hinweis im Template ist Absicht und muss von Eddy nach
- * der Prüfung entfernt werden.
  */
 useSeoMeta({
   title: 'Datenschutz — Eduard Andrae',
@@ -34,17 +33,6 @@ useSeoMeta({
       <h1 class="legal__title">
         Datenschutz&shy;erklärung
       </h1>
-
-      <aside class="draft">
-        <p class="draft__title">
-          Entwurf — noch nicht geprüft
-        </p>
-        <p>
-          Dieser Text beschreibt die tatsächliche Technik dieser Seite, ersetzt aber
-          keine juristische Prüfung. Vor der Live-Schaltung prüfen lassen und diesen
-          Hinweis entfernen.
-        </p>
-      </aside>
 
       <div class="legal__body">
         <h2>Verantwortlicher</h2>
@@ -141,27 +129,6 @@ useSeoMeta({
   letter-spacing: -0.035em;
   color: var(--color-steel-100);
   hyphens: auto;
-}
-
-/* Entwurfs-Hinweis — nach juristischer Prüfung entfernen. */
-.draft {
-  margin-top: 2.5rem;
-  max-width: 42rem;
-  border-left: 2px solid var(--color-brass-400);
-  background: color-mix(in oklab, var(--color-brass-500) 10%, transparent);
-  padding: 1rem 1.25rem;
-  font-size: var(--text-base);
-  line-height: 1.6;
-  color: var(--color-steel-300);
-}
-
-.draft__title {
-  margin-bottom: 0.35rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-brass-300);
 }
 
 .legal__body {

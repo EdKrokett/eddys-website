@@ -195,15 +195,20 @@ Kategorien: Laufen, Wandern, Diverses (Allgemeines). Content liegt in WordPress
 
 ## Kontakt
 
-- Calendly-Link: <!-- einfügen -->
+- Calendly-Link: ✅ geliefert, steht in `CALENDLY_URL` (`app/utils/site.ts`).
 
 ## Social-Media-Profile
 
-<!-- Links einfügen -->
+✅ LinkedIn, Facebook und trusted blogs gepflegt in `SOCIAL_PROFILES` (`app/utils/site.ts`).
+Offen und bewusst auf `null`: YouTube und Instagram — solange keine bestätigte URL
+vorliegt, werden die Einträge ausgeblendet statt zu raten.
 
 ## Impressum + Datenschutz
 
-Bestehendes `/impressum` prüfen — aktuell kein separater Datenschutz-Bereich, klären ob
-eigene Seite/Sektion nötig ist.
+✅ Beides als eigene Seite umgesetzt und von Eddy am 30.08.2026 bestätigt:
+`app/pages/impressum.vue` und `app/pages/datenschutz.vue`.
 
-<!-- Quelle einfügen -->
+- Der Datenschutz-Text ist neu geschrieben, nicht von blog.eduard-andrae.de/disclaimer/
+  übernommen — die alte Erklärung nennt Analytics und Social-Plugins, die hier nicht laufen.
+- **Keine Umsatzsteuer-ID**, weil es eine private Seite ist. Der Block fehlt deshalb bewusst.
+- Impressumspflicht zitiert als § 5 DDG (das TMG ist seit 14.05.2024 abgelöst).

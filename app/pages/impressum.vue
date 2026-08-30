@@ -1,9 +1,13 @@
 <script setup lang="ts">
 /**
- * Angaben 1:1 von der bisherigen Seite übernommen (www.eduard-andrae.de/impressum/).
- * Dort war weder eine USt-ID noch ein gesonderter "Verantwortlich für den Inhalt"-
- * Absatz jenseits des Namens zu finden — vor Live-Schaltung von Eddy prüfen lassen,
- * nicht stillschweigend ergänzt.
+ * Angaben von der bisherigen Seite übernommen (www.eduard-andrae.de/impressum/),
+ * von Eddy bestätigt am 30.08.2026.
+ *
+ * KEINE Umsatzsteuer-ID: Das ist eine private Seite, es gibt keine. Der Block fehlt
+ * deshalb bewusst und darf nicht "der Vollständigkeit halber" ergänzt werden.
+ *
+ * Zitiert wird § 5 DDG, nicht § 5 TMG: Das Digitale-Dienste-Gesetz hat das
+ * Telemediengesetz am 14.05.2024 abgelöst, die Impressumspflicht steht seitdem dort.
  */
 useSeoMeta({
   title: 'Impressum — Eduard Andrae',
@@ -19,7 +23,7 @@ useSeoMeta({
       </p>
 
       <h1 class="legal__title">
-        Angaben gemäß § 5 TMG
+        Angaben gemäß § 5 DDG
       </h1>
 
       <div class="legal__grid">
