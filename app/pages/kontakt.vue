@@ -39,7 +39,12 @@ useSeoMeta({
       <UContainer>
         <div class="channels">
           <!-- E-Mail -->
-          <a :href="`mailto:${CONTACT_EMAIL}`" class="channel">
+          <a
+            :href="`mailto:${CONTACT_EMAIL}`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="channel"
+          >
             <span class="channel__num">01</span>
             <div class="channel__main">
               <h2 class="channel__title">
