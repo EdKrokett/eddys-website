@@ -185,3 +185,12 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Liest eine per ISR gecachte Seite Query-Parameter? Dann teilen sich alle Varianten einen
   Edge-Eintrag und der nächste Besucher bekommt das Ergebnis des vorigen. Suche und Filter
   gehören hinter die Hydration.
+- Pflegt der Code eine Liste, deren Wahrheit in einem **Fremdsystem** liegt (Kategorien,
+  Tags, Autoren aus WordPress)? Dann driftet sie, sobald dort etwas angelegt wird, und kein
+  Test schlägt an — er kennt dieselbe Kopie. Prüffragen an den Kommentar darüber: Steht da,
+  dass die Liste kuratiert und nicht vollständig ist? Ist jede Auslassung begründet? Steht
+  da, wo man ergänzt? Prüfmethode: die Taxonomie einmal live abfragen
+  (`/wp-json/wp/v2/categories`) und mit der Liste im Code abgleichen.
+- Liest sich ein Kommentar wie eine **Bestandsaufnahme** („der Blog hat vier Kategorien")?
+  Solche Sätze altern still und verwandeln sich in Falschaussagen, die niemand prüft. Ein
+  Kommentar sollte sagen, was zu tun ist, nicht was gerade zufällig zutrifft.

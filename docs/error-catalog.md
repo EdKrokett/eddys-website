@@ -613,3 +613,57 @@ aus der URL roh als Key durch — `/blog/a:b` hätte `blog-post/a/b` angelegt. D
 
 **→ AUDIT-PERSPEKTIVE:** „Geht ein Wert von außen in einen Cache-Key, Dateinamen oder
 Storage-Pfad — und kann er dort die Struktur verändern statt nur zu benennen?"
+
+
+### Kuratierte Spiegelliste einer Fremdsystem-Taxonomie driftet still
+
+**Symptom:** Ein in WordPress neu angelegter Beitrag erschien auf `/blog` in der Liste,
+aber die zugehörige Kategorie „Reisen" bekam keinen Filter-Chip. Kein Fehler, kein Log,
+keine leere Trefferliste — der Chip war schlicht nicht da (09.09.2026).
+
+**FALSCH:**
+```ts
+// Kommentar behauptet Vollständigkeit, die Liste hält sie nicht
+// "der Blog hat insgesamt vier Kategorien, keine davon verschachtelt"
+export const BLOG_CATEGORIES: readonly BlogCategory[] = [
+  { slug: 'laufen', label: 'Laufen', id: 1 },
+  { slug: 'wandern', label: 'Wandern', id: 153 },
+  { slug: 'bloggen', label: 'Bloggen', id: 94 },
+] as const
+```
+
+**RICHTIG:**
+```ts
+// `werbung` (ID 223) gehört nicht in die Leiste: gekennzeichnete Kooperationen sind
+// keine Rubrik, nach der jemand filtern will. Die Liste ist kuratiert, nicht
+// vollständig — wer eine Kategorie ergänzt, ergänzt sie HIER, sonst bleibt sie auf
+// `/blog` unsichtbar, auch wenn WordPress sie längst kennt.
+export const BLOG_CATEGORIES: readonly BlogCategory[] = [
+  { slug: 'laufen', label: 'Laufen', id: 1 },
+  { slug: 'wandern', label: 'Wandern', id: 153 },
+  { slug: 'reisen', label: 'Reisen', id: 224 },
+  { slug: 'bloggen', label: 'Bloggen', id: 94 },
+] as const
+```
+
+**WARUM:** Die feste Liste ist als Performance-Entscheidung richtig und bleibt (siehe
+`performance.md`). Der Fehler lag nicht in der Technik, sondern im Kommentar: Er las sich
+wie eine Bestandsaufnahme („der Blog hat vier Kategorien") statt wie eine Pflege-Anweisung.
+Wer die Datei später öffnete, sah eine Liste, die vollständig zu sein behauptete, und
+hatte keinen Anlass, sie zu ergänzen. Die Auslassung von `werbung` war dokumentiert
+nirgends — sie sah aus wie ein Versehen und machte damit auch die anderen Einträge
+unglaubwürdig.
+
+Das ist die allgemeine Form: **Jede im Code gepflegte Kopie einer Taxonomie aus einem
+Fremdsystem driftet**, weil die Änderung im Fremdsystem stattfindet und der Code davon
+nichts erfährt. Ein Test kann das nicht auffangen, denn er kennt dieselbe Kopie. Was hilft,
+ist ein Kommentar, der die Liste als kuratiert kennzeichnet, jede Auslassung begründet und
+die Pflegestelle benennt — plus ein Test, der die bewusste Auslassung festhält, damit sie
+sich von einem Tippfehler unterscheidet.
+
+Analogie-Suche: `app/utils/site.ts` verweist auf dieselbe Liste, führt aber keine eigene
+Kopie. Keine weitere Spiegelliste einer WordPress-Taxonomie im Repo gefunden.
+
+**→ AUDIT-PERSPEKTIVE:** „Pflegt der Code eine Liste, deren Wahrheit in einem Fremdsystem
+liegt — und sagt der Kommentar, dass sie kuratiert ist, warum etwas fehlt und wo man
+ergänzt?"

@@ -16,11 +16,17 @@ export interface BlogCategory {
  * Das spart pro Filterklick einen WordPress-Roundtrip und macht den Fehlerfall
  * eindeutig: Eine unbekannte Kategorie ist ein Tippfehler in der URL, kein halb
  * geladener Zustand. WordPress-Term-IDs ändern sich nicht — der Blog hat insgesamt
- * vier Kategorien, keine davon verschachtelt (geprüft 30.08.2026).
+ * fünf Kategorien, keine davon verschachtelt (geprüft 09.09.2026).
+ *
+ * `werbung` (ID 223) gehört nicht in die Leiste: gekennzeichnete Kooperationen sind
+ * keine Rubrik, nach der jemand filtern will. Die Liste ist kuratiert, nicht
+ * vollständig — wer eine Kategorie ergänzt, ergänzt sie HIER, sonst bleibt sie auf
+ * `/blog` unsichtbar, auch wenn WordPress sie längst kennt.
  */
 export const BLOG_CATEGORIES: readonly BlogCategory[] = [
   { slug: 'laufen', label: 'Laufen', id: 1 },
   { slug: 'wandern', label: 'Wandern', id: 153 },
+  { slug: 'reisen', label: 'Reisen', id: 224 },
   { slug: 'bloggen', label: 'Bloggen', id: 94 },
 ] as const
 
