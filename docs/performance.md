@@ -75,10 +75,12 @@ Die Kategorie-IDs stehen fest in `shared/utils/blog-categories.ts`, statt sie ü
 `/wp/v2/categories?slug=…` aufzulösen — das spart pro Filterklick einen Roundtrip, und
 WordPress-Term-IDs ändern sich nicht.
 
-**Preis dieser Entscheidung:** Eine in WordPress neu angelegte Kategorie erscheint auf
-`/blog` erst, wenn sie auch in dieser Liste steht. Aufgefallen am 09.09.2026, als die
-Kategorie „Reisen" (ID 224) zwar Beiträge hatte, aber keinen Chip bekam. Wer im Blog
-eine Kategorie anlegt, ergänzt sie hier mit.
+**Preis dieser Entscheidung:** Die Liste muss in beide Richtungen von Hand nachgezogen
+werden. Eine in WordPress neu angelegte Kategorie erscheint auf `/blog` erst, wenn sie
+auch hier steht — aufgefallen am 09.09.2026, als „Reisen" (ID 224) zwar Beiträge hatte,
+aber keinen Chip bekam. Eine gelöschte Kategorie muss umgekehrt hier verschwinden, sonst
+führt der Chip auf ein 404-Archiv — so geschehen am 10.09.2026 mit „Wandern" (ID 153),
+dessen Beiträge nach „Reisen" umgehängt wurden.
 
 Der Filter läuft ausschließlich im Client. `/blog` liegt per ISR am Edge (Schicht 4) und
 alle Query-Varianten teilen sich dort einen Eintrag — serverseitig gefiltert bekäme der

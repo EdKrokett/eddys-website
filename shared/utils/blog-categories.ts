@@ -16,7 +16,11 @@ export interface BlogCategory {
  * Das spart pro Filterklick einen WordPress-Roundtrip und macht den Fehlerfall
  * eindeutig: Eine unbekannte Kategorie ist ein Tippfehler in der URL, kein halb
  * geladener Zustand. WordPress-Term-IDs ändern sich nicht — der Blog hat insgesamt
- * fünf Kategorien, keine davon verschachtelt (geprüft 09.09.2026).
+ * vier Kategorien, keine davon verschachtelt (geprüft 10.09.2026).
+ *
+ * `wandern` (ID 153) stand hier bis zum 10.09.2026. Die Kategorie ist in WordPress
+ * gelöscht, ihre sechs Beiträge liegen jetzt unter `reisen`. Nicht wieder aufnehmen:
+ * Der Chip führte auf ein Archiv, das es nicht mehr gibt.
  *
  * `werbung` (ID 223) gehört nicht in die Leiste: gekennzeichnete Kooperationen sind
  * keine Rubrik, nach der jemand filtern will. Die Liste ist kuratiert, nicht
@@ -25,7 +29,6 @@ export interface BlogCategory {
  */
 export const BLOG_CATEGORIES: readonly BlogCategory[] = [
   { slug: 'laufen', label: 'Laufen', id: 1 },
-  { slug: 'wandern', label: 'Wandern', id: 153 },
   { slug: 'reisen', label: 'Reisen', id: 224 },
   { slug: 'bloggen', label: 'Bloggen', id: 94 },
 ] as const

@@ -10,7 +10,6 @@ describe('blogCategoryId', () => {
 
   it('trifft die WordPress-IDs des Blogs', () => {
     expect(blogCategoryId('laufen')).toBe(1)
-    expect(blogCategoryId('wandern')).toBe(153)
     expect(blogCategoryId('reisen')).toBe(224)
     expect(blogCategoryId('bloggen')).toBe(94)
   })
@@ -24,6 +23,13 @@ describe('blogCategoryId', () => {
   // Eintrag: ein späterer Slug-Tippfehler fiele sonst nicht auf.
   it('filtert nicht nach der ausgelassenen Kategorie werbung', () => {
     expect(blogCategoryId('werbung')).toBeNull()
+  })
+
+  // `wandern` wurde am 10.09.2026 in WordPress gelöscht, die Beiträge liegen unter
+  // `reisen`. Ein Chip dafür führte auf ein 404-Archiv.
+  it('kennt die geloeschte Kategorie wandern nicht mehr', () => {
+    expect(blogCategoryId('wandern')).toBeNull()
+    expect(BLOG_CATEGORIES.some(cat => cat.slug === 'wandern')).toBe(false)
   })
 
   it('behandelt leere und fehlende Werte als "keine Kategorie"', () => {
