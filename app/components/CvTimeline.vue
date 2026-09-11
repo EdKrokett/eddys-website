@@ -89,6 +89,28 @@ const isOpen = (key: string) => props.openKeys.includes(key)
             <p class="timeline__description">
               {{ item.station.description }}
             </p>
+
+            <!--
+              Steht AUSSERHALB des Toggle-Buttons: ein Link im Button wäre ein
+              verschachteltes interaktives Element und für Tastatur und
+              Vorlesesoftware kaputt.
+
+              `tabindex="-1"` im zugeklappten Zustand ist PFLICHT, nicht Kosmetik:
+              Das Panel klappt über `grid-template-rows: 0fr` plus `overflow: hidden`
+              zu, versteckt seinen Inhalt also nur optisch. Ohne das hier würde die
+              Tab-Taste auf einen unsichtbaren Link springen. Bewusst kein `inert`
+              am Panel: das nähme auch die Beschreibung aus dem Accessibility-Tree,
+              und die soll laut Kommentar oben gerade immer lesbar bleiben.
+            -->
+            <NuxtLink
+              v-if="item.station.story"
+              :to="item.station.story.to"
+              class="timeline__story"
+              :tabindex="isOpen(item.key) ? undefined : -1"
+            >
+              <span class="timeline__story-label">{{ item.station.story.label }}</span>
+              <Icon name="lucide:arrow-right" class="timeline__story-icon size-3.5" />
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -309,5 +331,45 @@ const isOpen = (key: string) => props.openKeys.includes(key)
 .timeline__item--open .timeline__description {
   opacity: 1;
   transition-delay: 120ms;
+}
+
+/*
+ * Weiterführender Link im Panel — gleiche Tonlage wie `.project__story` auf
+ * /ueber-mich: Mono, klein, gesperrt, leiser als die Station selbst. Er blendet
+ * mit derselben Verzögerung ein wie die Beschreibung, damit das Panel als ein
+ * Element aufgeht und nicht in zwei Stufen.
+ */
+.timeline__story {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--color-steel-500);
+  opacity: 0;
+  transition: opacity 240ms ease, color 200ms ease;
+}
+.timeline__item--open .timeline__story {
+  opacity: 1;
+  transition-delay: 120ms;
+}
+.timeline__story-label {
+  border-bottom: 1px solid var(--color-graphite-700);
+  padding-bottom: 0.15rem;
+  transition: border-color 200ms ease;
+}
+.timeline__story-icon {
+  transition: translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.timeline__story:hover {
+  color: var(--color-accent-400);
+}
+.timeline__story:hover .timeline__story-label {
+  border-color: var(--color-accent-400);
+}
+.timeline__story:hover .timeline__story-icon {
+  translate: 0.2rem 0;
 }
 </style>

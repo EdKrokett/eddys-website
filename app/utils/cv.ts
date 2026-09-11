@@ -94,6 +94,10 @@ export const CV_STATIONS: CvStation[] = [
     location: 'Gütersloh',
     description:
       'Mein erstes Startup. „Markenartikel zu Hammerpreisen“ — radikal reduzierte Schnäppchen. Das damals völlig neuartige Konzept wurde vom Otto-Konzern als Discount24.de nachgebaut.',
+    story: {
+      to: '/1apreis',
+      label: 'Gedenkseite für 1Apreis.de',
+    },
   },
   {
     period: '1991—1999',
@@ -193,6 +197,10 @@ export const CV_PROJECTS: CvProject[] = [
     role: 'Gründer & Geschäftsführer',
     description:
       'Mein erstes Startup und Schnäppchenportal. Das Konzept wurde vom Otto-Konzern als Discount24.de nachgebaut.',
+    story: {
+      to: '/1apreis',
+      label: 'Gedenkseite mit vier Ansichten aus dem Archiv',
+    },
   },
 ]
 

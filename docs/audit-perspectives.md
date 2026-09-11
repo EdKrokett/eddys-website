@@ -194,3 +194,30 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Liest sich ein Kommentar wie eine **Bestandsaufnahme** („der Blog hat vier Kategorien")?
   Solche Sätze altern still und verwandeln sich in Falschaussagen, die niemand prüft. Ein
   Kommentar sollte sagen, was zu tun ist, nicht was gerade zufällig zutrifft.
+
+### Bildauslieferung (abgeleitet 2026-09-11)
+
+- Ist `width` bei `NuxtImg` als reiner Layout-Hinweis gemeint, wirkt aber als **angeforderte
+  Breite**? Trägt man dort die Originalbreite eines Bildes ein, rundet der Vercel-Provider
+  auf den nächsten erlaubten `screens`-Wert auf und rechnet das Bild über seine eigene
+  Auflösung hinaus hoch. Prüfmethode: `srcset` im gerenderten HTML gegen die echten
+  Bildmaße halten (`file public/images/...`).
+- Welches Format verlässt den Server wirklich? Ohne `format` liefert IPX das Quellformat
+  aus, bei Screenshots also PNG — hier war das der Unterschied zwischen 1428 KB und 259 KB.
+  Prüfmethode: `curl -o /dev/null -w "%{content_type} %{size_download}"` auf eine URL aus
+  dem `srcset`, und das `&amp;` darin vorher zu `&` dekodieren, sonst misst man eine andere
+  Variante als die, die der Browser lädt.
+- Beschreibt der `sizes`-String wirklich das, was das CSS tut? Ein Eintrag, den @nuxt/image
+  nicht versteht, wirft keinen Fehler, sondern erzeugt still unbrauchbare Kandidaten
+  (`1w`, `2w`) im `srcset`.
+
+### Aufklappbare Bereiche (abgeleitet 2026-09-11)
+
+- Enthält ein per CSS zugeklappter Bereich etwas **Fokussierbares**? `grid-template-rows: 0fr`
+  plus `overflow: hidden` versteckt nur optisch; Links und Buttons darin bleiben mit der
+  Tab-Taste erreichbar, und der Fokus landet im Unsichtbaren. Prüfmethode: die Seite einmal
+  nur mit Tab durchlaufen. Gegenmittel ist `tabindex="-1"` im geschlossenen Zustand — `inert`
+  am Panel nur dann, wenn der Inhalt auch aus dem Accessibility-Tree verschwinden darf.
+- Liegt ein neues interaktives Element **innerhalb** des Toggle-`<button>`? Verschachtelte
+  interaktive Elemente sind für Tastatur und Vorlesesoftware kaputt; der Inhalt gehört ins
+  Panel daneben, nicht in den Schalter.

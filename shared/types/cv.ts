@@ -1,3 +1,17 @@
+/**
+ * Weiterführende Seite innerhalb dieser Website.
+ *
+ * Bewusst NICHT dasselbe wie `CvProject.url`: `url` heißt „läuft noch und ist dort
+ * erreichbar“ und führt nach draußen. Ein `CvLink` führt auf eine eigene Seite —
+ * einen Blogbeitrag oder eine Gedenkseite — und bleibt intern.
+ */
+export interface CvLink {
+  /** Interne Route, z. B. "/blog/mein-beitrag" oder "/1apreis". */
+  to: string
+  /** Linktext — der Titel des Ziels, nicht "hier klicken". */
+  label: string
+}
+
 export interface CvStation {
   /** Anzeigeform des Zeitraums, z. B. "2016" oder "1991—1999". */
   period: string
@@ -18,6 +32,13 @@ export interface CvStation {
   description: string
   /** Läuft die Station aktuell noch? Steuert die Markierung auf der Timeline. */
   current?: boolean
+  /**
+   * Weiterführende Seite zu dieser Station, erscheint im aufgeklappten Panel.
+   *
+   * Nur für Stationen, zu denen es hier wirklich mehr zu lesen gibt. Die Timeline
+   * ist die Übersicht, nicht der Ort für acht Links.
+   */
+  story?: CvLink
 }
 
 export interface CvEducation {
@@ -51,18 +72,13 @@ export interface CvProject {
   /** Projekt ist unter dieser Adresse erreichbar — speist die Kennzahl "davon online". */
   url?: string
   /**
-   * Weiterführender Beitrag im eigenen Blog, als interne Route.
+   * Weiterführende Seite zum Projekt, als interne Route.
    *
    * Bewusst NICHT über `url` gelöst: `url` heißt "läuft noch und ist dort erreichbar"
    * und wird extern im neuen Tab geöffnet. Ein geschlossenes Projekt darf in der
    * Kennzahl "davon online" nicht mitzählen, hat aber trotzdem eine Geschichte.
    */
-  story?: {
-    /** Interne Route, z. B. "/blog/mein-beitrag". */
-    to: string
-    /** Linktext — der Titel des Beitrags, nicht "hier klicken". */
-    label: string
-  }
+  story?: CvLink
 }
 
 export interface CvLanguage {
