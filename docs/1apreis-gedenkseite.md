@@ -53,28 +53,40 @@ der Vercel-Provider auf 1280 aufrunden (siehe `screens` in `nuxt.config.ts`) und
 über ihre eigene Auflösung hinaus hochrechnen. Das Seitenverhältnis ist identisch, der
 Schutz vor Layout-Sprüngen bleibt also erhalten.
 
-### Warum `format="webp"` hier nicht optional ist
+### Bildgewicht, und was `format="webp"` wirklich tut
 
-Gemessen am 11.09.2026 gegen den lokalen Production-Build, jeweils die vier Screenshots
-zusammen in Anzeigegröße:
+Alles am 11.09.2026 gemessen, jeweils die vier Screenshots zusammen in Anzeigegröße:
 
-| Auslieferung            | 1x      | 2x      |
-|-------------------------|---------|---------|
-| PNG (ohne `format`)     | 1428 KB | —       |
-| WebP, `quality="80"`    |  259 KB |  432 KB |
+| Umgebung           | Auslieferung                 | 1x      | 2x      |
+|--------------------|------------------------------|---------|---------|
+| lokal (IPX)        | PNG, also ohne `format`      | 1428 KB | —       |
+| lokal (IPX)        | WebP, `quality="80"`         |  259 KB |  432 KB |
+| Produktion (Vercel)| AVIF, per Accept ausgehandelt|  157 KB |  226 KB |
 
-Screenshots sind großflächig und detailreich; als PNG hätte dieser eine Abschnitt mehr
-gewogen als der Rest der Seite zusammen. `densities="1x 2x"` bleibt trotzdem gesetzt: Auf
-einem Retina-Display soll man die alten Shops lesen können, und die 2x-Stufe kostet nur
-173 KB extra.
+**Wichtig für das Verständnis der beiden Provider:** `format="webp"` wirkt nur lokal.
+IPX liefert ohne diesen Prop das Quellformat aus, hier also PNG. Der Vercel-Optimizer
+ignoriert den Prop dagegen und wählt das Format selbst über den Accept-Header des
+Browsers — modern kommt AVIF an, als Fallback PNG. In Produktion hinge das Gewicht also
+nicht am Prop; er bleibt gesetzt, damit die Entwicklungsansicht nicht um ein Vielfaches
+schwerer ist als die ausgelieferte Seite.
 
-Nachmessen geht so — das `&amp;` aus dem HTML-Attribut muss dabei zu `&` dekodiert werden,
+Nachmessen, lokal — das `&amp;` aus dem HTML-Attribut muss dabei zu `&` dekodiert werden,
 sonst misst man eine andere Variante als die, die der Browser lädt:
 
 ```bash
 node .output/server/index.mjs &
 curl -s localhost:3000/1apreis | grep -o 'srcset="[^"]*1apreis/2006[^"]*"'
-curl -s -o /dev/null -w "%{content_type} %{size_download}\n" "localhost:3000/_ipx/f_webp&q_80&s_640x932/images/1apreis/2006.png"
+curl -s -o /dev/null -w "%{content_type} %{size_download}\n" \
+  "localhost:3000/_ipx/f_webp&q_80&s_640x932/images/1apreis/2006.png"
+```
+
+Nachmessen, Produktion — ohne `Accept`-Header misst man den PNG-Fallback, nicht das,
+was ein Browser bekommt:
+
+```bash
+curl -s -o /dev/null -w "%{content_type} %{size_download}\n" \
+  -H "Accept: image/avif,image/webp,image/*,*/*" \
+  "https://eduard-andrae.de/_vercel/image?url=%2Fimages%2F1apreis%2F2006.png&w=640&q=80"
 ```
 
 ## Inhaltliche Abweichungen zur WordPress-Fassung

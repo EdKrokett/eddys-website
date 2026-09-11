@@ -131,13 +131,21 @@ useSeoMeta({
               <figure class="exhibit__body">
                 <div class="case">
                   <!--
-                    `format="webp"` ist hier kein Feinschliff, sondern der Unterschied
-                    zwischen 1428 KB und 259 KB für die vier Screenshots (gemessen
-                    11.09.2026 gegen den lokalen Build). Screenshots sind großflächig
-                    und detailreich, als PNG kostet dieser Abschnitt mehr als der Rest
-                    der Seite zusammen. `densities="1x 2x"` bleibt trotzdem drin: Auf
-                    einem Retina-Display muss man die alten Shops lesen können, und die
-                    2x-Stufe kostet nur 173 KB extra.
+                    Screenshots sind großflächig und detailreich; als PNG wöge dieser
+                    Abschnitt mehr als der Rest der Seite zusammen (1428 KB für die vier
+                    Quelldateien).
+
+                    `format="webp"` wirkt dabei NUR lokal: IPX liefert ohne diesen Prop
+                    das Quellformat aus, also PNG — damit fällt der Abschnitt im Dev-Build
+                    von 1428 KB auf 259 KB. Auf Vercel ignoriert der Image-Optimizer den
+                    Prop und wählt das Format selbst über den Accept-Header; dort kommen
+                    157 KB als AVIF an (beides gemessen 11.09.2026).
+
+                    Der Prop bleibt trotzdem stehen, damit die Entwicklungsansicht nicht
+                    um ein Vielfaches schwerer ist als die ausgelieferte Seite.
+
+                    `densities="1x 2x"`, weil man die alten Shops auf einem
+                    Retina-Display lesen können soll.
                   -->
                   <NuxtImg
                     :src="`/images/1apreis/${exhibit.year}.png`"
