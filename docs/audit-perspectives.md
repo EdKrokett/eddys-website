@@ -221,3 +221,19 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Liegt ein neues interaktives Element **innerhalb** des Toggle-`<button>`? Verschachtelte
   interaktive Elemente sind für Tastatur und Vorlesesoftware kaputt; der Inhalt gehört ins
   Panel daneben, nicht in den Schalter.
+
+### Verbrauchsmodelle (abgeleitet 2026-09-11)
+
+- Kostet diese Operation **pro Aufruf** oder **pro Ergebnis**? Bei allem, was gecacht wird,
+  entscheidet die TTL über den Verbrauch, nicht die Zahl der Objekte. Prüffrage: Wie oft
+  läuft derselbe Abruf durch, wenn er dauerhaft Traffic bekommt?
+- Steht der TTL-Default in `node_modules` statt im Projekt? Dann ist er unsichtbar und
+  niemand überprüft ihn. Prüfmethode: Den Wert im erzeugten Build-Output nachsehen, nicht
+  in der Konfiguration — `NITRO_PRESET=vercel npm run build` und dann
+  `.vercel/output/config.json` lesen.
+- Hängt die Cache-Dauer von einem Header ab, den ein **fremder** Server schickt? Fehlt er,
+  greift still der Default. Prüfmethode: `curl -sI` auf eine echte Quell-URL und nach
+  `Cache-Control` sehen, statt anzunehmen, dass ein Webserver schon einen setzt.
+- Ist der Fehler daran erkennbar, dass etwas **kaputt** ist? Verbrauchsfehler liefern
+  korrekte Ergebnisse und fallen erst beim Limit auf. Ein grüner Test und eine funktionierende
+  Seite sind hier kein Beleg — nur die Verbrauchsanzeige des Anbieters ist einer.

@@ -667,3 +667,48 @@ Kopie. Keine weitere Spiegelliste einer WordPress-Taxonomie im Repo gefunden.
 **→ AUDIT-PERSPEKTIVE:** „Pflegt der Code eine Liste, deren Wahrheit in einem Fremdsystem
 liegt — und sagt der Kommentar, dass sie kuratiert ist, warum etwas fehlt und wo man
 ergänzt?"
+
+### Provider-Default für Cache-TTL trifft auf eine Quelle ohne `Cache-Control`
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Handwerklich |
+| Gefunden | 2026-09-11 |
+| Schwere | Hoch |
+
+**FALSCH:**
+```typescript
+image: {
+  domains: ['blog.eduard-andrae.de'],
+  // minimumCacheTTL nicht gesetzt → @nuxt/image nimmt 60 * 5 = 300 Sekunden
+  screens: { /* ... */ },
+}
+```
+
+**RICHTIG:**
+```typescript
+image: {
+  domains: ['blog.eduard-andrae.de'],
+  vercel: {
+    // 31 Tage; der Default von 300 s ist für eine Quelle ohne Cache-Control ein Leck
+    minimumCacheTTL: 60 * 60 * 24 * 31,
+  },
+  screens: { /* ... */ },
+}
+```
+
+**WARUM:** Vercel bestimmt die Cache-Dauer entfernter Bilder als `max(Cache-Control des
+Quellservers, minimumCacheTTL)` und rechnet MISS **und STALE** je als Transformation ab.
+WordPress schickt auf `/wp-content/uploads/` keinen `Cache-Control`-Header, also blieb der
+Provider-Default von 300 Sekunden stehen: Jedes Beitragsbild wurde alle fünf Minuten neu
+transformiert. Bei 5.000 Transformationen im Monat (Hobby) war das Kontingent nach zwei
+Wochen zu 75 % verbraucht, ohne dass sich an Inhalt oder Traffic etwas geändert hatte.
+Der Fehler war unsichtbar, weil nichts kaputtging: Die Bilder wurden ja korrekt
+ausgeliefert, nur eben immer wieder neu erzeugt. Sichtbar geworden wäre er erst bei 100 %,
+und dann als Alt-Text statt Bild.
+
+Zwei Eigenschaften machen diese Klasse gefährlich: Der Default steht in `node_modules`,
+nicht im Projekt, und er ist nur in Kombination mit einer *fremden* Eigenschaft falsch
+(dem fehlenden Header der Quelle). Keine der beiden Seiten ist für sich genommen auffällig.
+
+**→ AUDIT-PERSPEKTIVE:** „Verbrauchsmodelle" in `docs/audit-perspectives.md`.

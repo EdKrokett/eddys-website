@@ -136,6 +136,37 @@ export default defineNuxtConfig({
     domains: ['blog.eduard-andrae.de'],
 
     /**
+     * Provider-Optionen für Vercel. Greifen NUR im Vercel-Build; lokal läuft IPX.
+     */
+    vercel: {
+      /**
+       * Wie lange Vercel ein transformiertes Bild vorhält. 31 Tage ist das Maximum,
+       * das die Vercel-CDN überhaupt cacht.
+       *
+       * DIESER WERT MUSS GESETZT BLEIBEN. @nuxt/image lässt ihn sonst auf 300 Sekunden
+       * fallen (dist/module.js, `minimumCacheTTL: ... ?? 60 * 5`) — und für die
+       * WordPress-Bilder ist das ein Dauerleck:
+       *
+       * Bei entfernten Bildern gilt `max(Cache-Control des Quellservers, minimumCacheTTL)`.
+       * blog.eduard-andrae.de schickt auf /wp-content/uploads/ ÜBERHAUPT keinen
+       * Cache-Control-Header (geprüft 11.09.2026, nur last-modified und etag). Damit
+       * blieb der Default stehen und jedes Beitragsbild lief nach fünf Minuten auf STALE.
+       * Vercel rechnet MISS *und* STALE je als Transformation ab, der Abruf desselben
+       * Bildes kostete also alle fünf Minuten erneut — bei 5.000 Transformationen im
+       * Monat im Hobby-Tarif. Genau das hat die 75-%-Warnung am 10.09.2026 ausgelöst.
+       *
+       * Preis dieser Einstellung: Wird ein Beitragsbild in WordPress ausgetauscht, zeigt
+       * diese Seite bis zu 31 Tage die alte Fassung. Für ein Archiv, dessen Bilder sich
+       * praktisch nie ändern, ist das der günstigere Handel. Einzelne Bilder lassen sich
+       * bei Bedarf über den CDN-Purge gezielt entwerten.
+       *
+       * Dauerhafte Lösung wäre ein Cache-Control-Header direkt aus WordPress; dann zöge
+       * `max(...)` von selbst. Steht als offener Punkt in docs/performance.md.
+       */
+      minimumCacheTTL: 60 * 60 * 24 * 31,
+    },
+
+    /**
      * `screens` ist auf Vercel nicht nur ein Breakpoint-Alias, sondern die Liste der
      * ERLAUBTEN Bildbreiten: @nuxt/image schreibt genau diese Werte als `images.sizes`
      * in die Vercel-Build-Config, und der Vercel-Provider rundet jede angeforderte

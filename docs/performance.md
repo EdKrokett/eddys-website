@@ -252,3 +252,62 @@ Client sofort anders rendern als das gecachte HTML (Hydration-Mismatch).
 
 **Regel für neue Seiten:** Eine Seite mit `isr`/`swr` darf im SSR-Pfad keine
 Query-Parameter lesen. Wer das braucht, liest sie nach der Hydration oder verzichtet auf ISR.
+
+## Schicht 5: Bild-Transformationen bei Vercel (11.09.2026)
+
+Am 10.09.2026 meldete Vercel, dass 75 % des Hobby-Kontingents für Image-Optimization-
+Transformationen verbraucht sind (5.000/Monat). Ursache war kein Wachstum, sondern ein
+Default.
+
+### Die Kette
+
+1. Vercel rechnet eine Transformation bei jedem Cache-**MISS und STALE** ab, nicht nur
+   beim ersten Abruf.
+2. Für entfernte Bilder gilt als Cache-Dauer `max(Cache-Control des Quellservers,
+   minimumCacheTTL)`.
+3. `blog.eduard-andrae.de` schickt auf `/wp-content/uploads/` **keinen**
+   `Cache-Control`-Header. Nachgeprüft:
+
+   ```bash
+   curl -sI "https://blog.eduard-andrae.de/wp-content/uploads/2023/02/1apreis-2006.png" \
+     | grep -iE "^(cache-control|expires|last-modified|etag)"
+   # → nur last-modified und etag
+   ```
+
+4. `@nuxt/image` setzt `minimumCacheTTL` ohne explizite Angabe auf **300 Sekunden**
+   (`node_modules/@nuxt/image/dist/module.js`, `?? 60 * 5`).
+
+Ergebnis: Jedes Beitragsbild lief nach fünf Minuten auf STALE und kostete beim nächsten
+Abruf erneut eine Transformation. Der Verbrauch hing damit nicht an der Zahl der Bilder,
+sondern an der Zahl der Fünf-Minuten-Fenster mit Traffic. `/blog` allein zeigt 30
+Beitragsbilder in je zwei Breiten (480 und 1024), und AVIF, WebP sowie das Original zählen
+getrennt — der `Accept`-Header ist Teil des Cache-Keys.
+
+### Die Korrektur
+
+`image.vercel.minimumCacheTTL` in `nuxt.config.ts` auf 31 Tage, das Maximum der Vercel-CDN.
+Gegenprobe am erzeugten Build-Output, nicht nur an der Konfiguration:
+
+```bash
+NITRO_PRESET=vercel npm run build
+python3 -c "import json;print(json.load(open('.vercel/output/config.json'))['images'])"
+# → minimumCacheTTL: 2678400
+```
+
+Preis: Ein in WordPress ausgetauschtes Beitragsbild erscheint hier bis zu 31 Tage später.
+Für ein Archiv, dessen Bilder sich praktisch nie ändern, ist das der günstigere Handel;
+einzelne Bilder lassen sich über den CDN-Purge gezielt entwerten.
+
+### Was bei Überschreitung passiert
+
+Laut Vercel-Doku liefern im Hobby-Tarif **nur neue** Bilder einen 402, der Browser zeigt
+dann den `alt`-Text statt des Bildes. Bereits gecachte Bilder laufen weiter, berechnet wird
+nichts, und Deployments werden nicht mehr pausiert. Die Seite fällt also nicht aus, aber im
+Blog erscheinen nach und nach Alt-Texte statt Bilder. Das macht den Fehler besonders
+tückisch: Er meldet sich nicht als Ausfall, sondern als langsam zerfallende Optik.
+
+### Offen, außerhalb des Repos
+
+- [ ] WordPress einen `Cache-Control`-Header für `/wp-content/uploads/` schicken lassen.
+      Dann zöge `max(...)` von selbst und die Einstellung hier wäre nur noch Absicherung.
+      Hilft zusätzlich dem Blog selbst.
