@@ -26,26 +26,11 @@ const maxModules = Math.max(...WERKBANK_SZENARIEN.map(scenario => scenario.modul
 const shotDialog = useTemplateRef<HTMLDialogElement>('shotDialog')
 
 /**
- * Ankersprung nachjustieren, wenn die Seite direkt mit `#szenario` geöffnet wird.
- *
- * Der Browser springt beim Direktaufruf, bevor die selbst gehosteten Schriften fertig
- * geladen sind. Fraunces und Manrope ersetzen dann die Fallback-Schrift, die Textblöcke
- * darüber ändern ihre Höhe, und das Ziel rutscht weg — gemessen am 12.09.2026 zwischen
- * 54 und 140px, bei einem Header von 64px also mal frei und mal halb verdeckt.
- * `scroll-margin-top` allein fängt das nicht ab, weil die Abweichung von Lauf zu Lauf
- * unterschiedlich ausfällt.
- *
- * Über den Klickweg von /ueber-mich tritt das nicht auf: Dort sind die Schriften längst
- * geladen. Die Korrektur läuft deshalb nur, wenn beim Laden ein Hash gesetzt ist.
+ * Hält den Ankersprung auf dem Ziel, während die Schriften nachladen. Betrifft die
+ * beiden öffentlichen Sprungziele `#handwerk` und `#szenario`; Begründung und Messwerte
+ * stehen in `app/composables/useAnchorScroll.ts`.
  */
-const route = useRoute()
-
-onMounted(async () => {
-  if (!route.hash) return
-
-  await document.fonts?.ready
-  document.getElementById(route.hash.slice(1))?.scrollIntoView()
-})
+useAnchorScroll()
 
 const title = 'Werkbank — Eduard Andrae'
 const description

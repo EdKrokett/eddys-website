@@ -159,11 +159,23 @@ werden, ohne fremde Links zu brechen:
 | `/werkbank#handwerk` | Kapitel 02, „Eine Geige macht noch keine Musik" | extern, von Eddy geteilt |
 | `/werkbank#szenario` | Die Vitrine mit dem Make-Screenshot | Make-Zertifikat im Datenblatt auf `/ueber-mich` |
 
-Beide brauchen `scroll-margin-top: 9rem` und den Nachscroll in `onMounted`: Beim
-Direktaufruf eines Ankers springt der Browser, bevor die selbst gehosteten Schriften
-geladen sind, der Textfluss darüber ändert danach seine Höhe und das Ziel rutscht weg.
-Gemessen ohne die Korrektur: 54 bis 140px bei einem Header von 64px, also mal frei und
-mal halb verdeckt. Details im Kommentar in `app/pages/werkbank.vue`.
+Beide brauchen zweierlei: `scroll-margin-top: 9rem` (als `.section[id]`, damit ein
+künftiger Anker nichts Zusätzliches braucht) und `useAnchorScroll()`.
+
+**Warum das Composable nötig ist.** Beim Direktaufruf eines Ankers springt der Browser,
+bevor die selbst gehosteten Schriften geladen sind. Sobald Fraunces und Manrope die
+Ersatzschrift ablösen, ändern die Textblöcke oberhalb des Ziels ihre Höhe, und das Ziel
+wandert weg — in beide Richtungen, je nachdem welche Blöcke wachsen und welche schrumpfen.
+Messreihen auf `/werkbank#handwerk` (12.09.2026, Header 64px):
+
+| Zustand | Position des Ziels |
+| --- | --- |
+| ohne Korrektur | 54 – 140px, teils verdeckt |
+| einmalig nach `document.fonts.ready` | 58 – 250px, teils verdeckt |
+| mit `useAnchorScroll()` | stabil, über drei Aufrufe identisch |
+
+Das Composable scrollt nach dem Font-Wechsel dreimal nach und bricht ab, sobald jemand
+selbst scrollt. Herleitung im Kommentar in `app/composables/useAnchorScroll.ts`.
 
 ### Warum „Das Handwerk" ein eigenes Kapitel ist (seit 12.09.2026)
 
