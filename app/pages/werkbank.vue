@@ -95,13 +95,15 @@ useSeoMeta({
           <p>
             Zwischen Februar und Mai 2026 habe ich trusted blogs vollständig neu gebaut.
             Nicht als Umbau des alten Systems, sondern von Grund auf, mit Claude Code als
-            Werkzeug. Seitdem kommen laufend neue Funktionen hinzu. Dazu neunzehn
-            Make-Szenarien, die inzwischen den größten Teil der Arbeit übernehmen, die ich
-            zuvor von Hand gemacht habe.
+            Werkzeug. Seitdem kommen laufend neue Funktionen hinzu.
           </p>
           <p>
-            Was hier steht, sind Zahlen aus dem Repository und aus Make. Der Stand ist der
-            {{ WERKBANK_STICHTAG }}.
+            Dazu neunzehn Make-Szenarien: Alles, was regelmäßig wiederkehrt, läuft heute
+            automatisch ab, ohne dass jemand es anstößt. Für dieselben Aufgaben habe ich
+            vorher Stunden von Hand gebraucht.
+          </p>
+          <p class="intro__note">
+            Zahlen aus dem Repository und aus Make.com, Stand {{ WERKBANK_STICHTAG }}.
           </p>
         </div>
 
@@ -586,6 +588,20 @@ useSeoMeta({
   font-size: var(--text-base);
   line-height: 1.75;
   color: var(--color-steel-300);
+}
+
+/*
+  Herkunftsangabe der Zahlen, als Fußnote gesetzt: Mono, klein, zurückgenommen. In der
+  schmaleren Laufweite passt sie auf eine Zeile, statt als zweiter Fließtextabsatz mit
+  den beiden Aussagen darüber um Aufmerksamkeit zu konkurrieren.
+*/
+.intro__note {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: var(--color-steel-500);
 }
 
 /* ── Das Faksimile ──────────────────────────────────────────────────────────── */
