@@ -2,12 +2,18 @@
 /**
  * Einheitlicher Sektionskopf: Mono-Kicker mit Indexstrich über einer Fraunces-
  * Überschrift. Hält den Rhythmus über alle Seiten gleich.
+ *
+ * Der Vorspann kommt entweder als `lead`-Prop (reiner Text, der Normalfall) oder
+ * über den `lead`-Slot, wenn er Auszeichnung braucht — etwa einen Link mitten im
+ * Satz. Der Slot gewinnt, wenn beides gesetzt ist.
  */
 defineProps<{
   kicker: string
   title: string
   lead?: string
 }>()
+
+const slots = useSlots()
 </script>
 
 <template>
@@ -20,8 +26,8 @@ defineProps<{
       {{ title }}
     </h2>
 
-    <p v-if="lead" class="head__lead">
-      {{ lead }}
+    <p v-if="slots.lead || lead" class="head__lead">
+      <slot name="lead">{{ lead }}</slot>
     </p>
   </header>
 </template>

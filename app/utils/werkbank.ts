@@ -56,6 +56,11 @@ export const WERKBANK_KOMPLEXITAET = {
 /**
  * Altsystem gegen Neubau. Die Balkenlängen werden aus `commits` gerechnet, nicht
  * gepflegt — sonst laufen Zahl und Balken auseinander.
+ *
+ * Der zweite Eintrag heißt bewusst „Das neue System" und nicht „Der Neubau": Der
+ * eigentliche Neubau war im Mai 2026 fertig, die Commits laufen aber bis heute weiter,
+ * weil seitdem Funktionen dazukommen. „Der Neubau … in 7 Monaten" würde eine Bauzeit
+ * behaupten, die so nicht stimmt.
  */
 export const WERKBANK_BUILDS: WerkbankBuild[] = [
   {
@@ -65,7 +70,7 @@ export const WERKBANK_BUILDS: WerkbankBuild[] = [
     months: 126,
   },
   {
-    label: 'Der Neubau, mit KI',
+    label: 'Das neue System, mit KI gebaut',
     period: 'Februar 2026 — September 2026',
     commits: 2562,
     months: 7,

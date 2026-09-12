@@ -58,21 +58,28 @@ useSeoMeta({
           <span class="intro__mark" aria-hidden="true" />Werkbank
         </p>
 
+        <!--
+          Beide Zeilen bleiben je für sich ungebrochen, solange die Breite reicht
+          (`.intro__line`). Ein hartes `nowrap` wäre hier falsch: „Ohne eine Zeile Code
+          selbst zu schreiben." passt bei 390px in keine Zeile und würde die Seite
+          seitlich aufschieben.
+        -->
         <h1 class="intro__title">
-          Eine Plattform, neu gebaut.<br>
-          Ohne eine Zeile selbst zu schreiben.
+          <span class="intro__line">Eine Plattform, neu gebaut.</span>
+          <span class="intro__line">Ohne eine Zeile Code selbst zu schreiben.</span>
         </h1>
 
         <div class="intro__text">
           <p>
-            Zwischen Februar und September 2026 habe ich trusted blogs vollständig neu
-            gebaut. Nicht als Umbau des alten Systems, sondern von Grund auf, mit Claude
-            Code als Werkzeug. Dazu kommen neunzehn Make-Szenarien, die inzwischen den
-            größten Teil der Arbeit übernehmen, die vorher jemand von Hand gemacht hat.
+            Zwischen Februar und Mai 2026 habe ich trusted blogs vollständig neu gebaut.
+            Nicht als Umbau des alten Systems, sondern von Grund auf, mit Claude Code als
+            Werkzeug. Seitdem kommen laufend neue Funktionen hinzu. Dazu neunzehn
+            Make-Szenarien, die inzwischen den größten Teil der Arbeit übernehmen, die ich
+            zuvor von Hand gemacht habe.
           </p>
           <p>
-            Was hier steht, sind Zahlen aus dem Repository und aus Make, keine
-            Selbsteinschätzung. Der Stand ist der {{ WERKBANK_STICHTAG }}.
+            Was hier steht, sind Zahlen aus dem Repository und aus Make. Der Stand ist der
+            {{ WERKBANK_STICHTAG }}.
           </p>
         </div>
 
@@ -82,12 +89,22 @@ useSeoMeta({
           Screenshot der PDF-Seite, damit die Typografie zur Seite gehört und mitskaliert.
         -->
         <figure class="folio reveal">
-          <blockquote class="folio__sheet">
+          <blockquote class="folio__sheet" :cite="WERKBANK_ZITAT.url">
+            <!-- Der Bund einer aufgeschlagenen Seite, links an der Kante. -->
+            <span class="folio__gutter" aria-hidden="true" />
+            <!--
+              Großes Anführungszeichen als Wasserzeichen, rein dekorativ.
+              Bewusst das SCHLIESSENDE deutsche Zeichen (U+201C): Es sitzt auf
+              Versalhöhe und steht damit oben richtig. Das öffnende „ liegt auf der
+              Grundlinie und sieht hier oben verkehrt herum aus.
+            -->
+            <span class="folio__mark" aria-hidden="true">“</span>
+
             <p class="folio__heading">
               {{ WERKBANK_ZITAT.heading }}
             </p>
             <p class="folio__body">
-              {{ WERKBANK_ZITAT.body }}
+              „{{ WERKBANK_ZITAT.body }}“
             </p>
             <span class="folio__page" aria-hidden="true">175</span>
           </blockquote>
@@ -115,8 +132,18 @@ useSeoMeta({
         <SectionHead
           kicker="01 · Der Neubau"
           title="Was da eigentlich gebaut wurde"
-          lead="Manfred Wolff beschreibt die Plattform in seinem Buch genauer, als ich es über mein eigenes Produkt täte. Deshalb hier seine Worte."
-        />
+        >
+          <template #lead>
+            Manfred Wolff beschreibt die Plattform
+            <a
+              href="https://mwolff.org/whitepapers"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="textlink"
+            >in seinem Buch</a>
+            genauer, als ich es über mein eigenes Produkt täte. Deshalb hier seine Worte.
+          </template>
+        </SectionHead>
 
         <div class="section__body">
           <blockquote class="pull">
@@ -126,8 +153,8 @@ useSeoMeta({
 
           <p class="prose">
             Die Plattform gibt es seit 2015. Was heute läuft, ist kein weiterentwickelter
-            Altbestand, sondern ein zweiter Aufbau von der leeren Datei an. Der Vergleich
-            der beiden Repositories zeigt, was das heißt.
+            Altbestand, sondern ein kompletter Neubau. Der Vergleich der beiden
+            Repositories zeigt, was das heißt.
           </p>
 
           <!-- Balkenvergleich: Länge IMMER aus commits gerechnet, nie gepflegt. -->
@@ -182,8 +209,15 @@ useSeoMeta({
           </h3>
 
           <p class="prose">
-            Das Schwierigste war der Start. Dabei hat mich Hardy Kutzer unterstützt, und
-            zwar in den ersten Tagen im Februar 2026. Er hat nicht mitprogrammiert. Er hat
+            Das Schwierigste war der Start. Dabei hat mich
+            <a
+              href="https://www.linkedin.com/in/hardy-kutzer/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="textlink"
+            >Hardy Kutzer</a>
+            unterstützt, und zwar in den ersten Tagen im Februar 2026. Er hat nicht
+            mitprogrammiert. Er hat
             das Gerüst gestellt: die Bau- und Ausliefer-Strecke, die Prüfungen, die bei
             jedem Push laufen, und die Regelwerke, nach denen Claude in diesem Projekt
             arbeitet. Von seinen 112 Beiträgen liegen fast alle in diesen ersten Tagen. Die
@@ -191,11 +225,17 @@ useSeoMeta({
           </p>
 
           <p class="prose">
-            Das halte ich für den entscheidenden Teil der Geschichte. Wolff schreibt in
-            seinem Buch, KI-Werkzeuge in ungeübten Händen seien gefährlich, weil ein Modell
-            plausiblen Code schneller produziert, als eine unerfahrene Person ihn prüfen
-            kann. Das stimmt. Meine Antwort darauf war, mir für die Leitplanken jemanden zu
-            holen, der sie bauen kann.
+            Das halte ich für den entscheidenden Teil der Geschichte.
+            <a
+              href="https://www.linkedin.com/in/manfred-wolff-2a7a224/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="textlink"
+            >Manfred</a>
+            schreibt in seinem Buch, KI-Werkzeuge in ungeübten Händen seien gefährlich,
+            weil ein Modell plausiblen Code schneller produziert, als eine unerfahrene
+            Person ihn prüfen kann. Das stimmt. Meine Antwort darauf war, mir für die
+            Leitplanken jemanden zu holen, der sie bauen kann. Danke, Hardy!
           </p>
         </div>
       </UContainer>
@@ -452,6 +492,17 @@ useSeoMeta({
   color: var(--color-steel-100);
 }
 
+/*
+  Jede Zeile der Überschrift ein eigener Block: Damit steht der Umbruch zwischen den
+  beiden Sätzen fest, ohne dass ein <br> mitten im Text hängt — und jede Zeile darf
+  für sich umbrechen, wenn der Platz nicht reicht. `text-wrap: balance` verteilt einen
+  solchen Umbruch dann gleichmäßig, statt ein einzelnes Wort abzuhängen.
+*/
+.intro__line {
+  display: block;
+  text-wrap: balance;
+}
+
 .intro__text {
   margin-top: 1.75rem;
   max-width: 38rem;
@@ -475,8 +526,11 @@ useSeoMeta({
 
 .folio__sheet {
   position: relative;
+  overflow: hidden;
   margin: 0;
-  padding: clamp(2rem, 4.5vw, 3rem) clamp(1.75rem, 4vw, 3.25rem) clamp(2.75rem, 5vw, 3.5rem);
+  /* Links mehr Innenabstand als rechts: Der Bund braucht Platz, sonst klebt der Text daran. */
+  padding: clamp(2rem, 4.5vw, 3rem) clamp(1.75rem, 4vw, 3.25rem) clamp(2.75rem, 5vw, 3.5rem)
+    clamp(2.5rem, 5.5vw, 4.25rem);
   background: #f2ece1;
   color: #221f1a;
   border: 1px solid var(--color-brass-500);
@@ -485,7 +539,43 @@ useSeoMeta({
     0 26px 60px rgba(8, 9, 11, 0.6);
 }
 
+/*
+  Der Bund: ein schmaler Schattenverlauf an der linken Kante, wie er entsteht, wenn eine
+  Seite zur Bindung hin gewölbt ist. Macht aus der Fläche eine aufgeschlagene Seite,
+  ohne dass ein Bild nötig wäre.
+*/
+.folio__gutter {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: clamp(1rem, 2.5vw, 1.75rem);
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(70, 58, 40, 0.22) 0%,
+    rgba(70, 58, 40, 0.08) 45%,
+    transparent 100%
+  );
+}
+
+/*
+  Das Anführungszeichen als Wasserzeichen. Sehr groß, sehr schwach, halb aus dem Satzspiegel
+  geschoben — es soll das Zitat markieren, nicht mit ihm um Aufmerksamkeit streiten. Der
+  echte Zitatanfang steht trotzdem als Zeichen im Text, damit er auch vorgelesen wird.
+*/
+.folio__mark {
+  position: absolute;
+  /* Knapp unter die Oberkante, damit es die erste Textzeile nicht hinterlegt. */
+  top: -0.06em;
+  right: 0.14em;
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 13vw, 9.5rem);
+  line-height: 1;
+  color: rgba(120, 100, 66, 0.11);
+  user-select: none;
+}
+
 .folio__heading {
+  position: relative;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: clamp(1.35rem, 2.6vw, 1.75rem);
@@ -494,6 +584,7 @@ useSeoMeta({
 }
 
 .folio__body {
+  position: relative;
   margin-top: 1rem;
   font-family: var(--font-display);
   font-size: var(--text-md);
@@ -582,6 +673,21 @@ useSeoMeta({
   font-size: var(--text-base);
   line-height: 1.75;
   color: var(--color-steel-300);
+}
+
+/*
+  Link mitten im Fließtext. Bewusst über eine eigene Klasse statt über `.prose a`:
+  Der Sektionskopf nutzt ihn auch, und dort greift `.prose` nicht.
+*/
+.textlink {
+  color: var(--color-steel-100);
+  border-bottom: 1px solid var(--color-accent-600);
+  padding-bottom: 0.05rem;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.textlink:hover {
+  color: var(--color-accent-300);
+  border-bottom-color: var(--color-accent-400);
 }
 
 .sub {
