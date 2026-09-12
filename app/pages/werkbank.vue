@@ -365,8 +365,8 @@ useSeoMeta({
       <UContainer>
         <SectionHead
           kicker="03 · Wo es klemmte"
-          title="Vier Sachen, die ich falsch gemacht habe"
-          lead="Im Projekt läuft ein Dokument mit, in dem nach jeder größeren Runde steht, was schiefgegangen ist. Vier Einträge daraus, übersetzt."
+          title="Drei Sachen, die ich falsch gemacht habe"
+          lead="Im Projekt läuft ein Dokument mit, in dem nach jeder größeren Runde steht, was schiefgegangen ist. Drei Einträge daraus, übersetzt."
         />
 
         <div class="section__body">
@@ -392,8 +392,8 @@ useSeoMeta({
       <UContainer>
         <SectionHead
           kicker="04 · Diese Seite"
-          title="Und dann ist da noch diese Seite"
-          lead="Auch diese Website ist so entstanden. Sie ist das kleinste der drei Beispiele und das einzige, das sich ohne Umweg nachsehen lässt."
+          title="Und dann ist da noch diese Seite hier"
+          lead="Gemeint ist die Seite, auf der dieser Satz steht: eduard-andrae.de. Auch sie ist mit Claude Code entstanden, und sie ist das einzige der drei Beispiele, das sich ohne Umweg ansehen lässt."
         />
 
         <div class="section__body">
@@ -409,9 +409,12 @@ useSeoMeta({
           </dl>
 
           <p class="prose">
-            Nuxt 4, Tailwind und TypeScript, dazu der Blog, der weiter in WordPress liegt
-            und über eine Schnittstelle hereinkommt. Ich kann diesen Code lesen und
-            beurteilen. Schreiben kann ich ihn nicht, und ich muss es auch nicht.
+            Das Zifferblatt auf der Seite „Über mich", die Bilderwand auf der Startseite,
+            die Zeichnung weiter oben und das Papier, auf dem Manfreds Zitat steht: alles
+            in diesem Browserfenster ist so entstanden. Darunter liegen Nuxt 4, Tailwind
+            und TypeScript, dazu der Blog, der weiter in WordPress wohnt und über eine
+            Schnittstelle hereinkommt. Ich kann diesen Code lesen und beurteilen.
+            Schreiben kann ich ihn nicht, und ich muss es auch nicht.
           </p>
         </div>
       </UContainer>
@@ -421,9 +424,16 @@ useSeoMeta({
     <section class="outro reveal">
       <UContainer>
         <p class="outro__lead">
-          Immer wieder fragt mich jemand, wie ich das gemacht habe. Für einen von ihnen habe
-          ich aufgeschrieben, wie man sich dieselbe Umgebung einrichtet. Fünfzig Minuten,
-          Klick für Klick, ohne Kommandozeile.
+          Immer wieder fragt mich jemand, wie ich das gemacht habe. Für
+          <a
+            href="https://www.trusted-blogs.com/hilfe/das-team"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="outro__link-inline"
+          >Carsten Meyer-Heder</a>
+          habe ich aufgeschrieben, wie man sich dieselbe Umgebung einrichtet. Fünfzig
+          Minuten, Klick für Klick, ohne Kommandozeile. Die Anleitung stelle ich gern allen
+          zur Verfügung.
         </p>
 
         <div class="outro__actions">
@@ -1098,9 +1108,16 @@ useSeoMeta({
   background: var(--color-graphite-700);
   border: 1px solid var(--color-graphite-700);
 }
-@media (min-width: 860px) {
+
+/*
+  Drei Spalten, seit es drei Lektionen sind. Bei zwei Spalten stünde die dritte allein
+  in einer zweiten Reihe und läse sich wie ein Nachtrag. Die Schwelle liegt bei 1040px,
+  weil eine Spalte darunter zu schmal für den Fließtext wird; dazwischen und darunter
+  steht alles untereinander.
+*/
+@media (min-width: 1040px) {
   .lessons {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1148,6 +1165,24 @@ useSeoMeta({
   font-size: clamp(1.25rem, 2.4vw, 1.6rem);
   line-height: 1.45;
   color: var(--color-steel-200);
+}
+
+/*
+  Link im großen Fraunces-Satz des Schlussabsatzes. Eigene Regel statt `.textlink`:
+  Bei dieser Schriftgröße braucht die Unterlinie mehr Abstand, sonst schneidet sie
+  durch die Unterlängen von „y“ und „g“.
+*/
+.outro__link-inline {
+  color: var(--color-steel-100);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-600);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+  transition: color 200ms ease, text-decoration-color 200ms ease;
+}
+.outro__link-inline:hover {
+  color: var(--color-accent-300);
+  text-decoration-color: var(--color-accent-400);
 }
 
 .outro__actions {

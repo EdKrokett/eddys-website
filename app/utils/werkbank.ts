@@ -139,39 +139,37 @@ export const WERKBANK_WERKZEUGE: WerkbankTool[] = [
 
 // ── Wo es klemmte ──────────────────────────────────────────────────────────────
 /**
- * Vier Lektionen aus `tb26-code/docs/ai-lessons.md` — dem fortlaufenden
+ * Drei Lektionen aus `tb26-code/docs/ai-lessons.md` — dem fortlaufenden
  * Lessons-Learned des Neubaus. Für Lesende ohne Entwicklerhintergrund übersetzt,
  * aber nicht verwässert: Jede beschreibt einen echten Fehlschlag, keine Binsenweisheit.
+ *
+ * Die dritte schließt den Bogen zu Hardy Kutzer aus Kapitel 01: Die Prüfungen, von
+ * denen sie handelt, sind genau die, die er im Februar eingerichtet hat.
  */
 export const WERKBANK_LEKTIONEN: WerkbankLesson[] = [
   {
     title: 'Die KI übertreibt, wenn sie sich selbst prüft',
     text:
-      'Ein Prüflauf meldete 30 bis 40 Prozent überflüssigen Text in meinen eigenen Regeln. '
-      + 'Nachgezählt waren es zehn Zeilen. Seitdem gilt: Jeder Befund wird gegen die Datei '
-      + 'gehalten, bevor irgendetwas daraufhin geändert wird.',
+      'Ich habe die KI ihre eigenen Anweisungsdateien durchsehen lassen. Das Urteil klang '
+      + 'nach Messung: 30 bis 40 Prozent davon seien überflüssig. Nachgezählt waren es zehn '
+      + 'Zeilen von mehreren hundert. Eine Prozentzahl wirkt genau, auch wenn sie geraten '
+      + 'ist. Heute sehe ich mir jeden Befund erst in der Datei selbst an.',
   },
   {
     title: 'Zu viele Regeln heben sich gegenseitig auf',
     text:
-      'Ab etwa zehn Anweisungen fängt ein Modell an, einzelne zu übergehen. Ich hatte das '
-      + 'Wort „Pflicht" achtmal in einer Datei stehen. Jedes weitere Mal hat die sieben davor '
-      + 'geschwächt. Heute stehen dort höchstens drei.',
-  },
-  {
-    title: 'Was auf meinem Rechner wirkt, muss auf dem Server nicht wirken',
-    text:
-      'Meine Schutzregeln verwiesen auf Pfade, die es nur auf meinem Mac gibt. Auf dem '
-      + 'Linux-Server liefen sie monatelang ins Leere, ohne eine einzige Fehlermeldung. Von '
-      + 'allein wäre mir das nie aufgefallen.',
+      'Meine Anweisungsdatei war auf 187 Zeilen gewachsen, weil ich nach jedem Fehler eine '
+      + 'weitere Regel angehängt habe. Je länger sie wurde, desto mehr davon hat die KI '
+      + 'übergangen. Ab etwa zehn Anweisungen fängt das an. Ich habe auf 135 Zeilen gekürzt, '
+      + 'und seitdem hält sie sich an mehr, als sie es mit der langen Fassung tat.',
   },
   {
     title: 'Prüfen muss die Maschine',
     text:
-      'Am Anfang standen meine wichtigsten Regeln als Text in der Anleitung. Sobald es eilig '
-      + 'wurde, hat die KI sie übergangen, und ich habe es erst hinterher gemerkt. Heute hängt '
-      + 'alles Wichtige an einem Skript, das den Build abbricht. Ein Skript kann man nicht '
-      + 'überlesen.',
+      'Anfangs standen meine wichtigsten Regeln als Text in der Anleitung. Sobald es eilig '
+      + 'wurde, hat die KI sie übergangen, und ich habe es erst hinterher gemerkt. Heute '
+      + 'hängen sie an Prüfungen, die den Build abbrechen, wenn etwas dagegen verstößt. '
+      + 'Genau die hat Hardy im Februar eingerichtet. Ein Skript kann man nicht überlesen.',
   },
 ]
 
