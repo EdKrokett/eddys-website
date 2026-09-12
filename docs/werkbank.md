@@ -149,6 +149,22 @@ Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualitä
 | 05 Diese Seite | Colophon zu eduard-andrae.de | Kennzahlenleiste |
 | Leise Tür | Werkzeugkasten-Link + Kontakt | — |
 
+### Öffentliche Sprungziele
+
+Zwei Anker auf dieser Seite werden von außen verlinkt und dürfen **nicht umbenannt**
+werden, ohne fremde Links zu brechen:
+
+| Anker | Ziel | Verlinkt von |
+| --- | --- | --- |
+| `/werkbank#handwerk` | Kapitel 02, „Eine Geige macht noch keine Musik" | extern, von Eddy geteilt |
+| `/werkbank#szenario` | Die Vitrine mit dem Make-Screenshot | Make-Zertifikat im Datenblatt auf `/ueber-mich` |
+
+Beide brauchen `scroll-margin-top: 9rem` und den Nachscroll in `onMounted`: Beim
+Direktaufruf eines Ankers springt der Browser, bevor die selbst gehosteten Schriften
+geladen sind, der Textfluss darüber ändert danach seine Höhe und das Ziel rutscht weg.
+Gemessen ohne die Korrektur: 54 bis 140px bei einem Header von 64px, also mal frei und
+mal halb verdeckt. Details im Kommentar in `app/pages/werkbank.vue`.
+
 ### Warum „Das Handwerk" ein eigenes Kapitel ist (seit 12.09.2026)
 
 Der Abschnitt über Hardy Kutzer stand zuerst als Unterabschnitt am Ende von Kapitel 01 und

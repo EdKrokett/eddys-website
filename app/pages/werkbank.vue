@@ -238,8 +238,11 @@ useSeoMeta({
       beantwortet aber die Frage, die nach Kapitel 01 offen im Raum steht: Wie kann
       jemand, der keinen Code schreibt, so etwas bauen? Das ist kein Anhang, das ist die
       These der Seite.
+
+      Die `id` ist ein öffentliches Sprungziel: /werkbank#handwerk wird von außen
+      verlinkt. Beim Umbenennen brechen fremde Links, die niemand nachziehen kann.
     -->
-    <section class="section section--bordered section--muted reveal">
+    <section id="handwerk" class="section section--bordered section--muted reveal">
       <UContainer>
         <SectionHead
           kicker="02 · Das Handwerk"
@@ -735,6 +738,16 @@ useSeoMeta({
 
 .section--bordered + .section--bordered {
   border-top: 1px solid var(--color-graphite-700);
+}
+
+/*
+  Sprungziel-Abstand für jede Sektion mit `id`, gleiche Begründung wie bei `.vitrine`:
+  4rem Header plus Reserve, weil der Direktaufruf eines Ankers landet, bevor die
+  Schriften final sind. Als Attributselektor, damit ein künftiger Anker nichts
+  Zusätzliches braucht.
+*/
+.section[id] {
+  scroll-margin-top: 9rem;
 }
 
 .section--muted {
