@@ -100,7 +100,7 @@ useSeoMeta({
           <p>
             Dazu neunzehn Make-Szenarien: Alles, was regelmäßig wiederkehrt, läuft heute
             automatisch ab, ohne dass jemand es anstößt. Für dieselben Aufgaben habe ich
-            vorher Stunden von Hand gebraucht.
+            vorher jede Woche viele Stunden von Hand gebraucht.
           </p>
           <p class="intro__note">
             Zahlen aus dem Repository und aus Make.com, Stand {{ WERKBANK_STICHTAG }}.
