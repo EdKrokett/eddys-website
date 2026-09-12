@@ -25,6 +25,28 @@ const maxModules = Math.max(...WERKBANK_SZENARIEN.map(scenario => scenario.modul
  */
 const shotDialog = useTemplateRef<HTMLDialogElement>('shotDialog')
 
+/**
+ * Ankersprung nachjustieren, wenn die Seite direkt mit `#szenario` geöffnet wird.
+ *
+ * Der Browser springt beim Direktaufruf, bevor die selbst gehosteten Schriften fertig
+ * geladen sind. Fraunces und Manrope ersetzen dann die Fallback-Schrift, die Textblöcke
+ * darüber ändern ihre Höhe, und das Ziel rutscht weg — gemessen am 12.09.2026 zwischen
+ * 54 und 140px, bei einem Header von 64px also mal frei und mal halb verdeckt.
+ * `scroll-margin-top` allein fängt das nicht ab, weil die Abweichung von Lauf zu Lauf
+ * unterschiedlich ausfällt.
+ *
+ * Über den Klickweg von /ueber-mich tritt das nicht auf: Dort sind die Schriften längst
+ * geladen. Die Korrektur läuft deshalb nur, wenn beim Laden ein Hash gesetzt ist.
+ */
+const route = useRoute()
+
+onMounted(async () => {
+  if (!route.hash) return
+
+  await document.fonts?.ready
+  document.getElementById(route.hash.slice(1))?.scrollIntoView()
+})
+
 const title = 'Werkbank — Eduard Andrae'
 const description
   = 'Wie ich trusted blogs mit KI neu gebaut habe: Zahlen aus dem Repository, 19 Make-Szenarien '
@@ -268,7 +290,13 @@ useSeoMeta({
             Die Vitrine erscheint nur, wenn der Screenshot wirklich im Repo liegt
             (`WERKBANK_SCREENSHOT`). Sonst bliebe hier eine 404-Lücke im Layout stehen.
           -->
-          <figure v-if="WERKBANK_SCREENSHOT" class="vitrine">
+          <!--
+            Sprungziel des Links am Make-Zertifikat auf /ueber-mich. Bewusst hier und
+            nicht an der Sektion: Von dort aus soll man das Szenario sehen, nicht die
+            Kapitelüberschrift. Die `id` hängt am selben `v-if` wie die Vitrine — ohne
+            Screenshot gibt es kein Ziel und der Link landet oben auf der Seite.
+          -->
+          <figure v-if="WERKBANK_SCREENSHOT" id="szenario" class="vitrine">
             <button
               type="button"
               class="vitrine__trigger"
@@ -851,6 +879,17 @@ useSeoMeta({
 /* ── Vitrine ────────────────────────────────────────────────────────────────── */
 .vitrine {
   margin: 0;
+  /*
+    Abstand zum Header (4rem) beim Ankersprung, mit Reserve.
+
+    9rem statt der rechnerisch nötigen 5rem, weil der Direktaufruf von
+    /werkbank#szenario anders landet als der Klick von /ueber-mich: Der Browser
+    springt dabei, bevor Schriften und Bilder final sind, und liegt dadurch je nach
+    Lauf 40 bis 60px zu tief (gemessen 12.09.2026: 51px, 57px, 74px gegenüber 112px
+    beim Klickweg). Mit 9rem bleibt die Oberkante auch im ungünstigsten Fall unter
+    dem Header, statt halb darunter zu verschwinden.
+  */
+  scroll-margin-top: 9rem;
 }
 
 .vitrine__trigger {

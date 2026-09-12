@@ -122,7 +122,9 @@ export const CV_CERTIFICATES: CvCertificate[] = [
     year: '2025',
     name: 'Make Advanced',
     issuer: 'Make',
-    story: { to: '/werkbank', label: 'Was damit gebaut wurde' },
+    // Direkt auf die Szenario-Grafik, nicht an den Seitenanfang: Wer hier klickt,
+    // will sehen, was mit Make gebaut wurde, und nicht erst dorthin scrollen.
+    story: { to: '/werkbank#szenario', label: 'Was damit gebaut wurde' },
   },
   { year: '2020', name: 'Professional Scrum Master', issuer: 'Scrum.org' },
   { year: '2014', name: 'Professional Scrum Product Owner', issuer: 'Scrum.org' },

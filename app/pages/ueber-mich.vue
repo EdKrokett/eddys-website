@@ -369,17 +369,26 @@ useSeoMeta({
             <h3 class="datasheet__title">
               Sprachen
             </h3>
-            <ul class="datasheet__list">
+            <!--
+              Ohne führende Spalte: Zertifikate und Ausbildung haben dort eine Jahreszahl,
+              Sprachen hätten nur einen Platzhalterstrich. Eine Spalte, die in jeder Zeile
+              dasselbe Zeichen zeigt, trägt keine Information.
+            -->
+            <ul class="datasheet__list datasheet__list--plain">
               <li
                 v-for="lang in CV_LANGUAGES"
                 :key="lang.name"
                 class="datasheet__row"
                 :class="{ 'datasheet__row--playful': lang.playful }"
               >
-                <span class="datasheet__year">{{ lang.playful ? '¯\\_(ツ)_/¯' : '—' }}</span>
                 <span>
                   <span class="datasheet__name">{{ lang.name }}</span>
-                  <span class="datasheet__meta">{{ lang.level }}</span>
+                  <span class="datasheet__meta">
+                    {{ lang.level }}
+                    <!-- Der Shruggie hing vorher in der Strichspalte und wäre mit ihr
+                         verschwunden; er steht jetzt hinter dem Niveau. -->
+                    <span v-if="lang.playful" class="datasheet__shrug">¯\_(ツ)_/¯</span>
+                  </span>
                 </span>
               </li>
             </ul>
@@ -439,6 +448,11 @@ useSeoMeta({
     <!-- ═══════════════ ABSCHLUSS ═══════════════ -->
     <section class="outro reveal">
       <UContainer>
+        <p class="outro__label">
+          Mein Motto. Es gilt nicht nur beim Laufen, sondern fürs ganze Leben
+          <span class="outro__wink" aria-hidden="true">;-)</span>
+        </p>
+
         <p class="outro__quote">
           „Es ist nicht die Zeit, die zählt — es ist Deine Leidenschaft.“
         </p>
@@ -842,12 +856,22 @@ useSeoMeta({
   border-bottom-color: var(--color-accent-500);
 }
 
-.datasheet__row--playful .datasheet__year {
-  font-size: var(--text-2xs);
-  color: var(--color-brass-400);
+/* Sprachen: einspaltig, weil die Jahresspalte dort nichts zu zeigen hätte. */
+.datasheet__list--plain .datasheet__row {
+  grid-template-columns: 1fr;
+  gap: 0;
 }
+
 .datasheet__row--playful .datasheet__name {
   color: var(--color-brass-300);
+}
+
+.datasheet__shrug {
+  margin-left: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  white-space: nowrap;
+  color: var(--color-brass-400);
 }
 
 /* ── Projekte ───────────────────────────────────────────────────────────── */
@@ -977,6 +1001,27 @@ useSeoMeta({
   background: var(--color-graphite-950);
   padding: clamp(3.5rem, 8vw, 5.5rem) 0;
   text-align: center;
+}
+
+/*
+  Kleine Einordnung über dem Zitat. Bewusst zurückgenommen in Mono: Sie sagt, was das
+  Zitat ist, und soll ihm nicht die Aufmerksamkeit nehmen.
+*/
+.outro__label {
+  margin-inline: auto;
+  margin-bottom: 1.25rem;
+  max-width: 30rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  color: var(--color-steel-500);
+}
+
+/* Zwinkersmiley nicht umbrechen lassen, sonst steht die Klammer allein in der Zeile. */
+.outro__wink {
+  white-space: nowrap;
+  color: var(--color-brass-400);
 }
 
 .outro__quote {
