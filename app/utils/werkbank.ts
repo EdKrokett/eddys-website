@@ -78,8 +78,18 @@ export const WERKBANK_BUILDS: WerkbankBuild[] = [
   },
 ]
 
+/**
+ * Die drei Zahlen, die doppelt stehen: einmal in den Kennzahlenleisten dieser Seite,
+ * einmal im Startseiten-Band (`HomeWerkbank.vue`). Als benannte Konstanten statt als
+ * zwei Literale, weil sonst beim Aktualisieren zuverlässig eine der beiden Stellen
+ * stehen bleibt — die Startseite behauptete dann einen Stand, den es nicht mehr gibt.
+ */
+const COMMITS_NEUBAU = '2.562'
+const SZENARIEN_AKTIV = '19'
+const OPERATIONEN_GELAUFEN = '29.110'
+
 export const WERKBANK_NEUBAU_METRIKEN: WerkbankMetric[] = [
-  { value: '2.562', label: 'Commits, davon 2.450 von mir' },
+  { value: COMMITS_NEUBAU, label: 'Commits, davon 2.450 von mir' },
   { value: '1.477', label: 'Dateien' },
   { value: '333', label: 'zusammengeführte Zweige' },
   { value: '103', label: 'Markdown-Dokumente', accent: true },
@@ -106,10 +116,23 @@ export const WERKBANK_SZENARIEN: WerkbankScenario[] = [
 ]
 
 export const WERKBANK_MAKE_METRIKEN: WerkbankMetric[] = [
-  { value: '19', label: 'Szenarien, alle aktiv' },
+  { value: SZENARIEN_AKTIV, label: 'Szenarien, alle aktiv' },
   { value: '115', label: 'Module im größten davon', accent: true },
   { value: '20', label: 'angebundene Dienste' },
-  { value: '29.110', label: 'Operationen gelaufen' },
+  { value: OPERATIONEN_GELAUFEN, label: 'Operationen gelaufen' },
+]
+
+/**
+ * Die Kennzahlen des Startseiten-Bands — dieselben Werte wie oben, aber mit kurzen
+ * Labels: Im Band stehen drei Zahlen nebeneinander in einer schmalen Spalte, dort passt
+ * „Commits, davon 2.450 von mir" nicht in eine Zeile. Die Auswahl deckt beide Hälften
+ * der Werkbank ab (Neubau und Automatisierung), damit das Band nicht nur einen Teil
+ * der Seite ankündigt.
+ */
+export const WERKBANK_STARTSEITE_METRIKEN: WerkbankMetric[] = [
+  { value: COMMITS_NEUBAU, label: 'Commits im Neubau' },
+  { value: SZENARIEN_AKTIV, label: 'Make-Szenarien, alle aktiv', accent: true },
+  { value: OPERATIONEN_GELAUFEN, label: 'Operationen gelaufen' },
 ]
 
 export const WERKBANK_WERKZEUGE: WerkbankTool[] = [

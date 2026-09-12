@@ -232,6 +232,21 @@ const columns = computed<string[][]>(() => {
             <Icon name="lucide:arrow-right" class="hero__cta-icon size-4" />
           </NuxtLink>
         </div>
+
+        <!--
+          Dritter Weg, aber bewusst KEIN dritter Button: Drei gleich starke Flächen
+          nebeneinander nähmen dem Teal-Button seine Sonderstellung, und die dritte
+          bräche auf Tablet-Breite allein um. Als leise Mono-Zeile ist die Werkbank
+          oben sichtbar, ohne die Zwei-Türen-Logik zu brechen, die sich unten in
+          HomeDoors wiederholt. Ihr eigenes Gewicht bekommt sie dort im Band.
+        -->
+        <NuxtLink to="/werkbank" class="hero__aside">
+          <Icon name="lucide:corner-down-right" class="hero__aside-mark size-3.5" />
+          <span>
+            <span class="hero__aside-key">Werkbank</span>
+            Wie ich trusted blogs mit KI neu gebaut habe
+          </span>
+        </NuxtLink>
       </div>
     </UContainer>
   </section>
@@ -473,5 +488,50 @@ const columns = computed<string[][]>(() => {
 }
 .hero__cta:hover .hero__cta-icon {
   translate: 0.3rem 0;
+}
+
+/* ── Nebeneingang ───────────────────────────────────────────────────────── */
+/*
+ * Bewusst ohne Rahmen und ohne Fläche, damit die Zeile unterhalb der Buttons
+ * bleibt und nicht neben ihnen konkurriert. `align-items: baseline` wäre hier
+ * falsch: Der Pfeil soll auf der ersten Zeile sitzen, auch wenn der Text auf
+ * schmalen Screens zweizeilig umbricht.
+ */
+.hero__aside {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-top: 1.75rem;
+  max-width: 32rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--color-steel-400);
+  text-shadow: 0 1px 20px rgba(14, 15, 18, 0.9);
+  transition: color 250ms ease;
+}
+.hero__aside:hover {
+  color: var(--color-steel-200);
+}
+
+.hero__aside-mark {
+  flex: none;
+  /* Auf die Mitte der ersten Textzeile setzen, statt an deren Oberkante. */
+  margin-top: 0.3em;
+  color: var(--color-accent-500);
+  transition: translate 250ms cubic-bezier(0.16, 1, 0.3, 1), color 250ms ease;
+}
+.hero__aside:hover .hero__aside-mark {
+  translate: 0.25rem 0;
+  color: var(--color-accent-300);
+}
+
+.hero__aside-key {
+  margin-right: 0.5rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+  border-bottom: 1px solid var(--color-accent-700);
+  padding-bottom: 0.1rem;
 }
 </style>

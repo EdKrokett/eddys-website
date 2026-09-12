@@ -92,6 +92,12 @@ useSeoMeta({
 
     <HomeDoors />
 
+    <!--
+      Die Werkbank liegt quer unter den beiden Türen statt als dritte Tür neben
+      ihnen — Begründung in HomeWerkbank.vue.
+    -->
+    <HomeWerkbank />
+
     <!-- ═══════════════ BLOG-VORSCHAU (live von blog.eduard-andrae.de) ═══════════════ -->
     <section class="section reveal">
       <UContainer>
