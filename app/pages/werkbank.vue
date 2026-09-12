@@ -279,7 +279,7 @@ useSeoMeta({
             Er hat nicht mitprogrammiert. In den ersten Tagen im Februar 2026 hat er das
             Gerüst gestellt: die Bau- und Ausliefer-Strecke, die Prüfungen, die bei jedem
             Push laufen, und die Regelwerke, nach denen Claude in diesem Projekt arbeitet.
-            Von seinen 112 Beiträgen liegen fast alle in diesen ersten Tagen. Die
+            Von seinen 112 Commits liegen fast alle in diesen ersten Tagen. Die
             restlichen 2.450 sind dann meine gewesen.
           </p>
 
