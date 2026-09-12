@@ -102,12 +102,16 @@ Make-API.
 | Publer-API (Pinterest ×2, Twitter, Facebook, LinkedIn) | je 40 | 589 | 5.303 |
 | **Summe über alle 19 Szenarien** | | **1.665** | **29.110** |
 
-**Warum die Tabelle auf der Seite nicht „die fünf größten" zeigt.** Nach Modulzahl stünde
-auf Platz drei „Pinterest: Multi-PIN-Erstellung" mit 56 Modulen und **0 Läufen**. Ein
-gebautes, aber nie gestartetes Szenario wirft in einer Tabelle, die zeigen soll was läuft,
-mehr Fragen auf als es beantwortet. Auf der Seite steht dort stattdessen „Publer-API:
-Pinterest" (41 Module, 161 Läufe), und die Beschriftung sagt ehrlich „Fünf der neunzehn
-Szenarien" statt „die fünf größten".
+**Auf der Seite stehen drei davon** (Eddys Auswahl, 12.09.2026): Promotion erstellen,
+KI-Blogpost erstellen, Content-Versand. Die Beschriftung sagt „Drei der neunzehn Szenarien",
+nicht „die drei größten" — nach Modulzahl stünde auf Platz drei „Pinterest:
+Multi-PIN-Erstellung" mit 56 Modulen und **0 Läufen**, und ein gebautes, aber nie
+gestartetes Szenario wirft in einer Tabelle, die zeigen soll was läuft, mehr Fragen auf als
+es beantwortet.
+
+Der Balken hinter jedem Namen rechnet gegen die größte Modulzahl **dieser Liste**, nicht
+gegen alle neunzehn. Kommt eine Zeile dazu oder fällt eine weg, skalieren die Balken
+entsprechend mit.
 
 Angebundene Dienste (20): Google Sheets, HTTP, JSON, ai-tools, Placid, Cloudinary, OpenAI,
 Anthropic Claude, Brevo/Sendinblue, Notion, Apify, Scraptio, WordPress, Data Store u. a.

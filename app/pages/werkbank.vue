@@ -304,7 +304,7 @@ useSeoMeta({
           <div class="table-scroll">
             <table class="scenarios">
               <caption class="scenarios__caption">
-                Fünf der neunzehn Szenarien, Stand {{ WERKBANK_STICHTAG }}
+                Drei der neunzehn Szenarien, Stand {{ WERKBANK_STICHTAG }}
               </caption>
               <thead>
                 <tr>

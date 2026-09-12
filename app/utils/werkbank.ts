@@ -87,20 +87,21 @@ export const WERKBANK_NEUBAU_METRIKEN: WerkbankMetric[] = [
 
 // ── Die Maschinen ──────────────────────────────────────────────────────────────
 /**
- * Fünf der neunzehn Szenarien, nach Modulzahl absteigend. Eine vollständige Tabelle
+ * Drei der neunzehn Szenarien (Eddys Auswahl, 12.09.2026). Eine vollständige Tabelle
  * wäre eine Inventarliste, keine Aussage.
  *
- * Bewusst NICHT „die fünf größten“: Auf Platz drei nach Modulzahl stünde
+ * Bewusst NICHT „die drei größten“: Auf Platz drei nach Modulzahl stünde
  * „Pinterest: Multi-PIN-Erstellung“ (56 Module, 0 Läufe). Ein gebautes, aber nie
  * gestartetes Szenario in einer Tabelle, die zeigen soll, was läuft, wirft beim Lesen
- * mehr Fragen auf, als es beantwortet. Stattdessen steht dort eines der Publer-
- * Szenarien mit echten Laufzahlen.
+ * mehr Fragen auf, als es beantwortet.
+ *
+ * Die Reihenfolge ist die der Aufzählung, nicht sortiert. Dass sie trotzdem von lang
+ * nach kurz läuft, ist Zufall der Auswahl: Der Balken hinter dem Namen rechnet gegen
+ * die größte Modulzahl DIESER Liste, nicht gegen alle neunzehn.
  */
 export const WERKBANK_SZENARIEN: WerkbankScenario[] = [
   { name: 'Promotion erstellen', modules: 115, runs: 482, operations: 13321 },
   { name: 'KI-Blogpost erstellen', modules: 87, runs: 49, operations: 1437 },
-  { name: 'Publer-API: Pinterest', modules: 41, runs: 161, operations: 1629 },
-  { name: 'Promos: Kacheln + Mail', modules: 26, runs: 152, operations: 3515 },
   { name: 'Content-Versand', modules: 26, runs: 160, operations: 3327 },
 ]
 
@@ -122,7 +123,7 @@ export const WERKBANK_WERKZEUGE: WerkbankTool[] = [
   },
   {
     name: 'ChatGPT',
-    role: 'Steckt in den Szenarien selbst und formuliert dort, wo eine Maschine Text braucht.',
+    role: 'Steckt in den Szenarien und generiert passende Bilder.',
   },
   {
     name: 'GitLab & VS Code',
@@ -130,7 +131,9 @@ export const WERKBANK_WERKZEUGE: WerkbankTool[] = [
   },
   {
     name: 'Placid & Cloudinary',
-    role: 'Erzeugen die Bilder, die sonst jedes Mal jemand von Hand bauen müsste.',
+    role:
+      'Ergänzen Wasserzeichen und Texte in den Bildern, die sonst jedes Mal jemand von '
+      + 'Hand einsetzen müsste.',
   },
 ]
 
