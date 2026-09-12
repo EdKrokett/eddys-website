@@ -308,7 +308,7 @@ useSeoMeta({
         <SectionHead
           kicker="03 · Die Maschinen"
           title="Neunzehn Szenarien, die ihre Arbeit alleine machen"
-          lead="Make verbindet Dienste zu Ketten. Ein Szenario von neunzehn, stellvertretend gezeigt: Eine Zeile in einer Tabelle löst aus, am Ende steht ein fertiger Beitrag auf vier Netzwerken. Die anderen erzeugen Bilder, verschicken Newsletter, holen Kennzahlen oder räumen hinterher auf."
+          lead="Make verbindet Dienste zu Ketten. Ein Szenario von neunzehn, stellvertretend gezeigt: Eine Zeile in einer Tabelle löst aus, am Ende steht ein fertiger Beitrag auf vier Netzwerken. Die anderen Szenarien erzeugen Bilder, verschicken Newsletter, holen Kennzahlen oder räumen hinterher auf."
         />
 
         <div class="section__body">
