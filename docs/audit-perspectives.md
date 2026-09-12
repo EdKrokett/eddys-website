@@ -267,3 +267,25 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
   Namen auffällt, bevor er abgeschnitten wird.
 - Gilt allgemein: Kommt der Inhalt aus einer Datenliste, die wachsen kann? Dann ist die
   Frage nicht, ob der heutige Bestand passt, sondern welcher Wert ihn sprengen würde.
+
+### Neue Seiten hinter einer 301-Catch-all (abgeleitet 2026-09-12)
+
+Beobachtet beim Livegang von `/werkbank`: Zwischen Push und fertigem Vercel-Build lieferte
+die Catch-all-Route (`app/pages/[...slug].vue`) für den neuen Pfad einen **301 auf
+blog.eduard-andrae.de**. Ein 301 ist ein *permanenter* Redirect: Browser merken ihn sich und
+fragen die URL nicht erneut ab, auch nachdem die Seite längst existiert. Zusätzlich hielt
+Vercels Edge-Cache die Weiterleitung noch, als das Deployment schon `READY` war — ein Abruf
+mit Cache-Buster lieferte bereits 200, der ohne noch 301.
+
+- Wurde der neue Pfad **vor** dem Deployment schon einmal aufgerufen? Dann hat dieser Browser
+  den 301 gespeichert. Prüfmethode: privates Fenster oder `?cb=$(date +%s)` anhängen; ein
+  Unterschied zwischen beiden Abrufen ist der Beweis, nicht die Vermutung.
+- Ist das Deployment wirklich live, oder antwortet nur der Edge-Cache? Prüfmethode:
+  `readyState` über die Vercel-API abfragen UND parallel mit Cache-Buster abrufen.
+- Grundsätzlich: Vor dem Ankündigen einer neuen URL erst prüfen, ob sie ohne Cache-Buster
+  200 liefert. Eine frisch geteilte URL, die bei den ersten Lesern auf dem Blog landet, ist
+  für diese Leser dauerhaft kaputt.
+
+Nicht geändert wurde der 301 selbst: Für die echten Alt-URLs aus 20 Jahren WordPress ist er
+richtig, und ein 302 würde deren Ranking-Übertragung verschenken. Der Preis ist dieses
+Zeitfenster beim Anlegen jeder neuen Seite.
