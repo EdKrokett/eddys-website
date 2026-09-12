@@ -142,10 +142,27 @@ Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualitä
 | Abschnitt | Inhalt | Visuelles Element |
 | --- | --- | --- |
 | Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces, Seitenzahl |
-| 01 Der Neubau | Wolffs Beschreibung, Kennzahlen, Hardys Leitplanken | Balkenvergleich 10 Jahre / 7 Monate |
-| 02 Die Maschinen | 19 Szenarien, 115 Module, 20 Dienste | Screenshot in der Vitrine + SVG-Kette |
-| 03 Wo es klemmte | Lessons aus `tb26-code/docs/ai-lessons.md` | Werkzeugregal, typografisch |
+| 01 Der Neubau | Wolffs Beschreibung, Kennzahlen | Balkenvergleich Altsystem / neues System |
+| 02 Das Handwerk | Die Geigen-These, Hardys Rolle, Wolffs zweiter Einwand | Statement-Satzbild mit Teal-Pointe |
+| 03 Die Maschinen | 19 Szenarien, 115 Module, 20 Dienste | Screenshot in der Vitrine + SVG-Kette |
+| 04 Wo es klemmte | Lessons aus `tb26-code/docs/ai-lessons.md` | Werkzeugregal, typografisch |
+| 05 Diese Seite | Colophon zu eduard-andrae.de | Kennzahlenleiste |
 | Leise Tür | Werkzeugkasten-Link + Kontakt | — |
+
+### Warum „Das Handwerk" ein eigenes Kapitel ist (seit 12.09.2026)
+
+Der Abschnitt über Hardy Kutzer stand zuerst als Unterabschnitt am Ende von Kapitel 01 und
+las sich dort wie eine Fußnote zum Neubau. Er beantwortet aber die Frage, die nach Kapitel 01
+offen im Raum steht: Wie kann jemand, der keinen Code schreibt, so etwas bauen?
+
+Eddys Antwort darauf ist die These der ganzen Seite, in seinen Worten: Wer KI für einen
+Hammer hält, schlägt damit einen Nagel ins Brett; wer sie als Instrument begreift, muss darauf
+spielen lernen. Auf der Seite steht sie erzählend statt als Zwillingsfigur (siehe
+Schreibregeln), mit „KI ist eine Geige." als abgesetzter Pointe in Teal.
+
+Das Statement bekommt ein eigenes Satzbild mit Linien oben und unten, **kein** Papier-Motiv:
+Das Faksimile im Intro bleibt der einzige helle Block und das einzige Zitat der Seite. Hier
+spricht Eddy selbst, und der Wechsel des Satzbildes soll das zeigen.
 
 ## Design-Richtung
 

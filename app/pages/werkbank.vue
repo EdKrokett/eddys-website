@@ -49,8 +49,8 @@ onMounted(async () => {
 
 const title = 'Werkbank — Eduard Andrae'
 const description
-  = 'Wie ich trusted blogs mit KI neu gebaut habe: Zahlen aus dem Repository, 19 Make-Szenarien '
-    + 'und die Stellen, an denen es geklemmt hat.'
+  = 'Wie ich trusted blogs mit KI neu gebaut habe: Zahlen aus dem Repository, 19 Make-Szenarien, '
+    + 'die Stellen, an denen es geklemmt hat, und warum KI eher eine Geige ist als ein Hammer.'
 
 const { url: siteUrl } = useSiteConfig()
 
@@ -225,24 +225,61 @@ useSeoMeta({
             Regeln, Konzepten und Fehlerprotokollen. Ohne die schreibt eine KI munter
             weiter, was sie für richtig hält.
           </p>
+        </div>
+      </UContainer>
+    </section>
 
-          <h3 class="sub">
-            Den Anfang habe ich mir nicht selbst gebaut
-          </h3>
+    <!-- ═══════════════ 02 · DAS HANDWERK ═══════════════ -->
+    <!--
+      Eigenes Kapitel seit 12.09.2026. Der Abschnitt über Hardy Kutzer stand vorher als
+      Unterabschnitt am Ende von Kapitel 01 und war dort eine Fußnote zum Neubau. Er
+      beantwortet aber die Frage, die nach Kapitel 01 offen im Raum steht: Wie kann
+      jemand, der keinen Code schreibt, so etwas bauen? Das ist kein Anhang, das ist die
+      These der Seite.
+    -->
+    <section class="section section--bordered section--muted reveal">
+      <UContainer>
+        <SectionHead
+          kicker="02 · Das Handwerk"
+          title="Eine Geige macht noch keine Musik"
+          lead="Der häufigste Satz zu KI lautet, sie sei ein Werkzeug. Das greift mir zu kurz."
+        />
+
+        <div class="section__body">
+          <!--
+            Das Statement der Seite. Eigenes Satzbild statt Fließtext, weil hier die
+            Haltung steht, aus der alles andere folgt. Bewusst NICHT im Papier-Motiv des
+            Faksimiles: Das gehört Manfreds Zitat und bleibt der einzige helle Block.
+          -->
+          <figure class="creed">
+            <p class="creed__text">
+              Mit einem Hammer schlägt man einen Nagel ins Brett. Das kann jeder nach
+              einer Minute. Eine Geige kann man genauso in die Hand nehmen, nur klingt
+              sie dann nicht.
+            </p>
+            <p class="creed__punch">
+              KI ist eine Geige.
+            </p>
+          </figure>
 
           <p class="prose">
-            Das Schwierigste war der Start. Dabei hat mich
+            Es nützt nichts, KI einzusetzen. Man muss sie auch beherrschen. Mir fehlen
+            dafür zwei Dinge: DevOps und die Erfahrung, wie man ein Modell so einspannt,
+            dass am Ende etwas Tragfähiges herauskommt.
             <a
               href="https://www.linkedin.com/in/hardy-kutzer/"
               target="_blank"
               rel="noopener noreferrer"
               class="textlink"
             >Hardy Kutzer</a>
-            unterstützt, und zwar in den ersten Tagen im Februar 2026. Er hat nicht
-            mitprogrammiert. Er hat
-            das Gerüst gestellt: die Bau- und Ausliefer-Strecke, die Prüfungen, die bei
-            jedem Push laufen, und die Regelwerke, nach denen Claude in diesem Projekt
-            arbeitet. Von seinen 112 Beiträgen liegen fast alle in diesen ersten Tagen. Die
+            hat beides. Ohne ihn hätte ich mich an trusted blogs nicht herangewagt.
+          </p>
+
+          <p class="prose">
+            Er hat nicht mitprogrammiert. In den ersten Tagen im Februar 2026 hat er das
+            Gerüst gestellt: die Bau- und Ausliefer-Strecke, die Prüfungen, die bei jedem
+            Push laufen, und die Regelwerke, nach denen Claude in diesem Projekt arbeitet.
+            Von seinen 112 Beiträgen liegen fast alle in diesen ersten Tagen. Die
             restlichen 2.450 sind dann meine gewesen.
           </p>
 
@@ -263,11 +300,11 @@ useSeoMeta({
       </UContainer>
     </section>
 
-    <!-- ═══════════════ 02 · DIE MASCHINEN ═══════════════ -->
-    <section class="section section--bordered section--muted reveal">
+    <!-- ═══════════════ 03 · DIE MASCHINEN ═══════════════ -->
+    <section class="section section--bordered reveal">
       <UContainer>
         <SectionHead
-          kicker="02 · Die Maschinen"
+          kicker="03 · Die Maschinen"
           title="Neunzehn Szenarien, die ihre Arbeit alleine machen"
           lead="Make verbindet Dienste zu Ketten. Eine Zeile in einer Tabelle löst aus, und am Ende steht ein fertiger Beitrag auf vier Netzwerken."
         />
@@ -388,11 +425,11 @@ useSeoMeta({
       </UContainer>
     </section>
 
-    <!-- ═══════════════ 03 · WO ES KLEMMTE ═══════════════ -->
-    <section class="section section--bordered reveal">
+    <!-- ═══════════════ 04 · WO ES KLEMMTE ═══════════════ -->
+    <section class="section section--bordered section--muted reveal">
       <UContainer>
         <SectionHead
-          kicker="03 · Wo es klemmte"
+          kicker="04 · Wo es klemmte"
           title="Drei Sachen, die ich falsch gemacht habe"
           lead="Im Projekt läuft ein Dokument mit, in dem nach jeder größeren Runde steht, was schiefgegangen ist. Drei Einträge daraus, übersetzt."
         />
@@ -415,11 +452,11 @@ useSeoMeta({
       </UContainer>
     </section>
 
-    <!-- ═══════════════ 04 · DIESE SEITE ═══════════════ -->
-    <section class="section section--bordered section--muted reveal">
+    <!-- ═══════════════ 05 · DIESE SEITE ═══════════════ -->
+    <section class="section section--bordered reveal">
       <UContainer>
         <SectionHead
-          kicker="04 · Diese Seite"
+          kicker="05 · Diese Seite"
           title="Und dann ist da noch diese Seite hier"
           lead="Gemeint ist die Seite, auf der dieser Satz steht: eduard-andrae.de. Auch sie ist mit Claude Code entstanden, und sie ist das einzige der drei Beispiele, das sich ohne Umweg ansehen lässt."
         />
@@ -736,6 +773,39 @@ useSeoMeta({
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-accent-300);
+}
+
+/* ── Das Statement ──────────────────────────────────────────────────────────── */
+/*
+  Die Haltung, aus der die ganze Seite folgt. Eigenes Satzbild mit Linien oben und
+  unten, wie eine Inschrift: Es steht für sich, nicht im Lesefluss.
+
+  Bewusst ohne Papier, ohne Kasten, ohne Anführungszeichen — das Faksimile im Intro
+  bleibt der einzige helle Block und das einzige Zitat. Hier spricht Eddy selbst, und
+  das soll man am Wechsel des Satzbildes merken.
+*/
+.creed {
+  margin: 0;
+  max-width: 42rem;
+  padding-block: clamp(1.75rem, 4vw, 2.5rem);
+  border-block: 1px solid var(--color-graphite-700);
+}
+
+.creed__text {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.6vw, 1.7rem);
+  line-height: 1.45;
+  color: var(--color-steel-200);
+  text-wrap: pretty;
+}
+
+/* Die Pointe größer und in Teal: der eine Satz, der hängen bleiben soll. */
+.creed__punch {
+  margin-top: 1.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.4vw, 2.3rem);
+  line-height: 1.1;
+  color: var(--color-accent-400);
 }
 
 /* ── Zitatblock im Fließtext ────────────────────────────────────────────────── */
