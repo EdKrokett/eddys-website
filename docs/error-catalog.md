@@ -712,3 +712,87 @@ nicht im Projekt, und er ist nur in Kombination mit einer *fremden* Eigenschaft 
 (dem fehlenden Header der Quelle). Keine der beiden Seiten ist für sich genommen auffällig.
 
 **→ AUDIT-PERSPEKTIVE:** „Verbrauchsmodelle" in `docs/audit-perspectives.md`.
+
+---
+
+## Ein Grid-Item schrumpft nicht unter seinen Inhalt
+
+**Gefunden:** 12.09.2026, beim Bau von `/werkbank`.
+
+**FALSCH:**
+```css
+.section__body {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Kind: bewusst breiter als die Spalte, mit eigenem Scroll-Container */
+.table-scroll { overflow-x: auto; }
+.scenarios { min-width: 34rem; }
+```
+
+**RICHTIG:**
+```css
+.section__body {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Ohne diese Zeile wächst das Grid-Item mit seinem Inhalt statt zu scrollen. */
+.section__body > * {
+  min-width: 0;
+}
+```
+
+**WARUM:** Grid- und Flex-Items haben `min-width: auto`, nicht `0`. Sie schrumpfen deshalb
+nie unter die Mindestbreite ihres Inhalts. Ein Kind mit `overflow-x: auto` und einem
+`min-width: 34rem` breiten Inhalt löst dadurch **kein** Scrollen aus: Stattdessen wächst
+das Grid-Item selbst auf 34rem, die Spalte wird breiter als der Viewport, und die ganze
+Seite bekommt eine waagerechte Bildlaufleiste. Der `overflow-x: auto`-Container greift nie,
+weil er nie zu schmal für seinen Inhalt wird.
+
+Die Klasse ist heimtückisch, weil die Lösung (`overflow-x: auto`) an der richtigen Stelle
+steht und trotzdem wirkungslos ist. Sichtbar wird der Fehler nur unterhalb der Breite, bei
+der der Inhalt noch passt — auf dem Entwicklungsrechner also meistens gar nicht.
+
+**Prüfen statt vermuten:** Ein Screenshot taugt hier nicht als Beweis. Chrome im alten
+Headless-Modus und Playwright mit `fullPage: true` erzeugen beide Bilder, die wie ein
+Überlauf aussehen, obwohl keiner vorliegt. Verlässlich ist nur die Messung im echten
+Viewport:
+
+```js
+document.documentElement.scrollWidth > document.documentElement.clientWidth
+```
+
+**→ AUDIT-PERSPEKTIVE:** „Schrumpfverhalten" in `docs/audit-perspectives.md`.
+
+---
+
+## Text läuft aus der SVG-viewBox, ohne überzulaufen
+
+**Gefunden:** 12.09.2026, in `app/components/WerkbankChain.vue`.
+
+**FALSCH:**
+```js
+const branchX = routerX + STEP_X
+// Labels beginnen bei branchX + 20 und laufen nach rechts
+const viewBoxWidth = branchX + 76
+```
+
+**RICHTIG:**
+```js
+/** Längstes Label ist „Pinterest": 9 Zeichen Mono auf 12px mit Sperrung, rund 70px. */
+const LABEL_SPACE = 110
+const viewBoxWidth = branchX + LABEL_SPACE
+```
+
+**WARUM:** Eine viewBox ist ein Beschnitt, kein Container. Zu knapp bemessen schneidet sie
+Inhalt ab, statt ihn überlaufen zu lassen — es gibt keine Bildlaufleiste, keine Warnung im
+Build, keinen Lint-Fehler. Auf der Seite stand deshalb „LinkedI", „Faceboo" und „Pintere",
+und zwar so selbstverständlich, dass es beim Überfliegen als Absicht durchgeht.
+
+Der eigentliche Fehler war, die Breite eines Textes zu schätzen, statt Platz für den
+längsten möglichen Fall einzuplanen. Bei SVG-Text gibt es keine Layout-Rückmeldung: Der
+Browser misst nichts nach, was man selbst nicht gerechnet hat.
+
+**→ AUDIT-PERSPEKTIVE:** „Beschnitt statt Überlauf" in `docs/audit-perspectives.md`.

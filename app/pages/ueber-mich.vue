@@ -337,6 +337,14 @@ useSeoMeta({
                 <span>
                   <span class="datasheet__name">{{ cert.name }}</span>
                   <span class="datasheet__meta">{{ cert.issuer }}</span>
+                  <NuxtLink
+                    v-if="cert.story"
+                    :to="cert.story.to"
+                    class="datasheet__story"
+                  >
+                    {{ cert.story.label }}
+                    <Icon name="lucide:arrow-right" class="size-3" />
+                  </NuxtLink>
                 </span>
               </li>
             </ul>
@@ -810,6 +818,28 @@ useSeoMeta({
   margin-top: 0.15rem;
   font-size: var(--text-xs);
   color: var(--color-steel-500);
+}
+
+/*
+  Weiterführender Link an einem Nachweis. Zurückgenommen gesetzt: Das Datenblatt ist
+  eine Nachweisliste und soll nicht zur Linksammlung werden, deshalb trägt aktuell nur
+  das Make-Zertifikat einen Verweis.
+*/
+.datasheet__story {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--color-accent-400);
+  border-bottom: 1px solid transparent;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.datasheet__story:hover {
+  color: var(--color-accent-300);
+  border-bottom-color: var(--color-accent-500);
 }
 
 .datasheet__row--playful .datasheet__year {

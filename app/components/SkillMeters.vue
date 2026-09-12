@@ -48,10 +48,17 @@ defineProps<{ groups: CvSkillGroup[] }>()
   display: grid;
   gap: 2.5rem;
 }
+
+/*
+  Zwei Spalten statt drei, seit es vier Gruppen sind (12.09.2026): Bei drei Spalten
+  stünde die vierte Gruppe allein in einer zweiten Reihe und zöge die Aufmerksamkeit
+  auf sich, als wäre sie ein Nachtrag. 2×2 ist ein geschlossenes Feld, und die
+  Messskalen bekommen dabei mehr Breite.
+*/
 @media (min-width: 768px) {
   .skills {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 3rem 2.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem 4rem;
   }
 }
 

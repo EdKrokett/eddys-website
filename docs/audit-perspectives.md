@@ -237,3 +237,33 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Ist der Fehler daran erkennbar, dass etwas **kaputt** ist? Verbrauchsfehler liefern
   korrekte Ergebnisse und fallen erst beim Limit auf. Ein grüner Test und eine funktionierende
   Seite sind hier kein Beleg — nur die Verbrauchsanzeige des Anbieters ist einer.
+
+### Schrumpfverhalten (abgeleitet 2026-09-12)
+
+- Liegt ein Element mit `overflow-x: auto` in einem **Grid- oder Flex-Container**? Dann
+  braucht das Item `min-width: 0`, sonst wächst es mit seinem Inhalt und der Scroll-Container
+  wird nie zu schmal, um zu scrollen. Prüffrage: Welches Element wird eigentlich schmaler,
+  wenn der Viewport schmaler wird?
+- Steht irgendwo ein `min-width` in `rem`? Dann ist die Frage nicht, ob es passt, sondern ab
+  welcher Viewport-Breite es nicht mehr passt, und was dann nachgibt.
+- Beweist ein Screenshot einen Überlauf? Nein. Chrome im alten Headless-Modus und Playwright
+  mit `fullPage: true` erzeugen beide Bilder, die wie ein Überlauf aussehen, ohne dass einer
+  vorliegt — und `fullPage` rendert zusätzlich alle `reveal`-Elemente unsichtbar, weil
+  `animation-timeline: view()` dabei nie in den Range kommt. Prüfmethode: im echten Viewport
+  `document.documentElement.scrollWidth > clientWidth` messen und die betroffenen Elemente
+  über `getBoundingClientRect().right` benennen lassen.
+- Ist eine Einblend-Animation an `animation-timeline: view()` gehängt? Dann zusätzlich die
+  berechnete `opacity` nach echtem `scrollIntoViewIfNeeded()` messen, bevor irgendetwas an
+  der Animation geändert wird. Ein leerer Screenshot ist hier kein Befund.
+
+### Beschnitt statt Überlauf (abgeleitet 2026-09-12)
+
+- Enthält ein SVG `<text>`? Dann ist die viewBox ein **Beschnitt**, kein Container: Zu kurz
+  bemessen verschwindet Text spurlos, ohne Bildlaufleiste, Build-Warnung oder Lint-Fehler.
+  Prüffrage: Welcher ist der längste Wert, der hier je stehen kann, und wie breit ist er in
+  der tatsächlich gesetzten Schrift?
+- Wird eine Textbreite im Code **geschätzt**? Dann gehört die Rechnung als Kommentar daneben
+  (Zeichenzahl × Zeichenbreite × Sperrung), damit der nächste Eintrag mit einem längeren
+  Namen auffällt, bevor er abgeschnitten wird.
+- Gilt allgemein: Kommt der Inhalt aus einer Datenliste, die wachsen kann? Dann ist die
+  Frage nicht, ob der heutige Bestand passt, sondern welcher Wert ihn sprengen würde.

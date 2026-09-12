@@ -51,6 +51,14 @@ export interface CvCertificate {
   year: string
   name: string
   issuer: string
+  /**
+   * Weiterführende Seite zum Zertifikat.
+   *
+   * Nur für Nachweise, hinter denen auf dieser Website wirklich etwas steht: Das
+   * Make-Zertifikat führt auf die Werkbank, weil es dort belegt wird. Die übrigen
+   * bleiben ohne Link, sonst wird aus dem Datenblatt eine Linkliste.
+   */
+  story?: CvLink
 }
 
 export interface CvSkill {

@@ -118,7 +118,12 @@ export const CV_EDUCATION: CvEducation[] = [
 ]
 
 export const CV_CERTIFICATES: CvCertificate[] = [
-  { year: '2025', name: 'Make Advanced', issuer: 'Make' },
+  {
+    year: '2025',
+    name: 'Make Advanced',
+    issuer: 'Make',
+    story: { to: '/werkbank', label: 'Was damit gebaut wurde' },
+  },
   { year: '2020', name: 'Professional Scrum Master', issuer: 'Scrum.org' },
   { year: '2014', name: 'Professional Scrum Product Owner', issuer: 'Scrum.org' },
   { year: '2011', name: 'PRINCE2 Foundation', issuer: 'APMG International' },
@@ -154,6 +159,23 @@ export const CV_SKILL_GROUPS: CvSkillGroup[] = [
       { name: 'ITIL', level: 4 },
     ],
   },
+  /**
+   * Vierte Gruppe seit 12.09.2026.
+   *
+   * Die einzige Gruppe, deren Werte NICHT aus dem team-neusta-Kompetenzprofil stammen:
+   * Dort steht als einziger verwandter Eintrag „Prozessautomatisierung 2/5“, und das ist
+   * seit dem Neubau von trusted blogs und dem Make-Advanced-Zertifikat überholt. Die
+   * Belege für diese Einschätzung stehen auf /werkbank.
+   */
+  {
+    title: 'KI & Automatisierung',
+    skills: [
+      { name: 'Prozessautomatisierung', level: 5 },
+      { name: 'KI-gestützte Entwicklung', level: 5 },
+      { name: 'Prompt & Kontext-Design', level: 4 },
+      { name: 'KI im Content-Marketing', level: 4 },
+    ],
+  },
 ]
 
 export const CV_PROJECTS: CvProject[] = [
@@ -162,8 +184,12 @@ export const CV_PROJECTS: CvProject[] = [
     period: 'seit 2015',
     role: 'Gründer, Product Owner',
     description:
-      'Blog-Suchmaschine, Marktplatz für Blog-Marketing und Blog-Magazin mit Statistik- und KI-Unterstützung.',
+      'Blog-Suchmaschine, Marktplatz für Blog-Marketing und Blog-Magazin mit Statistik- und KI-Unterstützung. 2026 vollständig neu gebaut, ausschließlich mit KI.',
     url: 'https://www.trusted-blogs.com',
+    story: {
+      to: '/werkbank',
+      label: 'Wie der Neubau entstanden ist',
+    },
   },
   {
     name: 'Eddys Laufblog',

@@ -12,6 +12,7 @@ const mobileOpen = ref(false)
 
 const links = [
   { to: '/ueber-mich', label: 'Über mich' },
+  { to: '/werkbank', label: 'Werkbank' },
   { to: '/blog', label: 'Blog' },
   { to: '/kontakt', label: 'Kontakt' },
 ]

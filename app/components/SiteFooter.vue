@@ -29,6 +29,9 @@ const year = new Date().getFullYear()
           <NuxtLink to="/ueber-mich" class="footer__link">
             Über mich
           </NuxtLink>
+          <NuxtLink to="/werkbank" class="footer__link">
+            Werkbank
+          </NuxtLink>
           <NuxtLink to="/blog" class="footer__link">
             Blog
           </NuxtLink>
@@ -69,8 +72,15 @@ const year = new Date().getFullYear()
 
       <div class="footer__bar">
         <p>© {{ year }} Eduard Andrae</p>
+        <!--
+          Steht auf jeder Seite und ist der leiseste Weg zur Werkbank: Wer wissen will,
+          was „mit Claude Code gebaut“ hier konkret heißt, findet dort die Zahlen dazu.
+        -->
         <p class="footer__made">
-          Bremen
+          Bremen ·
+          <NuxtLink to="/werkbank" class="footer__made-link">
+            Gebaut mit Claude Code
+          </NuxtLink>
         </p>
       </div>
     </UContainer>
@@ -149,6 +159,17 @@ const year = new Date().getFullYear()
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.footer__made-link {
+  color: var(--color-steel-400);
+  border-bottom: 1px solid var(--color-graphite-700);
+  padding-bottom: 0.1rem;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.footer__made-link:hover {
+  color: var(--color-accent-400);
+  border-bottom-color: var(--color-accent-500);
 }
 
 .footer__bar {
