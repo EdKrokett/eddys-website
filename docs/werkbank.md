@@ -77,6 +77,10 @@ Docker/Coolify-Deployment, ESLint — und dann „Crafted and added claude-skill
 „optimize nuxt4-architect, add AI-Log workflow", „Claude-Optimierungen (Frontend-Skills,
 Claude.md, docs/)".
 
+Verlinkt wird seine eigene Seite <https://hardy-kutzer.de>, nicht sein LinkedIn-Profil, und im
+Text steht eine Zeile dazu, was er macht („Prozessautomatisierung für den Mittelstand", sein
+Wortlaut). Beides hat Hardy nach dem Gegenlesen gewünscht (12.09.2026).
+
 Hardy hat also nicht mitprogrammiert. Er hat die **Leitplanken** gebaut, in denen die KI danach
 arbeiten konnte. Das ist die ehrliche und zugleich stärkste Version der Geschichte, weil sie
 Wolffs zweiten Einwand (Seite 7: KI-Werkzeuge in ungeübten Händen sind gefährlich, das Prüfen

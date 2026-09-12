@@ -256,12 +256,16 @@ useSeoMeta({
             Es nützt nichts, KI einzusetzen. Man muss sie auch beherrschen. Mir fehlen
             dafür zwei Dinge: DevOps und die Erfahrung, wie man ein Modell so einspannt,
             dass am Ende etwas Tragfähiges herauskommt.
+            <!--
+              Eigene Seite statt LinkedIn-Profil, und die Zeile dazu, was er macht:
+              beides auf Hardys Wunsch (12.09.2026). Die Beschreibung ist sein Wortlaut.
+            -->
             <a
-              href="https://www.linkedin.com/in/hardy-kutzer/"
+              href="https://hardy-kutzer.de"
               target="_blank"
               rel="noopener noreferrer"
               class="textlink"
-            >Hardy Kutzer</a>
+            >Hardy Kutzer</a>, der Prozessautomatisierung für den Mittelstand baut,
             hat beides. Ohne ihn hätte ich mich an trusted blogs nicht herangewagt.
           </p>
 
