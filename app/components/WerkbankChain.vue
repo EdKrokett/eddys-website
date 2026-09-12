@@ -14,6 +14,10 @@
  * Verzweigung, Zusammenführung —, nicht alle 115 Module. Das steht auch als
  * Bildunterschrift auf der Seite, damit die Zeichnung nicht als Vollbild missverstanden
  * wird.
+ *
+ * Die Modulzahl nennt die Vitrine darunter, nicht diese Bildunterschrift: Beide Zahlen
+ * an einer Stelle zu wiederholen, liest sich wie zwei verschiedene Angaben. Wird der
+ * Screenshot je entfernt, muss die 115 hier wieder auftauchen.
  */
 
 /** Waagerechter Abstand zwischen zwei Knoten der Hauptkette. */
@@ -154,7 +158,7 @@ const viewBoxHeight = MID_Y * 2
     </div>
 
     <figcaption class="chain__caption">
-      Die Bauform, nicht der Vollbestand: Das echte Szenario hat 115 Module.
+      Der Ablauf von „Promotion erstellen“, vereinfacht gezeichnet.
     </figcaption>
   </figure>
 </template>

@@ -308,7 +308,7 @@ useSeoMeta({
         <SectionHead
           kicker="03 · Die Maschinen"
           title="Neunzehn Szenarien, die ihre Arbeit alleine machen"
-          lead="Make verbindet Dienste zu Ketten. Eine Zeile in einer Tabelle löst aus, und am Ende steht ein fertiger Beitrag auf vier Netzwerken."
+          lead="Make verbindet Dienste zu Ketten. Ein Szenario von neunzehn, stellvertretend gezeigt: Eine Zeile in einer Tabelle löst aus, am Ende steht ein fertiger Beitrag auf vier Netzwerken. Die anderen erzeugen Bilder, verschicken Newsletter, holen Kennzahlen oder räumen hinterher auf."
         />
 
         <div class="section__body">
@@ -362,8 +362,7 @@ useSeoMeta({
             </button>
 
             <figcaption class="vitrine__caption">
-              So sieht das Szenario „Promotion erstellen“ wirklich aus. 115 Module in einer
-              Kette, verdrahtet ohne eine Zeile Code.
+              Dasselbe Szenario in echt: 115 Module, verdrahtet ohne eine Zeile Code.
             </figcaption>
           </figure>
 
