@@ -19,7 +19,7 @@ const CACHE_TTLS: Record<string, number> = {
  *
  * Kosten: rund zwei WordPress-Anfragen pro Beitrag und Stunde. Der SSR-Pfad ist durch
  * ISR gedeckt, der Client-Pfad durch den CDN-Cache auf `/api/blog/**`.
- * Herleitung: docs/blog-kommentare.md.
+ * Herleitung: docs/revalidierung.md.
  */
 
 const TOGGLE_KEY = 'wp-cache:enabled'

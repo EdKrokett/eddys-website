@@ -84,83 +84,16 @@ Was ein Schreibpfad zusätzlich bräuchte, siehe `docs/known-debt.md` KD-005.
 
 ## Wann ein neuer Kommentar auf der Seite erscheint (16.09.2026)
 
-Ohne Zutun: **frühestens nach einer Stunde, praktisch deutlich später.** Gemessen am
-16.09.2026 an `/blog/projekt-marathon-mit-60-warum-es-in-bremen-der-halbe-wurde`:
+Sofort — weil WordPress die Änderung aktiv meldet und die Beitragsseite daraufhin neu
+gebaut wird. Ohne diesen Weg dauerte es bis zu 19,5 Stunden, gemessen am 16.09.2026.
 
-```
-age: 70253          # 19,5 Stunden alt
-x-vercel-cache: STALE
-```
+Zwei Dinge, die den Kommentarbereich davon betreffen:
 
-Die Seite zeigte 5 Kommentare, die API lieferte 6. Grund ist die Kette aus
-`docs/performance.md`, Schicht 4: `'/blog/**': { isr: 3600 }` hält das HTML eine Stunde
-als frisch, danach liefert Vercel weiter die alte Fassung aus und regeneriert erst im
-Hintergrund. Der Besucher, der die Regeneration anstößt, sieht noch die alte Zahl; erst
-der nächste sieht die neue. ISR arbeitet **auf Abruf, nicht nach Uhrzeit** — ohne
-Besucher passiert gar nichts.
+- Kommentare laufen bewusst **nicht** durch `withWpCache`. Ein Eintrag dort hätte die
+  Revalidierung ausgehebelt und den alten Stand für eine weitere ISR-Periode
+  festgeschrieben.
+- Die Payload-Datei eines Beitrags (`/blog/<slug>/_payload.json`) enthält den kompletten
+  Kommentarbaum und ist ein eigener Cache-Eintrag. Sie muss mitrevalidiert werden, sonst
+  bleibt sie für jeden veraltet, der aus der Übersicht auf den Beitrag klickt.
 
-### Die Lösung: WordPress meldet sich, statt dass die Seite wartet
-
-`server/api/revalidate-comments.post.ts` nimmt einen Webhook aus WordPress entgegen und
-lässt genau die betroffene Beitragsseite sofort neu bauen. Ablauf:
-
-1. WordPress feuert bei `comment_post` und `transition_comment_status`.
-2. Der Handler prüft das Shared Secret, holt sich den Slug **selbst** bei WordPress
-   (siehe unten) und schickt einen `GET` auf `/blog/<slug>` mit dem Header
-   `x-prerender-revalidate: <bypassToken>`.
-3. Vercel verwirft den Edge-Eintrag und rendert frisch. Der nächste Besucher, egal wann
-   er kommt, sieht die richtige Zahl.
-
-Der `bypassToken` wird über `nitro.vercel.config.bypassToken` in `nuxt.config.ts` gesetzt
-und stammt aus `VERCEL_BYPASS_TOKEN`. Die Variable muss zur **Build-Zeit** in Vercel
-gesetzt sein — sie landet in `.vercel/output/config.json`, nicht erst zur Laufzeit.
-
-### Warum der Webhook auf `comment_post` hört und nicht nur auf die Freigabe
-
-Naheliegend wäre, nur bei der Moderations-Freigabe zu revalidieren. Das würde die
-Mehrheit der Fälle verpassen. Stand 16.09.2026 ist die Moderationswarteschlange leer
-(`x-wp-total: 0` auf `?status=hold`), und bei dem oben genannten Beitrag stehen alle
-sechs Kommentare auf `approved`, ohne dass je ein Freigabeklick nötig war:
-
-| Grund | Beispiel |
-|---|---|
-| Eddys eigene Antworten, eingeloggt | 3 von 6 Kommentaren |
-| Stammleser mit früher freigegebenem Kommentar | Martin, Reinhard |
-
-`transition_comment_status` deckt zusätzlich Löschen und Spam-Markieren ab — auch dann
-muss die Seite neu gebaut werden, sonst bleibt ein entfernter Kommentar sichtbar.
-
-### Warum Kommentare nicht mehr durch `withWpCache` laufen
-
-Vorher lag auf `blog-comments` eine TTL von 900 Sekunden. Diese Schicht **hätte den
-Webhook unzuverlässig gemacht**, und zwar nicht nur verzögert:
-
-Der Revalidate-Render ruft serverseitig `/api/blog/[slug]/comments` auf. Trifft er eine
-Function-Instanz mit einem noch gültigen Eintrag, baut Vercel die Seite mit der alten
-Kommentarliste neu — und diese falsche Fassung liegt danach wieder eine volle Stunde als
-frisch am Edge. Der Webhook hätte den Zustand zementiert statt behoben.
-
-Ein `delete` im Handler löst das **nicht**: Der Cache ist modul-global, lebt also pro
-Function-Instanz. Der Handler löscht in der Instanz, die den Webhook bearbeitet; der
-Seiten-Render kann in einer anderen laufen. Der `storage`-Mount scheidet als geteilte
-Schicht aus, weil das Vercel-Filesystem read-only ist (siehe `error-catalog.md`).
-
-Der Verzicht kostet fast nichts: Der SSR-Pfad ist durch ISR gedeckt, der Client-Pfad
-durch den CDN-Cache auf `/api/blog/**` (`s-maxage=3600`). Übrig bleiben rund zwei
-WordPress-Anfragen pro Beitrag und Stunde. Dafür wirkt der Webhook garantiert.
-
-**Regel:** Was per Webhook sofort stimmen soll, darf nicht hinter einem instanzlokalen
-Cache liegen.
-
-### Der Slug kommt aus WordPress, nicht aus dem Webhook
-
-Der Handler akzeptiert nur `postId` als positive Ganzzahl und fragt den Slug damit bei
-WordPress ab. Ein aus dem Body übernommener Slug wäre ein Fremdwert, der direkt in eine
-URL wandert. Nebeneffekt: Der Handler merkt dabei, ob der Beitrag überhaupt `publish`
-ist, und antwortet sonst mit 409, statt eine nicht existierende Seite zu revalidieren.
-
-### WordPress-Seite
-
-Das Gegenstück liegt in `wordpress/eddy-comment-revalidate/` und wird als Plugin im
-WP-Backend hochgeladen. Endpoint und Secret trägt man dort unter *Einstellungen →
-Kommentar-Webhook* ein; nichts davon steht im Code.
+Vollständige Herleitung, Auslöser und Fehlerbilder: `docs/revalidierung.md`.

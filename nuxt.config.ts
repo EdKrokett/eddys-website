@@ -121,7 +121,7 @@ export default defineNuxtConfig({
     /**
      * Schaltet On-Demand-Revalidierung für die ISR-Routen frei: Ein GET mit dem Header
      * `x-prerender-revalidate: <bypassToken>` verwirft den Edge-Eintrag und rendert neu.
-     * Genutzt vom WordPress-Kommentar-Webhook, siehe docs/blog-kommentare.md.
+     * Genutzt vom WordPress-Inhalts-Webhook, siehe docs/revalidierung.md.
      *
      * WICHTIG: Der Wert wird zur BUILD-Zeit gelesen und landet in
      * `.vercel/output/config.json`. VERCEL_BYPASS_TOKEN muss in Vercel deshalb auch für

@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Kommentar-Webhook für eduard-andrae.de
- * Description: Meldet neue, freigegebene, gelöschte und als Spam markierte Kommentare an die Nuxt-Seite, damit die Beitragsseite dort sofort neu gebaut wird statt auf den ISR-Ablauf zu warten.
- * Version:     1.0.0
+ * Plugin Name: Inhalts-Webhook für eduard-andrae.de
+ * Description: Meldet Änderungen an Kommentaren UND Beiträgen an die Nuxt-Seite, damit die betroffenen Seiten dort sofort neu gebaut werden statt auf den ISR-Ablauf zu warten.
+ * Version:     1.1.0
  * Author:      Eduard Andrae
  * License:     GPL-2.0-or-later
  *
- * Gegenstück: server/api/revalidate-comments.post.ts im Repo eduard-andrae-website.
- * Hintergrund und Begründung: docs/blog-kommentare.md dort.
+ * Gegenstück: server/api/revalidate.post.ts im Repo eduard-andrae-website.
+ * Hintergrund und Begründung: docs/revalidierung.md dort.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -110,46 +110,142 @@ function eddy_cr_is_plain_comment( $type ) {
 }
 
 /* -------------------------------------------------------------------------
+ * Auslöser: Beiträge
+ * ---------------------------------------------------------------------- */
+
+add_action( 'transition_post_status', 'eddy_cr_on_post_status_change', 10, 3 );
+
+/**
+ * Ein Beitrag wurde veröffentlicht, bearbeitet, zurückgezogen oder in den Papierkorb gelegt.
+ *
+ * transition_post_status feuert auch bei publish → publish, deckt also die reine
+ * Bearbeitung eines veröffentlichten Beitrags mit ab.
+ *
+ * @param string  $new_status Neuer Status.
+ * @param string  $old_status Bisheriger Status.
+ * @param WP_Post $post       Der Beitrag.
+ */
+function eddy_cr_on_post_status_change( $new_status, $old_status, $post ) {
+	if ( ! $post instanceof WP_Post || 'post' !== $post->post_type ) {
+		return;
+	}
+
+	// Revisionen und Autosaves sind eigene Datensätze. Ohne diese Prüfung feuerte der
+	// Webhook bei jedem Zwischenspeichern im Editor.
+	if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
+		return;
+	}
+
+	// Ein frisch geöffneter, leerer Editor legt einen auto-draft an. Der hat nie eine
+	// öffentliche Seite gehabt und bekommt auch keine.
+	if ( 'auto-draft' === $new_status || 'auto-draft' === $old_status ) {
+		return;
+	}
+
+	// Relevant ist nur, wenn ein Beitrag öffentlich WIRD, es BLEIBT (Bearbeitung) oder es
+	// nicht mehr IST. Ein Entwurf, der Entwurf bleibt, ändert an der Webseite nichts.
+	if ( 'publish' !== $new_status && 'publish' !== $old_status ) {
+		return;
+	}
+
+	// Der Slug ist hier noch sauber: wp_trash_post hängt das Suffix „__trashed" erst NACH
+	// dem Statuswechsel an.
+	eddy_cr_queue( (int) $post->ID, 'post', (string) $post->post_name );
+}
+
+add_action( 'deleted_post', 'eddy_cr_on_post_deleted', 10, 2 );
+
+/**
+ * Ein Beitrag wurde endgültig gelöscht.
+ *
+ * Bewusst NUR für Beiträge, die dabei noch auf „publish" standen — also direkt gelöscht,
+ * ohne Umweg über den Papierkorb. Wer über den Papierkorb geht, hat den Webhook schon beim
+ * Statuswechsel ausgelöst, und sein Slug trägt hier bereits das Suffix „__trashed", wäre
+ * als Pfad also ohnehin falsch.
+ *
+ * @param int     $post_id Beitrag.
+ * @param WP_Post $post    Der gelöschte Beitrag.
+ */
+function eddy_cr_on_post_deleted( $post_id, $post ) {
+	if ( ! $post instanceof WP_Post || 'post' !== $post->post_type ) {
+		return;
+	}
+
+	if ( 'publish' !== $post->post_status ) {
+		return;
+	}
+
+	eddy_cr_queue( (int) $post_id, 'post', (string) $post->post_name );
+}
+
+/* -------------------------------------------------------------------------
  * Versand
  * ---------------------------------------------------------------------- */
 
 /**
  * Plant den Webhook, statt ihn sofort zu senden.
  *
- * Zwei Gründe: Der Kommentator soll beim Absenden nicht auf einen fremden Server warten,
- * und wp_schedule_single_event plant denselben Hook mit denselben Argumenten innerhalb
- * von zehn Minuten nur einmal ein. Ein Kommentar, der gleich zwei der obigen Haken
- * auslöst, erzeugt dadurch trotzdem nur einen Aufruf.
+ * Zwei Gründe: Wer gerade kommentiert oder einen Beitrag speichert, soll nicht auf einen
+ * fremden Server warten, und wp_schedule_single_event plant denselben Hook mit denselben
+ * Argumenten innerhalb von zehn Minuten nur einmal ein. Ein Vorgang, der gleich zwei der
+ * obigen Haken auslöst, erzeugt dadurch trotzdem nur einen Aufruf.
  *
- * @param int $post_id Beitrag, dessen Seite neu gebaut werden soll.
+ * @param int    $post_id Beitrag, dessen Seite neu gebaut werden soll.
+ * @param string $scope   'comment' = nur die Beitragsseite, 'post' = zusätzlich die Übersicht.
+ * @param string $slug    Slug des Beitrags. Wird immer mitgeschickt, weil die WordPress-API
+ *                        einen gelöschten oder zurückgezogenen Beitrag nicht mehr herausgibt
+ *                        (404 bzw. 401) — dann ist das hier die einzige Quelle für den Pfad,
+ *                        der aus dem Cache verschwinden muss.
  */
-function eddy_cr_queue( $post_id ) {
+function eddy_cr_queue( $post_id, $scope = 'comment', $slug = '' ) {
 	$post_id = (int) $post_id;
 
 	if ( $post_id <= 0 ) {
 		return;
 	}
 
-	$args = array( $post_id );
+	if ( '' === $slug ) {
+		$slug = eddy_cr_slug_of( $post_id );
+	}
+
+	$args = array( $post_id, $scope, $slug );
 
 	if ( ! wp_next_scheduled( EDDY_CR_EVENT, $args ) ) {
 		wp_schedule_single_event( time() + 5, EDDY_CR_EVENT, $args );
 	}
 }
 
-add_action( EDDY_CR_EVENT, 'eddy_cr_send', 10, 1 );
+/**
+ * Liest den Slug eines Beitrags direkt aus der Datenbank.
+ *
+ * get_post_field statt get_permalink: Gebraucht wird nur `post_name`, und der bleibt auch
+ * dann lesbar, wenn der Beitrag im Papierkorb liegt.
+ *
+ * @param int $post_id Beitrag.
+ * @return string Slug oder leerer String.
+ */
+function eddy_cr_slug_of( $post_id ) {
+	$slug = get_post_field( 'post_name', (int) $post_id );
+
+	return is_string( $slug ) ? $slug : '';
+}
+
+add_action( EDDY_CR_EVENT, 'eddy_cr_send', 10, 3 );
 
 /**
  * Schickt den Webhook an die Nuxt-Seite und merkt sich das Ergebnis für die
  * Einstellungsseite.
  *
- * Übertragen wird nur die Post-ID. Die Gegenstelle holt sich den Slug selbst bei
- * WordPress, damit kein Fremdstring in die URL wandert, die sie anschließend aufruft.
+ * Die Gegenstelle holt sich den Slug bevorzugt selbst bei WordPress, damit kein
+ * Fremdstring in die URL wandert, die sie anschließend aufruft. Der hier mitgeschickte
+ * Slug ist nur die Rückfallebene für Beiträge, die es dort nicht mehr gibt.
  *
- * @param int $post_id Beitrag.
+ * @param int    $post_id Beitrag.
+ * @param string $scope   'comment' oder 'post'.
+ * @param string $slug    Slug als Rückfallebene.
  * @return bool Ob der Aufruf erfolgreich war.
  */
-function eddy_cr_send( $post_id ) {
+function eddy_cr_send( $post_id, $scope = 'comment', $slug = '' ) {
 	$endpoint = trim( (string) get_option( EDDY_CR_OPTION_ENDPOINT, '' ) );
 	$secret   = (string) get_option( EDDY_CR_OPTION_SECRET, '' );
 
@@ -167,7 +263,13 @@ function eddy_cr_send( $post_id ) {
 				'Content-Type'        => 'application/json',
 				'X-Revalidate-Secret' => $secret,
 			),
-			'body'     => wp_json_encode( array( 'postId' => (int) $post_id ) ),
+			'body'     => wp_json_encode(
+				array(
+					'postId' => (int) $post_id,
+					'scope'  => 'post' === $scope ? 'post' : 'comment',
+					'slug'   => (string) $slug,
+				)
+			),
 		)
 	);
 
@@ -210,12 +312,34 @@ function eddy_cr_remember( $post_id, $code, $message ) {
  * lassen, ohne dass ein Geheimnis in einer Datei landet.
  * ---------------------------------------------------------------------- */
 
+add_action( 'admin_init', 'eddy_cr_migrate_endpoint' );
+
+/**
+ * Übernimmt die Adresse aus Version 1.0.
+ *
+ * Dort hieß die Gegenstelle noch `/api/revalidate-comments`, weil sie nur Kommentare
+ * kannte. Ohne diese Umstellung liefe der Webhook nach dem Update auf einen 404, und zwar
+ * still — gemerkt hätte man es erst am ausbleibenden Ergebnis.
+ */
+function eddy_cr_migrate_endpoint() {
+	$endpoint = (string) get_option( EDDY_CR_OPTION_ENDPOINT, '' );
+
+	if ( '' === $endpoint || false === strpos( $endpoint, '/api/revalidate-comments' ) ) {
+		return;
+	}
+
+	update_option(
+		EDDY_CR_OPTION_ENDPOINT,
+		str_replace( '/api/revalidate-comments', '/api/revalidate', $endpoint )
+	);
+}
+
 add_action( 'admin_menu', 'eddy_cr_add_settings_page' );
 
 function eddy_cr_add_settings_page() {
 	add_options_page(
-		'Kommentar-Webhook',
-		'Kommentar-Webhook',
+		'Inhalts-Webhook',
+		'Inhalts-Webhook',
 		'manage_options',
 		'eddy-comment-revalidate',
 		'eddy_cr_render_settings_page'
@@ -301,14 +425,22 @@ function eddy_cr_render_settings_page() {
 	$last = get_option( EDDY_CR_OPTION_LAST, array() );
 	?>
 	<div class="wrap">
-		<h1>Kommentar-Webhook</h1>
+		<h1>Inhalts-Webhook</h1>
 
 		<p>
-			Meldet jeden neuen, freigegebenen oder gelöschten Kommentar an
-			eduard-andrae.de, damit die Beitragsseite dort sofort neu gebaut wird.
-			Ohne diese Meldung dauert es bis zu mehrere Stunden, bis eine neue
-			Kommentarzahl sichtbar wird.
+			Meldet Änderungen an eduard-andrae.de, damit die betroffenen Seiten dort sofort
+			neu gebaut werden. Ohne diese Meldung dauert es bis zu mehrere Stunden, bis eine
+			Änderung sichtbar wird.
 		</p>
+
+		<p>Gemeldet wird:</p>
+
+		<ul style="list-style:disc;margin-left:1.5rem">
+			<li>Ein Kommentar kommt dazu, wird freigegeben, gelöscht oder als Spam markiert
+				— dann wird die Seite des Beitrags neu gebaut.</li>
+			<li>Ein Beitrag wird veröffentlicht, bearbeitet, zurückgezogen oder gelöscht
+				— dann zusätzlich die Beitragsübersicht.</li>
+		</ul>
 
 		<form method="post" action="options.php">
 			<?php settings_fields( 'eddy_cr_settings' ); ?>
@@ -323,7 +455,7 @@ function eddy_cr_render_settings_page() {
 							name="<?php echo esc_attr( EDDY_CR_OPTION_ENDPOINT ); ?>"
 							value="<?php echo esc_attr( get_option( EDDY_CR_OPTION_ENDPOINT, '' ) ); ?>"
 							class="regular-text"
-							placeholder="https://eduard-andrae.de/api/revalidate-comments"
+							placeholder="https://eduard-andrae.de/api/revalidate"
 						>
 						<p class="description">Vollständige https-Adresse der Revalidate-Route.</p>
 					</td>
@@ -403,7 +535,7 @@ function eddy_cr_render_settings_page() {
 
 		<p>
 			Schickt sofort einen Webhook für den zuletzt veröffentlichten Beitrag und zeigt
-			das Ergebnis oben an. Ändert nichts an den Kommentaren.
+			das Ergebnis oben an. Ändert nichts an den Inhalten.
 		</p>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -435,7 +567,9 @@ function eddy_cr_handle_test() {
 	if ( empty( $posts ) ) {
 		eddy_cr_remember( 0, 0, 'Kein veröffentlichter Beitrag zum Testen gefunden.' );
 	} else {
-		eddy_cr_send( (int) $posts[0]->ID );
+		// Bewusst mit Geltungsbereich 'post': Das prüft alle vier Pfade auf einmal
+		// (Beitragsseite, Übersicht und beider Payload-Dateien), nicht nur zwei.
+		eddy_cr_send( (int) $posts[0]->ID, 'post', (string) $posts[0]->post_name );
 	}
 
 	wp_safe_redirect( admin_url( 'options-general.php?page=eddy-comment-revalidate' ) );

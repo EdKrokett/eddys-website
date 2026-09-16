@@ -839,3 +839,46 @@ er unsichtbar war: nicht im Normalbetrieb, sondern im Reparaturpfad.
 
 **→ AUDIT-PERSPEKTIVE:** „Was steht zwischen Auslöser und Ergebnis?" in
 `docs/audit-perspectives.md`.
+
+## Die Seite revalidiert, die Payload-Datei bleibt alt
+
+**Gefunden:** 16.09.2026, beim Erweitern des Webhooks auf Beiträge — der Fehler steckte
+im Kommentar-Webhook, der wenige Stunden vorher als fertig galt.
+
+**FALSCH:**
+```ts
+const path = `/blog/${encodeURIComponent(post.slug)}`
+await fetch(`${base}${path}`, { headers: { 'x-prerender-revalidate': token } })
+```
+
+**RICHTIG:**
+```ts
+// server/utils/revalidate-paths.ts
+export function postPaths(slug: string): string[] {
+  const encoded = encodeURIComponent(slug)
+  return [`/blog/${encoded}`, `/blog/${encoded}/_payload.json`]
+}
+```
+
+**WARUM:** Eine Nuxt-Seite liegt am Edge in zwei Fassungen. Das HTML bekommt, wer die URL
+direkt aufruft; `<pfad>/_payload.json` bekommt, wer innerhalb der Seite dorthin klickt.
+Beide sind eigene Cache-Einträge unter derselben `isr`-Regel, und beide enthalten dieselben
+Daten — nachgeprüft:
+
+```bash
+curl -s "https://eduard-andrae.de/blog/<slug>/_payload.json" | grep -c "Martin"
+# → enthält den kompletten Kommentarbaum samt Autorennamen
+```
+
+Wer nur das HTML revalidiert, repariert die Seite für Direktaufrufe und lässt sie für jeden
+Klick aus der Übersicht veraltet. Das Tückische ist die Prüfmethode: Wer den Fix
+kontrollieren will, ruft die URL direkt auf — und sieht genau die eine Fassung, die stimmt.
+Der Fehler überlebt seine eigene Verifikation.
+
+Gefunden wurde er nur, weil beim Erweitern auf Beiträge die Frage aufkam, welche Pfade
+Vercel überhaupt einzeln cacht. Die Antwort stand im Build-Verzeichnis:
+`.vercel/output/functions/` listet für `/blog` einen eigenen Eintrag
+`blog/_payload.json-isr.prerender-config.json`.
+
+**→ AUDIT-PERSPEKTIVE:** „In wie vielen Fassungen existiert das?" in
+`docs/audit-perspectives.md`.

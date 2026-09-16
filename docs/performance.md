@@ -263,8 +263,8 @@ Stunden alte Seite, `x-vercel-cache: STALE`.
 
 Für Inhalte, die sich unabhängig vom Deploy ändern, ist die Antwort deshalb nicht eine
 kürzere TTL, sondern On-Demand-Revalidierung: `x-prerender-revalidate` mit dem
-`bypassToken` aus `nitro.vercel.config`. Ausgeführt für Blog-Kommentare, komplette
-Herleitung in `docs/blog-kommentare.md`.
+`bypassToken` aus `nitro.vercel.config`. Ausgeführt für Kommentare und Beiträge,
+komplette Herleitung in `docs/revalidierung.md`.
 
 **Folgeregel, die dort teuer gelernt wurde:** Ein per Webhook revalidierter Pfad darf
 keinen instanzlokalen `withWpCache`-Eintrag im SSR-Pfad haben. Sonst baut die

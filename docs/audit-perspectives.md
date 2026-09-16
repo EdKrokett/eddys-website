@@ -310,3 +310,20 @@ Neuladen nach dem Speichern.
   ignorierter Header, ein Cache-Treffer: alles drei antwortet mit 200. Prüfmethode: einen
   Wert aus dem Ergebnis zurückgeben, an dem man den Unterschied sieht (`x-vercel-cache`,
   Zeitstempel, Anzahl) — nicht nur den Status.
+
+## In wie vielen Fassungen existiert das?
+
+Aus der vergessenen Payload-Datei vom 16.09.2026 (`docs/error-catalog.md`). Anzuwenden,
+wenn eine Ressource gezielt geleert, ersetzt oder neu gebaut wird.
+
+- Existiert das, was ich anfasse, an mehr als einer Stelle? Eine Nuxt-Seite liegt als HTML
+  **und** als `_payload.json` am Edge, ein Bild in mehreren Größen, ein Text in mehreren
+  Sprachen. Prüfmethode: nachsehen, was der Build tatsächlich erzeugt hat — bei Vercel
+  listet `.vercel/output/functions/` jeden einzeln gecachten Pfad.
+- Auf welchem Weg erreicht ein Besucher die jeweilige Fassung? Wenn zwei Wege zu
+  unterschiedlichen Dateien führen (Direktaufruf gegen Klick im Menü), müssen beide
+  behandelt werden.
+- **Prüft mein Test dieselbe Fassung, die der Fehler betrifft?** Das ist die eigentliche
+  Falle: Ein Fix, der nur das HTML erneuert, sieht bei jeder Kontrolle per `curl` auf die
+  URL richtig aus. Der Fehler überlebt seine eigene Verifikation. Prüfmethode: den Weg
+  nachstellen, den ein Besucher nimmt, nicht den bequemsten.
