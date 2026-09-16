@@ -1,10 +1,26 @@
 const CACHE_TTLS: Record<string, number> = {
   'blog-list': 1800,
   'blog-post': 3600,
-  // Kommentare ändern sich seltener als Beiträge, aber ein neuer Kommentar soll
-  // nicht stundenlang unsichtbar bleiben.
-  'blog-comments': 900,
 }
+
+/**
+ * KEIN Eintrag für Kommentare — das ist eine bewusste Entscheidung, keine Lücke.
+ *
+ * Kommentare werden per Webhook aus WordPress sofort revalidiert
+ * (server/api/revalidate-comments.post.ts). Ein Eintrag hier würde das aushebeln: Der
+ * Revalidate-Render ruft `/api/blog/[slug]/comments` serverseitig auf, träfe den noch
+ * gültigen Eintrag und baute die Seite mit der ALTEN Kommentarliste neu — die dann
+ * wieder eine volle ISR-Periode am Edge liegt. Der Webhook hätte den falschen Stand
+ * zementiert statt behoben.
+ *
+ * Ein gezieltes Löschen im Webhook-Handler löst das nicht: `memoryCache` ist
+ * modul-global, lebt also pro Function-Instanz. Gelöscht würde in der Instanz, die den
+ * Webhook bearbeitet; rendern kann eine andere.
+ *
+ * Kosten: rund zwei WordPress-Anfragen pro Beitrag und Stunde. Der SSR-Pfad ist durch
+ * ISR gedeckt, der Client-Pfad durch den CDN-Cache auf `/api/blog/**`.
+ * Herleitung: docs/blog-kommentare.md.
+ */
 
 const TOGGLE_KEY = 'wp-cache:enabled'
 const DATA_PREFIX = 'wp-cache:data:'

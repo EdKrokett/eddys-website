@@ -25,6 +25,29 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    /**
+     * Shared Secret, mit dem sich das WordPress-Plugin am Kommentar-Webhook ausweist
+     * (server/api/revalidate-comments.post.ts). Leer = der Endpunkt weist JEDE Anfrage
+     * ab; ein vergessener Wert öffnet ihn also nicht, er schließt ihn.
+     * Gesetzt über NUXT_REVALIDATE_SECRET.
+     */
+    revalidateSecret: '',
+
+    /**
+     * Derselbe Wert wie `nitro.vercel.config.bypassToken` unten — nur wird er dort zur
+     * BUILD-Zeit in die Vercel-Konfiguration geschrieben und hier zur LAUFZEIT gelesen,
+     * um ihn als `x-prerender-revalidate`-Header mitzuschicken. Beide Stellen speisen
+     * sich deshalb aus derselben Variable VERCEL_BYPASS_TOKEN.
+     */
+    vercelBypassToken: process.env.VERCEL_BYPASS_TOKEN ?? '',
+
+    /**
+     * Basis-URL, die der Webhook-Handler für den Revalidate-Aufruf verwendet. Bewusst
+     * fest verdrahtet statt aus dem Host-Header der Anfrage gelesen: der Host ist ein
+     * Fremdwert, und der Server ruft diese URL selbst auf.
+     */
+    revalidateBaseUrl: 'https://eduard-andrae.de',
+
     public: {
       // Via NUXT_PUBLIC_WORDPRESS_URL überschreibbar (z.B. für einen Staging-WP-Klon).
       wordpressUrl: 'https://blog.eduard-andrae.de',
@@ -94,6 +117,23 @@ export default defineNuxtConfig({
 
   nitro: {
     compressPublicAssets: { brotli: true, gzip: true },
+
+    /**
+     * Schaltet On-Demand-Revalidierung für die ISR-Routen frei: Ein GET mit dem Header
+     * `x-prerender-revalidate: <bypassToken>` verwirft den Edge-Eintrag und rendert neu.
+     * Genutzt vom WordPress-Kommentar-Webhook, siehe docs/blog-kommentare.md.
+     *
+     * WICHTIG: Der Wert wird zur BUILD-Zeit gelesen und landet in
+     * `.vercel/output/config.json`. VERCEL_BYPASS_TOKEN muss in Vercel deshalb auch für
+     * den Build gesetzt sein, nicht nur zur Laufzeit — fehlt er dort, ist die
+     * Revalidierung wirkungslos, obwohl der Webhook Erfolg meldet.
+     */
+    vercel: {
+      config: {
+        bypassToken: process.env.VERCEL_BYPASS_TOKEN,
+      },
+    },
+
     // Der TS2589-Workaround aus tb26-code (nitro.hooks['types:extend'], siehe dortige
     // docs/known-debt.md KD-004) fehlt hier bewusst: er greift erst ab ~270 typisierten
     // Server-Routen. Für dieses Ein-Seiten-Projekt kommt es dahin nicht — bei Bedarf

@@ -253,6 +253,24 @@ Client sofort anders rendern als das gecachte HTML (Hydration-Mismatch).
 **Regel für neue Seiten:** Eine Seite mit `isr`/`swr` darf im SSR-Pfad keine
 Query-Parameter lesen. Wer das braucht, liest sie nach der Hydration oder verzichtet auf ISR.
 
+### Kehrseite: ISR aktualisiert auf Abruf, nicht nach Uhrzeit (16.09.2026)
+
+Was die Tabelle oben an Geschwindigkeit gewinnt, kostet Aktualität. Nach Ablauf der
+`expiration` liefert Vercel weiter die alte Fassung aus und regeneriert im Hintergrund —
+der auslösende Besucher sieht noch das Alte, erst der nächste das Neue. Ohne Besucher
+passiert überhaupt nichts. Gemessen an einem Beitrag mit frischen Kommentaren: 19,5
+Stunden alte Seite, `x-vercel-cache: STALE`.
+
+Für Inhalte, die sich unabhängig vom Deploy ändern, ist die Antwort deshalb nicht eine
+kürzere TTL, sondern On-Demand-Revalidierung: `x-prerender-revalidate` mit dem
+`bypassToken` aus `nitro.vercel.config`. Ausgeführt für Blog-Kommentare, komplette
+Herleitung in `docs/blog-kommentare.md`.
+
+**Folgeregel, die dort teuer gelernt wurde:** Ein per Webhook revalidierter Pfad darf
+keinen instanzlokalen `withWpCache`-Eintrag im SSR-Pfad haben. Sonst baut die
+Revalidierung die Seite mit alten Daten neu und schreibt den falschen Stand für eine
+weitere ISR-Periode fest.
+
 ## Schicht 5: Bild-Transformationen bei Vercel (11.09.2026)
 
 Am 10.09.2026 meldete Vercel, dass 75 % des Hobby-Kontingents für Image-Optimization-

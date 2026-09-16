@@ -289,3 +289,24 @@ mit Cache-Buster lieferte bereits 200, der ohne noch 301.
 Nicht geändert wurde der 301 selbst: Für die echten Alt-URLs aus 20 Jahren WordPress ist er
 richtig, und ein 302 würde deren Ranking-Übertragung verschenken. Der Preis ist dieses
 Zeitfenster beim Anlegen jeder neuen Seite.
+
+## Was steht zwischen Auslöser und Ergebnis?
+
+Aus dem Kommentar-Webhook vom 16.09.2026 (`docs/error-catalog.md`). Anzuwenden auf jeden
+Mechanismus, der etwas „sofort" aktualisieren soll: Webhook, Purge, manueller Refresh-Knopf,
+Neuladen nach dem Speichern.
+
+- Welche Caches liegen auf dem Weg zwischen dem Auslöser und dem, was der Besucher sieht?
+  Jeden einzeln benennen, nicht nur den offensichtlichen. Prüfmethode: den Pfad rückwärts
+  abgehen — Browser, CDN, ISR/Prerender, In-Memory, Upstream.
+- Für jeden dieser Caches: Erreicht die Invalidierung ihn wirklich, oder nur die Instanz,
+  in der sie zufällig läuft? Alles, was modul-global im Speicher liegt, gilt pro Prozess.
+  Ein `delete` auf so einem Cache ist eine Wette, keine Garantie.
+- Was passiert im Fehlerfall — bleibt der alte Stand einfach stehen, oder wird er neu
+  festgeschrieben? Ein Refresh-Mechanismus, der alte Daten in einen frischen Cache-Eintrag
+  schreibt, macht das Problem länger statt kürzer. Das ist der schlimmere Ausgang und der
+  unauffälligere.
+- Meldet der Mechanismus Erfolg, obwohl nichts passiert ist? Ein fehlender Token, ein
+  ignorierter Header, ein Cache-Treffer: alles drei antwortet mit 200. Prüfmethode: einen
+  Wert aus dem Ergebnis zurückgeben, an dem man den Unterschied sieht (`x-vercel-cache`,
+  Zeitstempel, Anzahl) — nicht nur den Status.

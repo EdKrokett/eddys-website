@@ -22,6 +22,10 @@ const WP_FIELDS = ['id', 'parent', 'author', 'author_name', 'author_url', 'date'
  * 1. Das Kommentar-HTML wird zu reinem Text abgebaut (`commentHtmlToParagraphs`) —
  *    Kommentare sind Fremdtext, kein `v-html`. Siehe docs/blog-kommentare.md.
  * 2. Der Antwortbaum wird gebaut, damit der Client nur noch rendert.
+ *
+ * Bewusst OHNE `withWpCache`: Diese Antwort muss der WordPress-Webhook
+ * (server/api/revalidate-comments.post.ts) sofort frisch bekommen, sonst baut die
+ * Revalidierung die Seite mit alten Kommentaren neu. Begründung in wpCache.ts.
  */
 export default defineEventHandler(async (event): Promise<WordPressCommentsResponse> => {
   const slug = getRouterParam(event, 'slug')
@@ -33,35 +37,33 @@ export default defineEventHandler(async (event): Promise<WordPressCommentsRespon
   // Holt die Post-ID aus dem Cache-Eintrag, den die Detailseite ohnehin füllt.
   const post = await fetchWpPostBySlug(slug)
 
-  return withWpCache(String(post.id), 'blog-comments', async () => {
-    const config = useRuntimeConfig()
-    const wpUrl = config.public.wordpressUrl
+  const config = useRuntimeConfig()
+  const wpUrl = config.public.wordpressUrl
 
-    const response = await backendFetch<WpComment[]>(
-      `${wpUrl}/wp-json/wp/v2/comments`
-      + `?post=${post.id}&per_page=${MAX_COMMENTS}&order=asc&orderby=date&_fields=${WP_FIELDS}`,
-    )
+  const response = await backendFetch<WpComment[]>(
+    `${wpUrl}/wp-json/wp/v2/comments`
+    + `?post=${post.id}&per_page=${MAX_COMMENTS}&order=asc&orderby=date&_fields=${WP_FIELDS}`,
+  )
 
-    const comments: WordPressComment[] = (response ?? []).map(raw => ({
-      id: raw.id,
-      parent: raw.parent ?? 0,
-      // Anonyme Kommentare kommen mit leerem Namen vor (geprüft: Kommentar 125111).
-      authorName: decodeHtmlEntities(raw.author_name).trim() || 'Anonym',
-      authorUrl: safeAuthorUrl(raw.author_url),
-      date: raw.date,
-      paragraphs: commentHtmlToParagraphs(raw.content?.rendered),
-      // Nur der nachweislich eingeloggte Benutzer, nicht über den Namen geraten.
-      isSiteAuthor: (raw.author ?? 0) !== 0,
-    }))
-      // Ein Kommentar ohne Textinhalt (nur Markup) hätte nichts anzuzeigen.
-      .filter(comment => comment.paragraphs.length > 0)
+  const comments: WordPressComment[] = (response ?? []).map(raw => ({
+    id: raw.id,
+    parent: raw.parent ?? 0,
+    // Anonyme Kommentare kommen mit leerem Namen vor (geprüft: Kommentar 125111).
+    authorName: decodeHtmlEntities(raw.author_name).trim() || 'Anonym',
+    authorUrl: safeAuthorUrl(raw.author_url),
+    date: raw.date,
+    paragraphs: commentHtmlToParagraphs(raw.content?.rendered),
+    // Nur der nachweislich eingeloggte Benutzer, nicht über den Namen geraten.
+    isSiteAuthor: (raw.author ?? 0) !== 0,
+  }))
+    // Ein Kommentar ohne Textinhalt (nur Markup) hätte nichts anzuzeigen.
+    .filter(comment => comment.paragraphs.length > 0)
 
-    return {
-      total: comments.length,
-      truncated: (response?.length ?? 0) >= MAX_COMMENTS,
-      threads: buildCommentThreads(comments),
-    }
-  })
+  return {
+    total: comments.length,
+    truncated: (response?.length ?? 0) >= MAX_COMMENTS,
+    threads: buildCommentThreads(comments),
+  }
 })
 
 /**

@@ -796,3 +796,46 @@ längsten möglichen Fall einzuplanen. Bei SVG-Text gibt es keine Layout-Rückme
 Browser misst nichts nach, was man selbst nicht gerechnet hat.
 
 **→ AUDIT-PERSPEKTIVE:** „Beschnitt statt Überlauf" in `docs/audit-perspectives.md`.
+
+## Ein Cache im SSR-Pfad macht On-Demand-Revalidierung wirkungslos
+
+**Gefunden:** 16.09.2026, beim Bau des WordPress-Kommentar-Webhooks.
+
+**FALSCH:**
+```ts
+// wpCache.ts
+'blog-comments': 900,
+
+// revalidate-comments.post.ts (angedacht)
+memoryCache.delete(`wp-cache:data:blog-comments:${postId}`)
+await fetch(`${base}/blog/${slug}`, { headers: { 'x-prerender-revalidate': token } })
+```
+
+**RICHTIG:**
+```ts
+// wpCache.ts — kein Eintrag für Kommentare, Begründung im Kommentar daneben.
+const CACHE_TTLS: Record<string, number> = {
+  'blog-list': 1800,
+  'blog-post': 3600,
+}
+```
+
+**WARUM:** Zwei Fehler in einem, und der zweite ist der teurere.
+
+Erstens ist `memoryCache` modul-global, lebt also pro Function-Instanz. Der Handler löscht
+in der Instanz, die den Webhook bearbeitet; den anschließenden Seiten-Render kann eine
+andere Instanz übernehmen und ihren eigenen, noch gefüllten Cache benutzen. Ein `delete`
+sieht nach Invalidierung aus, ist aber nur eine Wette auf Instanz-Identität. Der
+`storage`-Mount taugt nicht als geteilte Schicht, weil das Vercel-Filesystem read-only ist.
+
+Zweitens ist die Folge nicht „ein bisschen veraltet", sondern das Gegenteil des
+Gewünschten: Der Revalidate-Render baut die Seite mit den alten Daten neu, und diese
+falsche Fassung liegt danach wieder eine volle ISR-Periode als *frisch* am Edge. Der
+Webhook hätte den falschen Stand für eine weitere Stunde zementiert, statt ihn zu beheben —
+und dabei Erfolg gemeldet.
+
+Die Verlockung war, den Cache „mitzunehmen, schadet ja nicht". Er schadete genau dort, wo
+er unsichtbar war: nicht im Normalbetrieb, sondern im Reparaturpfad.
+
+**→ AUDIT-PERSPEKTIVE:** „Was steht zwischen Auslöser und Ergebnis?" in
+`docs/audit-perspectives.md`.
