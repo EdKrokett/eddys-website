@@ -1,6 +1,6 @@
 # Werkbank: Konzept, Belege und Zahlen
 
-Stand 12.09.2026. Beschreibt `app/pages/werkbank.vue` — die Seite über Eddys Arbeit mit KI
+Stand 17.09.2026. Beschreibt `app/pages/werkbank.vue` — die Seite über Eddys Arbeit mit KI
 und Automatisierung.
 
 ## Warum es diese Seite gibt
@@ -92,6 +92,90 @@ Merge." In `tb26-code/ARCH_RULES.md` steht: „Bevor irgendein Code als 'fertig'
 MUSS das Audit-Skript fehlerfrei durchlaufen. Exit-Code muss 0 sein." Das sind Architekturregeln,
 die scheitern können — mechanisch erzwungen, nicht als Vorsatz formuliert.
 
+#### Der Screenshot der Startseite (seit 17.09.2026)
+
+`public/images/werkbank/trusted-blogs-startseite.jpg`, 2000×1250, aufgenommen am 17.09.2026.
+
+**Warum er in Kapitel 01 steht und nicht woanders.** Das Kapitel ging vorher von Wolffs
+abstrakter Beschreibung („zweiseitiger Marktplatz, Katalog mit Filtern, Buchungsstrecken,
+Honorarlogik") direkt in Balken und Kennzahlen. Das Produkt selbst kam auf der ganzen Seite
+nie vor: 2.562 Commits über etwas, das niemand zu Gesicht bekommt. Mit dem Bild steht die
+Reihenfolge, die die Seite überall sonst hält: jemand anderes beschreibt es, man sieht es,
+dann sagen die Zahlen, was es gekostet hat.
+
+Position **hinter** dem Zitat, nicht davor: Der Lead der Sektion kündigt an „Deshalb hier
+seine Worte" — ein Bild dazwischen bricht den Satz. Und nicht hinter den Kennzahlen, dort
+wäre es eine Illustration zu Commits statt ein Beleg zum Zitat.
+
+**Bildunterschrift fängt einen Widerspruch ab.** Wolff sagt „Das ist kein Webauftritt mit ein
+paar Unterseiten", und darunter steht ein Webauftritt. Deshalb sagt die Unterschrift, dass die
+Startseite der Eingang ist und Katalog, Buchungsstrecken und Abrechnung hinter der Anmeldung
+liegen. Sie trägt außerdem das Aufnahmedatum: Ein Screenshot einer lebenden Website altert
+schneller als jede Zahl auf dieser Seite, und ohne Datum behauptet er einen Stand, den es
+vielleicht nicht mehr gibt.
+
+**Er verlinkt nach außen, statt eine Lightbox zu öffnen** (Eddys Entscheidung, 17.09.2026;
+neuer Tab). Auf einer Seite, die nur aus Belegen besteht, ist „sieh selbst nach" die stärkste
+Form des Links. Ein Make-Szenario mit 115 Modulen ist bei Seitenbreite unlesbar und braucht
+Zoom; eine Website wird durch Zoom nicht aussagekräftiger, ihre Vergrößerung ist das Original.
+Diesen Unterschied trägt das optionale `href` in `WerkbankShot`: gesetzt → Link, fehlt →
+Lightbox.
+
+**So ist er entstanden (reproduzierbar, ohne neue Abhängigkeit im Projekt).** Chrome headless
+über `playwright-core`, installiert außerhalb des Repos, mit dem Browser aus dem
+Playwright-Cache. Wichtig sind drei Dinge:
+
+1. **Cookie-Banner ablehnen, nicht akzeptieren.** Der Banner steht sonst im Bild. „Akzeptieren"
+   würde beim Aufnehmen Google-Ads-Conversion-Tracking auslösen — für einen Screenshot ein
+   unnötiger Treffer in fremden Statistiken.
+2. **Viewport 1600×1000 bei `deviceScaleFactor: 2`**, danach mit `sharp` auf 2000px Breite.
+   Das ist der sichtbare Bereich, so wie man die Seite beim Aufrufen sieht, kein
+   Ganzseiten-Screenshot.
+3. **Als JPEG, nicht als PNG** wie der Make-Screenshot. Die Startseite ist zu großen Teilen ein
+   Fotomosaik; dieselbe Aufnahme wiegt als PNG 2,9 MB und als JPEG (q88, 4:4:4) 415 KB.
+
+Das Skript dazu, außerhalb des Repos in einem Wegwerf-Ordner (`npm i playwright-core`):
+
+```js
+import { chromium } from 'playwright-core'
+
+const browser = await chromium.launch({ channel: 'chrome', headless: true })
+const page = await browser.newPage({
+  viewport: { width: 1600, height: 1000 },
+  deviceScaleFactor: 2,
+})
+
+await page.goto('https://trusted-blogs.com/', { waitUntil: 'networkidle' })
+
+const reject = page.getByRole('button', { name: /ablehnen/i })
+if (await reject.count()) {
+  await reject.first().click()
+  await page.waitForTimeout(1200)
+}
+
+await page.waitForTimeout(2500)          // Lazy-Bilder nachladen lassen
+await page.screenshot({ path: 'roh.png', animations: 'disabled' })
+await browser.close()
+```
+
+Danach im Repo (`sharp` ist schon als devDependency da):
+
+```bash
+node -e "import('sharp').then(({default:s}) => s('roh.png')
+  .resize({ width: 2000 })
+  .jpeg({ quality: 88, chromaSubsampling: '4:4:4' })
+  .toFile('public/images/werkbank/trusted-blogs-startseite.jpg'))"
+```
+
+Beim Ersetzen `width`/`height` in `WERKBANK_STARTSEITE_SHOT` mitziehen, sonst reserviert der
+Browser den falschen Platz und das Layout springt beim Nachladen. Ebenso das Datum in der
+Bildunterschrift in `app/pages/werkbank.vue`.
+
+**Fremde Inhalte im Bild.** Zu sehen sind die Blog-Titelbilder, die zum Aufnahmezeitpunkt auf
+der Startseite lagen. Öffentlich sichtbar und von den Blogs selbst dort eingestellt, aber
+trotzdem fremd: Vor jedem Austausch prüfen, ob auf dem neuen Stand etwas zu sehen ist, das dort
+nicht hingehört. Ein Bild im Repo bleibt in der Git-Historie, auch wenn es später ersetzt wird.
+
 ### 3. Die Make-Szenarien
 
 Quelle: Make-Organisation „Eddys Automatisierungen", Team 1117283, abgerufen 12.09.2026 über die
@@ -146,7 +230,7 @@ Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualitä
 | Abschnitt | Inhalt | Visuelles Element |
 | --- | --- | --- |
 | Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces, Seitenzahl |
-| 01 Der Neubau | Wolffs Beschreibung, Kennzahlen | Balkenvergleich Altsystem / neues System |
+| 01 Der Neubau | Wolffs Beschreibung, Startseiten-Screenshot, Kennzahlen | Vitrine mit Link nach außen + Balkenvergleich Altsystem / neues System |
 | 02 Das Handwerk | Die Geigen-These, Hardys Rolle, Wolffs zweiter Einwand | Statement-Satzbild mit Teal-Pointe |
 | 03 Die Maschinen | 19 Szenarien, 115 Module, 20 Dienste | Screenshot in der Vitrine + SVG-Kette |
 | 04 Wo es klemmte | Lessons aus `tb26-code/docs/ai-lessons.md` | Werkzeugregal, typografisch |
@@ -204,11 +288,17 @@ Fortsetzung von „Präzisionswerk", aber im Modus Innenansicht:
   Dies ist die Maschinenseite, das darf man lesen.
 - **Die Kette ist das Leitmotiv.** Knoten auf einer Linie statt Karten im Raster — die Bauform
   eines Make-Szenarios, übersetzt in die Haarlinien-Sprache der Seite.
-- **Teal führt, Messing tritt einmal auf.** Teal ist die Maschine, Messing das Papier: Es
-  erscheint ausschließlich am Buch-Faksimile. Auf `/1apreis` ist Messing das Leitmotiv; hier
-  bliebe es sonst ununterscheidbar.
+- **Teal führt, Messing markiert das Ausgestellte.** Teal ist die Maschine. Messing erscheint
+  am Papier des Buch-Faksimiles und als Winkel an den beiden Vitrinenrahmen, sonst nirgends.
+  Auf `/1apreis` ist Messing das Leitmotiv; hier bliebe es sonst ununterscheidbar.
 - **Ein heller Block in einer dunklen Seite.** Das Faksimile ist die einzige helle Fläche der
   ganzen Site. Maximaler Kontrast an genau einer Stelle — der Moment, den man mitnimmt.
+  Die beiden Screenshots sind ebenfalls helle, farbige Flächen und liegen deshalb im
+  Ruhezustand gedämpft (`saturate(0.7) brightness(0.82)`); volle Helligkeit gibt es erst beim
+  Überfahren oder bei Tastaturfokus. Bewusst **dieselben Werte für beide**: Zwei
+  unterschiedlich stark gedämpfte Vitrinen läsen sich als Rangfolge zwischen den
+  Beweisstücken. Weiter abdunkeln kommt nicht in Frage, ein zurechtretuschiertes Beweisstück
+  ist keines mehr.
 
 ## Der Werkzeugkasten
 

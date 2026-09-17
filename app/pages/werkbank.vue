@@ -12,9 +12,12 @@
  *
  * - Mono trägt mehr als sonst. JetBrains Mono setzt ganze Datenblöcke, nicht nur Labels.
  * - Die Kette ist das Leitmotiv: Knoten auf einer Linie statt Karten im Raster.
- * - Teal führt (die Maschine), Messing tritt genau einmal auf (das Papier des Buches).
- * - Das Faksimile ist die einzige helle Fläche der ganzen Site. Maximaler Kontrast an
- *   genau einer Stelle, damit ein Moment hängen bleibt.
+ * - Teal führt (die Maschine). Messing bleibt dem Ausgestellten vorbehalten: dem Papier
+ *   des Buches und den Winkeln der beiden Vitrinen. Nirgends sonst.
+ * - Das Faksimile ist die einzige helle Fläche der ganzen Site. Die beiden Screenshots
+ *   liegen deshalb gedämpft und gehen erst beim Überfahren auf volle Helligkeit; sonst
+ *   stünden drei helle Flächen nebeneinander und keine wäre mehr der Moment, der hängen
+ *   bleibt.
  */
 const maxCommits = Math.max(...WERKBANK_BUILDS.map(build => build.commits))
 const maxModules = Math.max(...WERKBANK_SZENARIEN.map(scenario => scenario.modules))
@@ -159,6 +162,50 @@ useSeoMeta({
             <p>{{ WERKBANK_KOMPLEXITAET.quote }}</p>
             <cite class="pull__source">{{ WERKBANK_KOMPLEXITAET.page }}</cite>
           </blockquote>
+
+          <!--
+            Das Beweisstück zum Zitat und bewusst genau hier: Wolff beschreibt die
+            Plattform, danach sieht man sie, und erst dann sagen die Zahlen, was sie
+            gekostet hat. Vor dem Zitat stünde das Bild quer zum Lead der Sektion
+            („Deshalb hier seine Worte"), danach wäre es eine Illustration zu Commits.
+
+            Anders als die Make-Vitrine führt diese nach draußen statt in eine Lightbox
+            (`href` in `WERKBANK_STARTSEITE_SHOT`). Auf einer Seite, die nur aus Belegen
+            besteht, ist „sieh selbst nach" die stärkste Form des Links. Neuer Tab, damit
+            das Kapitel stehen bleibt.
+          -->
+          <figure v-if="WERKBANK_STARTSEITE_SHOT?.href" class="vitrine">
+            <a
+              :href="WERKBANK_STARTSEITE_SHOT.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="vitrine__trigger"
+            >
+              <span class="case">
+                <NuxtImg
+                  :src="WERKBANK_STARTSEITE_SHOT.src"
+                  :alt="WERKBANK_STARTSEITE_SHOT.alt"
+                  :width="WERKBANK_STARTSEITE_SHOT.width"
+                  :height="WERKBANK_STARTSEITE_SHOT.height"
+                  format="webp"
+                  quality="82"
+                  loading="lazy"
+                  class="vitrine__shot"
+                />
+                <span class="case__glass" aria-hidden="true" />
+                <span class="case__fittings" aria-hidden="true" />
+              </span>
+              <span class="vitrine__action">
+                <Icon name="lucide:arrow-up-right" class="size-3.5" />
+                trusted-blogs.com öffnen
+              </span>
+            </a>
+
+            <figcaption class="vitrine__caption">
+              Die Startseite am 17. September 2026. Sie ist der Eingang; Katalog,
+              Buchungsstrecken und Abrechnung liegen dahinter, hinter der Anmeldung.
+            </figcaption>
+          </figure>
 
           <p class="prose">
             Die Plattform gibt es seit 2015. Was heute läuft, ist kein weiterentwickelter
@@ -330,7 +377,7 @@ useSeoMeta({
           <figure v-if="WERKBANK_SCREENSHOT" id="szenario" class="vitrine">
             <button
               type="button"
-              class="vitrine__trigger"
+              class="vitrine__trigger vitrine__trigger--zoom"
               @click="shotDialog?.showModal()"
             >
               <span class="case">
@@ -347,7 +394,7 @@ useSeoMeta({
                 <span class="case__glass" aria-hidden="true" />
                 <span class="case__fittings" aria-hidden="true" />
               </span>
-              <span class="vitrine__zoom">
+              <span class="vitrine__action">
                 <Icon name="lucide:maximize-2" class="size-3.5" />
                 Vergrößern
               </span>
@@ -985,8 +1032,16 @@ useSeoMeta({
   padding: 0;
   border: 0;
   background: none;
-  cursor: zoom-in;
   text-align: left;
+}
+
+/*
+  Die Lupe bekommt nur die Vitrine mit Lightbox. Auf der verlinkten Vitrine wäre ein
+  `zoom-in` ein falsches Versprechen: Es kündigt Vergrößern an und liefert einen
+  Seitenwechsel.
+*/
+.vitrine__trigger--zoom {
+  cursor: zoom-in;
 }
 
 .case {
@@ -1002,11 +1057,15 @@ useSeoMeta({
   width: 100%;
   height: auto;
   /*
-    Der Make-Screenshot ist hell und violett und damit die zweite große helle Fläche der
-    Seite. Das Buch-Faksimile soll die auffälligste bleiben, deshalb liegt der Screenshot
-    im Ruhezustand spürbar gedämpft und geht erst beim Überfahren oder bei Tastaturfokus
-    auf die volle Helligkeit. Weiter abdunkeln geht nicht: Ein Beweisstück, das man
-    zurechtretuschiert, ist keines mehr.
+    Beide Screenshots sind helle, farbige Flächen: der Make-Canvas violett, die
+    trusted-blogs-Startseite mit weißer Kopfleiste und einem Mosaik aus Fotos. Das
+    Buch-Faksimile soll die auffälligste Fläche der Seite bleiben, deshalb liegen beide
+    im Ruhezustand spürbar gedämpft und gehen erst beim Überfahren oder bei Tastaturfokus
+    auf die volle Helligkeit. Absichtlich dieselben Werte für beide: Zwei unterschiedlich
+    stark gedämpfte Vitrinen läsen sich als Rangfolge zwischen den Beweisstücken.
+
+    Weiter abdunkeln geht nicht: Ein Beweisstück, das man zurechtretuschiert, ist keines
+    mehr.
   */
   filter: saturate(0.7) brightness(0.82);
   transition: filter 400ms ease;
@@ -1070,7 +1129,7 @@ useSeoMeta({
     100% 100%, 100% 100%;
 }
 
-.vitrine__zoom {
+.vitrine__action {
   margin-top: 0.85rem;
   display: inline-flex;
   align-items: center;
@@ -1083,7 +1142,7 @@ useSeoMeta({
   transition: color 200ms ease;
 }
 
-.vitrine__trigger:hover .vitrine__zoom {
+.vitrine__trigger:hover .vitrine__action {
   color: var(--color-accent-400);
 }
 

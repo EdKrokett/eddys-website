@@ -1,5 +1,9 @@
+import { access } from 'node:fs/promises'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
-import { barWidth, MIN_BAR_PERCENT } from './werkbank'
+import { barWidth, MIN_BAR_PERCENT, WERKBANK_SCREENSHOT, WERKBANK_STARTSEITE_SHOT } from './werkbank'
 
 /**
  * `barWidth` rechnet die Balkenlänge der Kennzahlen-Vergleiche auf der Werkbank.
@@ -50,5 +54,50 @@ describe('barWidth', () => {
 
   it('fängt Infinity ab', () => {
     expect(barWidth(Number.POSITIVE_INFINITY, 100)).toBe(MIN_BAR_PERCENT)
+  })
+})
+
+/**
+ * Die beiden Vitrinen der Seite.
+ *
+ * Diese Tests prüfen keine Logik, sondern eine Zusage: `docs/werkbank.md` verlangt beim
+ * Austausch eines Screenshots, `width` und `height` mitzuziehen. Eine Regel in einem
+ * Dokument wird vergessen; ein Test nicht. Beides geht still schief — ein falscher Pfad
+ * ergibt eine Lücke im Layout, falsche Maße einen Sprung beim Nachladen.
+ */
+const PUBLIC_DIR = fileURLToPath(new URL('../../public', import.meta.url))
+
+const SHOTS = [
+  ['WERKBANK_SCREENSHOT', WERKBANK_SCREENSHOT],
+  ['WERKBANK_STARTSEITE_SHOT', WERKBANK_STARTSEITE_SHOT],
+] as const
+
+describe.each(SHOTS)('%s', (_name, shot) => {
+  it('ist gesetzt — sonst fehlt die Vitrine auf der Seite', () => {
+    expect(shot).not.toBeNull()
+  })
+
+  it('zeigt auf eine Datei, die es in public/ wirklich gibt', async () => {
+    expect(shot!.src.startsWith('/')).toBe(true)
+    await expect(access(join(PUBLIC_DIR, shot!.src))).resolves.toBeUndefined()
+  })
+
+  it('trägt die Maße der echten Datei, damit das Layout beim Nachladen nicht springt', async () => {
+    const { width, height } = await sharp(join(PUBLIC_DIR, shot!.src)).metadata()
+
+    expect(width).toBe(shot!.width)
+    expect(height).toBe(shot!.height)
+  })
+
+  it('hat einen Alternativtext, der die Bildunterschrift nicht nur wiederholt', () => {
+    expect(shot!.alt.length).toBeGreaterThan(40)
+  })
+})
+
+describe('WERKBANK_STARTSEITE_SHOT.href', () => {
+  it('ist eine absolute https-Adresse — die Vitrine öffnet sie in einem neuen Tab', () => {
+    // Ein relativer Pfad würde mit target="_blank" einen zweiten Tab derselben Seite
+    // aufmachen, statt zum Beleg zu führen.
+    expect(WERKBANK_STARTSEITE_SHOT?.href).toBe('https://trusted-blogs.com/')
   })
 })

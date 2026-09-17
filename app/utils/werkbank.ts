@@ -3,6 +3,7 @@ import type {
   WerkbankLesson,
   WerkbankMetric,
   WerkbankScenario,
+  WerkbankShot,
   WerkbankTool,
 } from '#shared/types/werkbank'
 
@@ -220,14 +221,44 @@ export const WERKBANK_WERKZEUGKASTEN_URL
  * zu hinterlassen. Vor dem Einsetzen eines neuen Bildes IMMER prüfen, ob Verbindungs-
  * namen, Webhook-Adressen oder Kundendaten darauf lesbar sind — ein Screenshot im Repo
  * bleibt in der Git-Historie, auch wenn er später ersetzt wird.
+ *
+ * Ohne `href`, also mit Lightbox: 115 Module sind bei Seitenbreite nicht zu erkennen.
  */
-export const WERKBANK_SCREENSHOT: { src: string, width: number, height: number, alt: string } | null = {
+export const WERKBANK_SCREENSHOT: WerkbankShot | null = {
   src: '/images/werkbank/promotion-erstellen.png',
   width: 1606,
   height: 1242,
   alt:
     'Das Make-Szenario „Promotion erstellen" in der Bearbeitungsansicht: eine Kette aus '
     + 'über hundert Modulen, die sich mehrfach in parallel laufende Stränge verzweigt.',
+}
+
+/**
+ * Die Startseite von trusted blogs — das Beweisstück zu Kapitel 01.
+ *
+ * Mit `href` statt Lightbox: Auf einer Seite, die nur aus Belegen besteht, ist „sieh
+ * selbst nach" die stärkste Fassung des Links. Das Original ist die Vergrößerung.
+ *
+ * Aufgenommen am 17.09.2026, Chrome headless, Viewport 1600×1000 bei doppelter
+ * Pixeldichte, Cookie-Banner vorher abgelehnt (nicht akzeptiert, sonst löst der
+ * Screenshot Conversion-Tracking aus). Hergang und Befehl: `docs/werkbank.md`.
+ *
+ * Als JPEG und nicht als PNG wie der Make-Screenshot: Die Startseite ist zu großen
+ * Teilen ein Mosaik aus Fotos, und die bläht PNG auf das Siebenfache auf.
+ *
+ * ACHTUNG beim Austausch: Das Bild zeigt die Blog-Titelbilder, die zum Aufnahmezeitpunkt
+ * auf der Startseite lagen. Öffentlich sichtbare Inhalte, aber trotzdem fremde — vor dem
+ * Ersetzen prüfen, ob auf dem neuen Stand etwas zu sehen ist, das dort nicht hingehört.
+ */
+export const WERKBANK_STARTSEITE_SHOT: WerkbankShot | null = {
+  src: '/images/werkbank/trusted-blogs-startseite.jpg',
+  width: 2000,
+  height: 1250,
+  alt:
+    'Die Startseite von trusted-blogs.com: Über einem Mosaik aus Blog-Titelbildern steht '
+    + '„Blog-Marketing mit Langzeitwirkung", darunter ein Suchfeld mit Themenfiltern und '
+    + 'zwei Einstiege für Unternehmen und für Bloggerinnen und Blogger.',
+  href: 'https://trusted-blogs.com/',
 }
 
 // ── Logik ──────────────────────────────────────────────────────────────────────

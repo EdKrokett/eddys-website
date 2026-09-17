@@ -59,3 +59,24 @@ export interface WerkbankBuild {
   /** Der Neubau wird farblich abgesetzt, das Altsystem bleibt zurückgenommen. */
   current?: boolean
 }
+
+/**
+ * Ein ausgestelltes Bild in der Vitrine — Screenshot mit allem, was der Rahmen braucht.
+ *
+ * `width` und `height` sind Pflicht, nicht optional: Ohne sie reserviert der Browser
+ * keinen Platz, und das Layout springt, sobald das Bild nachlädt oder ausfällt.
+ *
+ * `href` unterscheidet die beiden Vitrinen der Seite. Ist es gesetzt, führt das Bild
+ * nach außen zum Original; fehlt es, öffnet ein Klick die Lightbox. Das ist keine
+ * Kosmetik, sondern folgt dem Inhalt: Ein Make-Szenario mit 115 Modulen ist bei
+ * Seitenbreite unlesbar und braucht Zoom. Eine Website wird durch Zoom nicht
+ * aussagekräftiger — ihre Vergrößerung ist das Original.
+ */
+export interface WerkbankShot {
+  src: string
+  width: number
+  height: number
+  alt: string
+  /** Ziel des Bildlinks. Fehlt es, bekommt das Bild stattdessen eine Lightbox. */
+  href?: string
+}
