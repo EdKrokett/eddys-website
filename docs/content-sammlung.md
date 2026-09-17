@@ -92,6 +92,11 @@ Quelle: LinkedIn-Profil, Abschnitt "Erfahrung" (26.08.2026), chronologisch abste
 Quelle: LinkedIn-Profil, Abschnitt "Bescheinigungen und Zertifikate" (26.08.2026)
 
 - Make Advanced — Make, Jan. 2025
+- Der kleine Coach — BCA Business Coaching Akademie GmbH & Co. KG, Hamburg, Jan. 2024
+  (Quelle: Eddy direkt, 17.09.2026 — steht nicht im LinkedIn-Profil). 12-stündige
+  Fortbildung: lösungsorientierte Fragen, Meta-Modell, Perspektivwechsel, wohlgeformte
+  Ziele, Gesprächsphasen, systemische Grundprinzipien, Grenzen und Weiterverweisung.
+  <https://bca-hamburg.de/akademie/der-kleine-coach/>
 - Professional Scrum Master — Scrum.org, Feb. 2020
 - Prince2 Foundation — APMG International, Juni 2011 (Nachweis-ID 02323360-01-FSQL)
 - Professional Scrum Product Owner — Scrum.org, Juni 2014

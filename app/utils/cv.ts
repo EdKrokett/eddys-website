@@ -126,6 +126,11 @@ export const CV_CERTIFICATES: CvCertificate[] = [
     // will sehen, was mit Make gebaut wurde, und nicht erst dorthin scrollen.
     story: { to: '/werkbank#szenario', label: 'Was damit gebaut wurde' },
   },
+  {
+    year: '2024',
+    name: 'Der kleine Coach',
+    issuer: 'BCA Business Coaching Akademie, Hamburg',
+  },
   { year: '2020', name: 'Professional Scrum Master', issuer: 'Scrum.org' },
   { year: '2014', name: 'Professional Scrum Product Owner', issuer: 'Scrum.org' },
   { year: '2011', name: 'PRINCE2 Foundation', issuer: 'APMG International' },
@@ -150,6 +155,7 @@ export const CV_SKILL_GROUPS: CvSkillGroup[] = [
       { name: 'Konfliktmanagement', level: 5 },
       { name: 'Product Owner', level: 4 },
       { name: 'Moderation', level: 4 },
+      { name: 'Coaching', level: 4 },
     ],
   },
   {
