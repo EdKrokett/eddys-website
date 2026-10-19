@@ -6,6 +6,11 @@
  * Der Vorspann kommt entweder als `lead`-Prop (reiner Text, der Normalfall) oder
  * über den `lead`-Slot, wenn er Auszeichnung braucht — etwa einen Link mitten im
  * Satz. Der Slot gewinnt, wenn beides gesetzt ist.
+ *
+ * Die Klassen heißen bewusst `section-head`, nicht `head`: Das Wurzelelement einer
+ * Komponente trägt auch das Scope-Attribut der Elternseite. Mehrere Seiten haben ein
+ * eigenes scoped `.head` für ihren Seitenkopf, und das traf hier mit (dunkler Kasten
+ * um jeden Sektionskopf auf /1apreis, docs/error-catalog.md).
  */
 defineProps<{
   kicker: string
@@ -17,36 +22,36 @@ const slots = useSlots()
 </script>
 
 <template>
-  <header class="head">
+  <header class="section-head">
     <p class="kicker">
-      <span class="head__mark" aria-hidden="true" />{{ kicker }}
+      <span class="section-head__mark" aria-hidden="true" />{{ kicker }}
     </p>
 
-    <h2 class="head__title">
+    <h2 class="section-head__title">
       {{ title }}
     </h2>
 
-    <p v-if="slots.lead || lead" class="head__lead">
+    <p v-if="slots.lead || lead" class="section-head__lead">
       <slot name="lead">{{ lead }}</slot>
     </p>
   </header>
 </template>
 
 <style scoped>
-.head__mark {
+.section-head__mark {
   width: 2rem;
   height: 2px;
   background: var(--color-accent-400);
 }
 
-.head__title {
+.section-head__title {
   margin-top: 1rem;
   font-size: clamp(1.6rem, 3.2vw, 2.35rem);
   line-height: 1.1;
   color: var(--color-steel-100);
 }
 
-.head__lead {
+.section-head__lead {
   margin-top: 1.15rem;
   max-width: 40rem;
   font-size: var(--text-base);

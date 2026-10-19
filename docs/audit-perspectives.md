@@ -61,6 +61,11 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Setzt eine Scoped-Regel dieselbe CSS-Property wie eine Tailwind-Utility am selben Element?
   Bei gleicher Spezifität gewinnt das später eingebundene Stylesheet — Scoped Styles schlagen
   Utilities, responsive Utility-Präfixe wirken dann nicht mehr.
+- Trägt das Wurzelelement einer gemeinsam genutzten Komponente einen Klassennamen, den auch
+  eine Seite für sich benutzt? Die Wurzel bekommt das Scope-Attribut der Elternseite mit,
+  deren scoped Regeln greifen dann auch dort (`.head` auf /1apreis, 19.10.2026).
+  Prüfmethode: Wurzelklassen der Komponenten gegen die scoped Selektoren der Seiten
+  abgleichen, die sie einbinden.
 - Welche CSS-Klassen liefert eine Fremdquelle (WordPress-Blöcke, eingebettete Widgets) mit,
   für die wir keine Regeln definiert haben? Fehlendes Layout-CSS sieht aus wie ein Bug im
   Inhalt, nicht wie eine Lücke im Stylesheet.

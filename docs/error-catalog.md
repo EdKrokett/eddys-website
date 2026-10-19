@@ -191,6 +191,51 @@ Tailwind-Utility am selben Element?"
 
 ---
 
+### Scoped-Klasse der Seite trifft das Wurzelelement einer Kind-Komponente
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Handwerklich |
+| Gefunden | 2026-10-19 |
+| Schwere | Niedrig (sichtbar, live auf /1apreis) |
+
+**FALSCH:**
+```vue
+<!-- SectionHead.vue -->
+<header class="head">…</header>
+
+<!-- 1apreis.vue -->
+<section class="head">…Seitenkopf…</section>
+<SectionHead kicker="Die Geschichte" title="Was hier einmal stand" />
+
+<style scoped>
+.head { padding: …; background: …, var(--color-graphite-950); border-bottom: …; }
+</style>
+```
+
+**RICHTIG:**
+```vue
+<!-- SectionHead.vue -->
+<header class="section-head">…</header>
+```
+
+**WARUM:** Vue gibt dem Wurzelelement einer Kind-Komponente zusätzlich das Scope-Attribut
+der Elternkomponente, damit die Eltern das Layout ihres Kindes setzen können. Ein scoped
+`.head` der Seite wird zu `.head[data-v-seite]` und passt damit auch auf
+`<header class="head" data-v-kind data-v-seite>` von SectionHead. Auf `/1apreis` stand
+dadurch jeder Sektionskopf in einem dunklen Kasten mit Messingschimmer. Kindelemente
+innerhalb der Komponente sind nicht betroffen, nur die Wurzel.
+
+Aufgefallen beim Bau von `/kooperationen`, das dasselbe Muster (Seitenkopf `.head` plus
+SectionHead) übernommen hatte. Behoben an der Ursache: Die Komponente benutzt jetzt einen
+Klassennamen, den keine Seite für sich verwendet. Ein weiterer Hinweis „nenn deinen
+Seitenkopf nicht `.head`“ wäre die dritte Regel für denselben Fehler gewesen.
+
+**→ AUDIT-PERSPEKTIVE:** „Trägt das Wurzelelement einer gemeinsam genutzten Komponente
+einen Klassennamen, den auch eine Seite für sich benutzt?"
+
+---
+
 ### Fremdes HTML ohne das CSS gerendert, das es voraussetzt
 
 | Feld | Inhalt |
