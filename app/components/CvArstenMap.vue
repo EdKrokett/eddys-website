@@ -208,7 +208,6 @@ const latLabels = map.gridY.map((y, i) => ({ label: MAP_GRID_LAT_LABELS[i], top:
     </div>
 
     <figcaption class="map__caption">
-      <span class="map__num">Abb. 2</span>
       <span>Bremen-Arsten, am südlichen Stadtrand</span>
       <span class="map__credit">
         Kartendaten ©
@@ -490,11 +489,6 @@ const latLabels = map.gridY.map((y, i) => ({ label: MAP_GRID_LAT_LABELS[i], top:
   letter-spacing: 0.04em;
   line-height: 1.5;
   color: var(--color-steel-400);
-}
-.map__num {
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-accent-300);
 }
 .map__credit {
   margin-left: auto;

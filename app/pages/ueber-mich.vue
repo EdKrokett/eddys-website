@@ -186,7 +186,6 @@ useSeoMeta({
           <CvPhotoPlate
             class="opening__plate"
             :photo="ABOUT_PHOTOS.colorRun"
-            :number="1"
             sizes="100vw sm:420px lg:420px"
             eager
           />
@@ -216,7 +215,6 @@ useSeoMeta({
           <CvPhotoPlate
             class="running__plate"
             :photo="ABOUT_PHOTOS.karstadtMarathon"
-            :number="3"
             sizes="100vw sm:420px lg:420px"
           />
 

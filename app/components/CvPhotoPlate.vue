@@ -3,14 +3,12 @@ import type { AboutPhoto } from '#shared/types/ueber-mich'
 
 /**
  * Ein Foto als Tafel: Haarlinienrahmen, Passermarken an den Ecken, darunter eine
- * Mono-Unterschrift mit Abbildungsnummer. Die Sprache eines technischen Tafelwerks
+ * Mono-Unterschrift. Die Sprache eines technischen Tafelwerks
  * hält die farbigen, lauten Lauffotos im Präzisionswerk-Design zusammen.
  * Konzept: docs/ueber-mich-einstieg.md.
  */
 const props = withDefaults(defineProps<{
   photo: AboutPhoto
-  /** Abbildungsnummer in der Unterschrift ("Abb. 1"). */
-  number: number
   /** Responsive Breiten für NuxtImg, abhängig vom Platz im Raster. */
   sizes: string
   /** Im ersten Bildschirm sofort laden statt lazy. */
@@ -42,8 +40,7 @@ const props = withDefaults(defineProps<{
     </div>
 
     <figcaption class="plate__caption">
-      <span class="plate__num">Abb. {{ props.number }}</span>
-      <span>{{ props.photo.caption }}</span>
+      {{ props.photo.caption }}
     </figcaption>
   </figure>
 </template>
@@ -107,11 +104,5 @@ const props = withDefaults(defineProps<{
   letter-spacing: 0.04em;
   line-height: 1.5;
   color: var(--color-steel-400);
-}
-
-.plate__num {
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-accent-300);
 }
 </style>

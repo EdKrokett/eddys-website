@@ -42,8 +42,9 @@ eigener Stil, die Korrektur sichtbar stehen zu lassen.
 Richtung bleibt „Präzisionswerk" (dunkel, Haarlinien, Mono-Zahlen, ein Teal-Akzent). Die
 Fotos sind farbig und laut, gerade der Color Run. Damit sie nicht wie eingeklebte Urlaubsbilder
 wirken, stehen sie als **Tafeln** im Raster: Haarlinienrahmen, Passermarken an den Ecken,
-darunter eine Mono-Bildunterschrift mit Nummer („Abb. 1"). Das ist die Sprache eines
-technischen Tafelwerks und passt zum Uhrmacher.
+darunter eine Mono-Bildunterschrift. Das ist die Sprache eines technischen Tafelwerks und
+passt zum Uhrmacher. Abbildungsnummern („Abb. 1") standen anfangs davor und sind auf
+Eddys Wunsch entfallen (19.10.2026).
 
 Raster auf breiten Bildschirmen (12 Spalten):
 
