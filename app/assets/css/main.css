@@ -261,6 +261,105 @@
     height: auto;
     aspect-ratio: 16 / 9;
   }
+
+  /*
+   * Zwei-Klick-Platzhalter für fremde Einbettungen (app/utils/embed-consent.ts,
+   * docs/blog-einbettungen.md). Alles <span>, weil der Platzhalter meist in einem <p>
+   * steht; `display` macht daraus die Blöcke. Das Seitenverhältnis kommt als
+   * Inline-Style aus dem Markup, damit nach dem Klick nichts springt.
+   *
+   * Vorschaubild gedämpft wie die Vitrinen auf /werkbank, Knopf als Teal-Fläche mit
+   * DUNKLER Schrift (Kontrastregel oben bei den Akzentfarben).
+   */
+  .wp-content .embed-consent {
+    position: relative;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-graphite-700);
+    border-radius: 2px;
+    background: var(--color-graphite-950);
+  }
+
+  /* Ohne Vorschaubild: Zifferblatt-Indexe als Fläche, damit es nicht wie ein Ladefehler aussieht. */
+  .wp-content .embed-consent--other {
+    background:
+      radial-gradient(60% 70% at 50% 45%, rgba(33, 164, 163, 0.08) 0%, transparent 70%),
+      repeating-linear-gradient(to right, var(--color-graphite-800) 0 1px, transparent 1px 12px),
+      var(--color-graphite-950);
+  }
+
+  .wp-content .embed-consent__thumb {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    border-radius: 0;
+    filter: saturate(0.7) brightness(0.55);
+    transition: filter 300ms ease, scale 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .wp-content .embed-consent:hover .embed-consent__thumb,
+  .wp-content .embed-consent:focus-within .embed-consent__thumb {
+    filter: saturate(0.85) brightness(0.72);
+    scale: 1.02;
+  }
+
+  .wp-content .embed-consent__button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 2px;
+    background: var(--color-accent-500);
+    color: var(--color-graphite-950);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    line-height: 1.2;
+    transition: background 200ms ease;
+  }
+  .wp-content .embed-consent__button:hover {
+    background: var(--color-accent-400);
+  }
+
+  /* Abspiel-Dreieck aus Rahmen, keine Icon-Schrift im fremden HTML. */
+  .wp-content .embed-consent__play {
+    width: 0;
+    height: 0;
+    border-top: 0.4rem solid transparent;
+    border-bottom: 0.4rem solid transparent;
+    border-left: 0.65rem solid currentColor;
+  }
+
+  .wp-content .embed-consent__note {
+    position: absolute;
+    inset: auto 1rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    line-height: 1.4;
+    text-align: center;
+    color: var(--color-steel-300);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  .wp-content .embed-consent.is-active {
+    border-color: transparent;
+  }
+
+  .wp-content .embed-consent .embed-consent__frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    border: 0;
+  }
   .wp-content blockquote {
     border-left: 2px solid var(--color-accent-500);
     padding-left: 1.5rem;

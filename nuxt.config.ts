@@ -211,7 +211,12 @@ export default defineNuxtConfig({
   // fehlschlagen. WordPress ist auf blog.eduard-andrae.de umgezogen (Migrationsplan
   // Phase B), eduard-andrae.de/www.eduard-andrae.de übernimmt die neue Nuxt-Seite.
   image: {
-    domains: ['blog.eduard-andrae.de'],
+    /**
+     * `i.ytimg.com`: Vorschaubilder der YouTube-Platzhalter in Blogbeiträgen. Sie laufen
+     * über den Bild-Proxy, damit der Browser vor dem Klick nicht mit YouTube spricht
+     * (docs/blog-einbettungen.md).
+     */
+    domains: ['blog.eduard-andrae.de', 'i.ytimg.com'],
 
     /**
      * Provider-Optionen für Vercel. Greifen NUR im Vercel-Build; lokal läuft IPX.

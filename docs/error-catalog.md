@@ -191,6 +191,38 @@ Tailwind-Utility am selben Element?"
 
 ---
 
+### Relativer Import nach `shared/` bricht den Produktions-Build
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Handwerklich |
+| Gefunden | 2026-10-19 (Pre-Push-Hook, nie live) |
+| Schwere | Niedrig (vom Hook abgefangen) |
+
+**FALSCH:**
+```ts
+// app/utils/embed-consent.ts
+import { decodeHtmlEntities } from '../../shared/utils/html-entities'
+```
+
+**RICHTIG:**
+```ts
+import { decodeHtmlEntities } from '#shared/utils/html-entities'
+// vitest.config.ts: resolve.alias['#shared'] → ./shared
+```
+
+**WARUM:** Der relative Pfad stimmt nur, solange die Datei an ihrem Ort im Quellbaum
+ausgeführt wird. Vitest und der Dev-Server tun das, alle Tests waren grün und die Seite
+lief. Beim Produktions-Build bündelt Vite den App-Code nach `.nuxt/dist/server/_nuxt/`,
+der Pfad zeigt von dort ins Leere: `Could not resolve "../shared/utils/html-entities.ts"`.
+Der übrige Code importiert aus `shared/utils` gar nicht ausdrücklich, er nutzt Nuxts
+Auto-Import. Den kennt Vitest nicht, deshalb jetzt der Alias in `vitest.config.ts`.
+
+**→ AUDIT-PERSPEKTIVE:** „Läuft ein neuer Import auch im Produktions-Build, oder nur im
+Dev-Server und in Vitest?"
+
+---
+
 ### `height: auto` auf iframes: Videos aus dem alten Editor nur 150px hoch
 
 | Feld | Inhalt |

@@ -12,6 +12,29 @@ if (status.value === 'error' || !post.value) {
   throw createError({ statusCode: 404, statusMessage: 'Blogbeitrag nicht gefunden' })
 }
 
+/**
+ * Fremde Einbettungen (YouTube, Vimeo, …) erst nach Klick: Die Datenschutzerklärung
+ * sagt zu, dass ohne Zutun keine Verbindung zu Drittanbietern entsteht. Hier statt in
+ * der Server-Route, weil nur `useImage()` die Vorschaubild-URL des jeweiligen
+ * Bild-Providers kennt. Hintergrund: docs/blog-einbettungen.md.
+ */
+const img = useImage()
+const content = computed(() => guardEmbeds(post.value?.content, {
+  youtubeThumbnail: id => img(`https://i.ytimg.com/vi/${id}/hqdefault.jpg`, {
+    width: 640,
+    format: 'webp',
+    quality: 75,
+  }),
+}))
+
+/** Ein Listener für alle Platzhalter, weil `v-html` keine Vue-Handler kennt. */
+function onContentClick(event: MouseEvent) {
+  const target = event.target
+  if (!(target instanceof Element)) return
+  const placeholder = target.closest('.embed-consent__button')?.closest('.embed-consent')
+  if (placeholder instanceof HTMLElement) activateEmbed(placeholder)
+}
+
 useSeoMeta({
   title: () => `${post.value?.title ?? 'Beitrag'} — Eduard Andrae`,
   description: () => post.value?.excerpt ?? '',
@@ -66,7 +89,7 @@ useSeoMeta({
         <!-- v-html bewusst: Content stammt aus der eigenen, vertrauten WP-Instanz.
              Titel/Excerpt laufen dagegen über v-text (siehe BlogCard.vue). -->
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="wp-content" v-html="post.content" />
+        <div class="wp-content" @click="onContentClick" v-html="content" />
 
         <div v-if="post.tags.length" class="post__tags">
           <span class="post__tags-label">Schlagwörter</span>

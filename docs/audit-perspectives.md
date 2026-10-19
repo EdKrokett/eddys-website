@@ -56,6 +56,13 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
 - Was an dieser Änderung funktioniert nur deshalb, weil eine Übergangslösung (Redirect,
   Alias, Weiterleitung) noch aktiv ist — und bricht, sobald sie abgeschaltet wird?
 
+### Build gegen Entwicklung (abgeleitet 2026-10-19)
+
+- Läuft ein neuer Import auch im Produktions-Build, oder nur im Dev-Server und in Vitest?
+  Relative Pfade über die Grenze `app/` → `shared/` stimmen im SSR-Bundle nicht mehr.
+  Laufzeit-Importe aus `shared/` über `#shared/…` (in `vitest.config.ts` als Alias
+  hinterlegt). Prüfmethode: `npm run build` vor dem Push, nicht erst im Hook.
+
 ### Styling-Kollisionen (abgeleitet 2026-08-26)
 
 - Setzt eine Scoped-Regel dieselbe CSS-Property wie eine Tailwind-Utility am selben Element?
