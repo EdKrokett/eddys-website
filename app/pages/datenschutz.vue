@@ -10,9 +10,11 @@
  * die nicht existierende Verarbeitungen beschreibt, ist schlechter als keine.
  *
  * Der Text unten beschreibt stattdessen, was diese Seite technisch tatsächlich tut
- * (Stand 26.08.2026, geprüft an nuxt.config.ts und den Server-Routen):
- * - kein Tracking, keine Analytics (Vercel Web Analytics ist im Projekt deaktiviert)
- * - keine Cookies, die Einwilligung bräuchten
+ * (Stand 19.10.2026, geprüft an nuxt.config.ts und den Server-Routen):
+ * - Reichweitenmessung mit Vercel Web Analytics, cookielos, ohne Consent-Banner (seit
+ *   19.10.2026, Abschnitt von Eddy freigegeben am 19.10.2026; Hintergrund in
+ *   docs/analytics.md)
+ * - keine Cookies, keine Marketing-Werkzeuge
  * - Schriften selbst gehostet über @nuxt/fonts (kein Google-Fonts-Request)
  * - Hosting bei Vercel, Serverless-Region iad1 (USA) — deshalb der Drittland-Absatz
  * - Bilder und Blogtexte werden von blog.eduard-andrae.de nachgeladen (IONOS)
@@ -43,12 +45,13 @@ useSeoMeta({
           E-Mail: <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
         </p>
 
-        <h2>Kein Tracking, keine Einwilligungs-Cookies</h2>
+        <h2>Keine Cookies, kein Profiling</h2>
         <p>
-          Diese Seite setzt keine Analyse- oder Marketing-Werkzeuge ein. Es gibt keine
-          Reichweitenmessung, kein Profiling und keine Cookies, die eine Einwilligung
-          erfordern würden. Deshalb finden Sie hier auch kein Cookie-Banner — es gäbe
-          nichts, worin einzuwilligen wäre.
+          Diese Seite setzt keine Cookies und keine Marketing-Werkzeuge ein. Es gibt
+          kein Profiling und keine Wiedererkennung über mehrere Tage oder Websites
+          hinweg. Für eine anonyme Reichweitenmessung nutze ich Vercel Web Analytics,
+          das ohne Cookies auskommt (siehe unten). Ein Cookie-Banner gibt es deshalb
+          nicht.
         </p>
 
         <h2>Schriftarten</h2>
@@ -69,6 +72,27 @@ useSeoMeta({
         <p>
           Die Verarbeitung findet teilweise auf Servern in den USA statt. Grundlage
           der Übermittlung sind die Standardvertragsklauseln der EU-Kommission.
+        </p>
+
+        <h2>Reichweitenmessung mit Vercel Web Analytics</h2>
+        <p>
+          Um zu sehen, welche Seiten und Beiträge gelesen werden, nutze ich Vercel Web
+          Analytics, einen Dienst des Hosters Vercel Inc. Das Messskript wird von dieser
+          Domain selbst ausgeliefert. Bei jedem Seitenaufruf werden erfasst: Zeitpunkt,
+          aufgerufene Adresse, verweisende Seite, Land und Region, Betriebssystem,
+          Browser und Gerätetyp.
+        </p>
+        <p>
+          Es werden keine Cookies gesetzt und keine Daten auf Ihrem Gerät gespeichert.
+          Ihre IP-Adresse wird nicht gespeichert. Um Besuche zählen zu können, bildet
+          Vercel aus der Anfrage einen Hashwert, der nach 24 Stunden verworfen wird.
+          Ich sehe ausschließlich zusammengefasste Zahlen, keine einzelnen Personen.
+        </p>
+        <p>
+          Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Mein berechtigtes Interesse
+          liegt darin, zu erfahren, welche Inhalte auf Interesse stoßen. Für die
+          Übermittlung in die USA gilt dasselbe wie beim Hosting. Wenn Sie nicht gezählt
+          werden möchten, genügt ein gängiger Werbe- oder Skriptblocker.
         </p>
 
         <h2>Blog-Inhalte</h2>

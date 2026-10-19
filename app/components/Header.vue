@@ -4,9 +4,10 @@
  * (Über mich, Blog) plus Kontakt. Impressum und Datenschutz stehen im Footer —
  * Pflichtangaben, aber keine Hauptnavigation.
  *
- * Kein "Cookie-Richtlinie"-Punkt: ohne Tracking/Cookies, die Einwilligung brauchen,
- * gibt es nichts zu regeln — kommt Tracking dazu, dann ein Consent-Banner statt
- * einer statischen Cookie-Seite.
+ * Kein "Cookie-Richtlinie"-Punkt: ohne Cookies, die Einwilligung brauchen, gibt es
+ * nichts zu regeln. Vercel Web Analytics (seit 19.10.2026) ist cookielos, siehe
+ * docs/analytics.md — kommt einwilligungspflichtiges Tracking dazu, dann ein
+ * Consent-Banner statt einer statischen Cookie-Seite.
  */
 const mobileOpen = ref(false)
 

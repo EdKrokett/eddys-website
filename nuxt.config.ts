@@ -1,7 +1,45 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+// Basis für Vercel Web Analytics, Herleitung am `$production`-Block unten. Den führenden
+// Slash ergänzt das Paket ebenso (`makeAbsolute`), Vercel liefert den Pfad nicht garantiert so.
+const observabilityBasePath = process.env.VITE_VERCEL_OBSERVABILITY_BASEPATH?.replace(/^\/+/, '')
+const insightsBase = observabilityBasePath ? `/${observabilityBasePath}/insights` : '/_vercel/insights'
+
 export default defineNuxtConfig({
 
   modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxt/image', '@nuxtjs/sitemap'],
+
+  /**
+   * Vercel Web Analytics — bewusst OHNE das Paket `@vercel/analytics`, Konzept und
+   * Datenschutz-Folgen in docs/analytics.md.
+   *
+   * Das Paket ließ sich nicht sauber installieren (19.10.2026): 2.0.1 erklärt
+   * `vue-router@^4` als Peer, Nuxt 4.4 bringt vue-router 5, und npm 10 stürzt beim
+   * Auflösen ab (`reading 'edgesOut'`, auch mit `overrides` und mit dem Canary).
+   * npm 11 kann es, schreibt aber eine Lockfile, die `npm ci` unter npm 10 (= CI mit
+   * Node 22) ablehnt. Das Nuxt-Modul des Pakets tut ohnehin nur eines: dieses Skript
+   * einhängen. Das übernimmt der Block hier.
+   *
+   * VITE_VERCEL_OBSERVABILITY_BASEPATH setzt Vercel beim Build ("Resilient Intake":
+   * zufälliger Pfad, den Adblocker nicht kennen). Fehlt er, bleibt der klassische
+   * Pfad `/_vercel/insights`, den Vercel ebenfalls bedient. Beides genau wie im Paket
+   * (dist/nuxt/runtime, `getScriptSrc`/`loadProps`).
+   *
+   * Seitenwechsel ohne Neuladen zählt das Skript selbst mit (Auto-Track über die
+   * History-API). Was dabei fehlt, ist nur die Gruppierung nach Routenmuster
+   * (`/blog/[slug]`) — das Dashboard zeigt jede Beitrags-URL einzeln.
+   *
+   * `$production`, weil der Pfad lokal nicht existiert: im Dev-Server gäbe es nur 404s.
+   */
+  $production: {
+    app: {
+      head: {
+        script: [
+          { 'src': `${insightsBase}/script.js`, 'defer': true, 'data-endpoint': insightsBase },
+        ],
+      },
+    },
+  },
 
   devtools: {
     enabled: true,
