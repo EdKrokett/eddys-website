@@ -29,7 +29,9 @@ useSeoMeta({
         </h1>
 
         <p class="head__lead">
-          Ob Blog-Kooperation, agile Fragen oder eine gemeinsame Laufrunde in
+          Ob
+          <NuxtLink to="/kooperationen" class="head__link">
+            Blog-Kooperation</NuxtLink>, agile Fragen oder eine gemeinsame Laufrunde in
           Bremen — schreib mir einfach.
         </p>
       </UContainer>
@@ -150,6 +152,19 @@ useSeoMeta({
   font-size: var(--text-lg);
   line-height: 1.65;
   color: var(--color-steel-300);
+}
+
+.head__link {
+  color: var(--color-steel-100);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-500);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: color 200ms ease, text-decoration-color 200ms ease;
+}
+.head__link:hover {
+  color: var(--color-accent-300);
+  text-decoration-color: var(--color-accent-300);
 }
 
 .body {
