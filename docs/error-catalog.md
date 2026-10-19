@@ -191,6 +191,52 @@ Tailwind-Utility am selben Element?"
 
 ---
 
+### `height: auto` auf iframes: Videos aus dem alten Editor nur 150px hoch
+
+| Feld | Inhalt |
+|------|--------|
+| Klasse | Handwerklich |
+| Gefunden | 2026-10-19 (Eddy, BITburger-Beitrag) |
+| Schwere | Mittel (63 Videos in ~50 Beiträgen) |
+
+**FALSCH:**
+```css
+.wp-content img,
+.wp-content iframe {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+**RICHTIG:**
+```css
+.wp-content img { max-width: 100%; height: auto; }
+.wp-content iframe { max-width: 100%; }
+
+.wp-content iframe[src*='youtube.com/'],
+.wp-content iframe[src*='youtube-nocookie.com/'],
+.wp-content iframe[src*='player.vimeo.com/'] {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+```
+
+**WARUM:** `height: auto` ist bei Bildern richtig, weil ein Bild eine eigene Proportion
+mitbringt. Ein iframe hat keine. `auto` überschreibt das `height="315"`-Attribut und fällt
+auf die Browser-Standardhöhe von 150px zurück, die Breite bleibt bei 560. Für Videos aus
+dem Gutenberg-Editor fiel das nicht auf: Die stecken in `.wp-block-embed` und haben dafür
+eine eigene `aspect-ratio`-Regel. Die Videos aus dem klassischen Editor sind nackte
+`<iframe>` in einem `<p>`, und das ist im Blog die Mehrheit (63 gegen 9, gezählt über alle
+Beiträge per REST-API). Karten und andere Einbettungen (GPSies, Facebook) behalten jetzt
+ihre Attributhöhe.
+
+**→ AUDIT-PERSPEKTIVE:** „Gilt eine Regel für Bilder auch für Elemente, die keine eigene
+Proportion haben?" und „Deckt eine Regel für Gutenberg-Blöcke auch den Altbestand aus dem
+klassischen Editor ab?"
+
+---
+
 ### Scoped-Klasse der Seite trifft das Wurzelelement einer Kind-Komponente
 
 | Feld | Inhalt |

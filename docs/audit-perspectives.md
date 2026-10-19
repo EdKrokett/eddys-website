@@ -66,6 +66,13 @@ Spezifische Fragen für Code-Reviews und Audits. Jede Perspektive beleuchtet ein
   deren scoped Regeln greifen dann auch dort (`.head` auf /1apreis, 19.10.2026).
   Prüfmethode: Wurzelklassen der Komponenten gegen die scoped Selektoren der Seiten
   abgleichen, die sie einbinden.
+- Gilt eine Regel, die für Bilder gedacht ist, auch für Elemente ohne eigene Proportion
+  (iframe, video ohne Metadaten, object)? `height: auto` wird dort zu 150px
+  (Videos im Blog, 19.10.2026).
+- Deckt eine Regel für WordPress-Inhalte nur das Gutenberg-Markup ab (`.wp-block-*`)?
+  Der Blog hat 20 Jahre Altbestand aus dem klassischen Editor mit nacktem HTML.
+  Prüfmethode: alle Beiträge per REST-API holen und das betroffene Element auszählen,
+  getrennt nach mit und ohne Block-Hülle.
 - Welche CSS-Klassen liefert eine Fremdquelle (WordPress-Blöcke, eingebettete Widgets) mit,
   für die wir keine Regeln definiert haben? Fehlendes Layout-CSS sieht aus wie ein Bug im
   Inhalt, nicht wie eine Lücke im Stylesheet.

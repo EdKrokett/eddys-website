@@ -232,11 +232,34 @@
   .wp-content a:hover {
     color: var(--color-accent-200);
   }
-  .wp-content img,
-  .wp-content iframe {
+  .wp-content img {
     max-width: 100%;
     height: auto;
     border-radius: 2px;
+  }
+
+  /*
+   * iframes OHNE `height: auto`: Anders als ein Bild hat ein iframe keine eigene
+   * Proportion, `auto` fällt auf die Browser-Standardhöhe von 150px zurück. So
+   * behalten Karten und andere Einbettungen ihr `height`-Attribut aus WordPress.
+   */
+  .wp-content iframe {
+    max-width: 100%;
+    border-radius: 2px;
+  }
+
+  /*
+   * Videos aus dem klassischen Editor: nacktes <iframe width="560" height="315">
+   * ohne Gutenberg-Hülle, deshalb greift die `.wp-block-embed`-Regel unten nicht.
+   * Betrifft 63 Videos (40 youtube.com, 22 youtube-nocookie.com, 1 Vimeo; gezählt
+   * 19.10.2026). Volle Textbreite in 16:9, wie die Gutenberg-Embeds.
+   */
+  .wp-content iframe[src*='youtube.com/'],
+  .wp-content iframe[src*='youtube-nocookie.com/'],
+  .wp-content iframe[src*='player.vimeo.com/'] {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
   .wp-content blockquote {
     border-left: 2px solid var(--color-accent-500);
