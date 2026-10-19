@@ -23,7 +23,7 @@ Jahre — das passt strukturell nicht hinein. Dazu war die Seite schon einmal �
 (siehe `ueber-mich-navigation.md`); ein fünftes Kapitel macht sie wieder länger. `/1apreis` ist
 der Präzedenzfall: eigene Geschichte, eigene Seite.
 
-**Warum „Werkbank":** Die Klammer zum Uhrmacher. `/ueber-mich` zeigt das Zifferblatt, die
+**Warum „Werkbank":** Die Klammer zum Uhrmacher. `/ueber-mich` ist das Zifferblatt, die
 Außenansicht. Die Werkbank ist die Rückseite — offenes Werk, sichtbare Mechanik. Und sie vermeidet,
 dass auf einer Seite ohne ein einziges Buzzword plötzlich „KI & Automatisierung" als Überschrift
 steht.

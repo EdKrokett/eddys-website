@@ -88,7 +88,7 @@ ausgerechnet den Uhrmacher versteckt — den roten Faden der ganzen Seite.
 ## Jahresachse
 
 `CvYearAxis.vue` zeichnet 1991—heute als Chronografen-Skala: Jahres-Ticks (Haupt-Tick alle
-5 Jahre, wie die Indexe auf dem Zifferblatt im Intro), Stationen als Balken. Klick auf einen
+5 Jahre, wie die Indexe eines Zifferblatts), Stationen als Balken. Klick auf einen
 Balken scrollt zur Station **und** klappt sie auf.
 
 ### Spuren statt einer Reihe
@@ -132,7 +132,7 @@ Ohne die erste Regel käme der Werdegang ohne Beschreibungen aus dem Drucker.
 ## Bewusst nicht gebaut
 
 - **Three.js** (Eddys Vorschlag, 30.08.2026). ~150 KB gzip Runtime, nicht SSR-fest, und es
-  bricht das Prinzip, das die ganze Seite trägt: Das Zifferblatt im Intro ist reines SVG,
+  bricht das Prinzip, das die ganze Seite trägt: Grafik ist reines SVG (heute der Lageplan im Intro),
   ohne Netzwerk-Request. Vor allem löst 3D das benannte Problem — die Länge — nicht.
 - **Skills-Vollprofil** (~70 Einzelbewertungen aus `docs/content-sammlung.md` per Umschalter).
   Von Eddy in derselben Rückfrage abgewählt. Die Rohdaten liegen weiter dort bereit.

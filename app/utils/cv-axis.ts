@@ -45,7 +45,7 @@ export interface CvAxisModel {
 
 export interface CvAxisTick {
   year: number
-  /** Betonter Index alle 5 Jahre, wie auf dem Zifferblatt im Intro. */
+  /** Betonter Index alle 5 Jahre, wie auf einem Zifferblatt. */
   major: boolean
   /**
    * Volles Jahrzehnt. Auf schmalen Screens ist nur dafür Platz — bei 375 px

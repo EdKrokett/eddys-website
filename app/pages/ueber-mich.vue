@@ -2,13 +2,13 @@
 import type { CvChapter } from '#shared/types/cv'
 
 /**
- * Das Zifferblatt-Motiv und die Fakten-Leiste standen zunächst auf der Startseite
- * und sind auf Eddys Wunsch hierher gewandert (26.08.2026) — inhaltlich gehören
- * beide zur Person, nicht zum Einstieg: Der Bezel greift die Uhrmacher-Herkunft
- * auf, die Fakten sind die Kurzfassung der Biografie darunter.
+ * ── Einstieg seit 19.10.2026 ───────────────────────────────────────────────
+ * Die animierte Uhr ist auf Eddys Wunsch entfallen. Oben steht jetzt der Text
+ * seiner alten Seite blog.eduard-andrae.de/persoenliches, mit den Fotos von dort
+ * als Tafeln und einem eigenen Lageplan von Arsten, über die volle Breite.
+ * Konzept, Textänderungen und Kartendaten: docs/ueber-mich-einstieg.md.
  *
- * Der Bezel ist reines SVG (kein Bild, kein Canvas): skaliert verlustfrei,
- * kostet keinen Netzwerk-Request und ist SSR-fest.
+ * Die Fakten-Leiste darunter ist geblieben: die Kurzfassung der Biografie.
  *
  * ── Navigierbar seit 30.08.2026 ────────────────────────────────────────────
  * Die Seite war "eine lange Tapete" (Eddy): ein Scroll ohne Orientierung. Sie ist
@@ -18,27 +18,8 @@ import type { CvChapter } from '#shared/types/cv'
  * aufklappbare Stationen. Konzept und Begründungen: docs/ueber-mich-navigation.md.
  */
 
-/** 60 Indexstriche wie auf einem Zifferblatt; jeder 5. ist ein betonter Hauptindex. */
-const TICKS = Array.from({ length: 60 }, (_, i) => ({
-  angle: i * 6,
-  major: i % 5 === 0,
-  /** Akzentindex auf 12 Uhr — die klassische Referenzmarke einer Uhr. */
-  accent: i === 0,
-}))
-
-/**
- * Die Uhr trägt bewusst NUR einen Sekundenzeiger (Eddys Wunsch, 26.08.2026).
- *
- * Stunden- und Minutenzeiger sind entfallen, weil sie zwangsläufig eine feste
- * und damit falsche Uhrzeit angezeigt hätten — eine echte Uhrzeit wiederum käme
- * auf Server und Client unterschiedlich heraus und erzeugte einen
- * Hydration-Mismatch (siehe docs/error-catalog.md). Ein einzelner laufender
- * Zeiger behauptet gar keine Zeit, sondern zeigt nur, dass sie vergeht: als
- * Motiv genau das Richtige für den Uhrmacher, der Marathon läuft.
- *
- * Er dreht gleitend statt im Quarz-Sekundentakt, wie ein mechanisches Werk —
- * 60 s pro Umlauf, reine CSS-Animation, kein JavaScript und kein Timer.
- */
+/** LinkedIn-Adresse aus der zentralen Profilliste statt doppelt gepflegt. */
+const linkedInUrl = SOCIAL_PROFILES.find(profile => profile.name === 'LinkedIn')?.url
 
 /**
  * Referenzjahr für Dauerangaben ("10 Jahre") und das Ende der Jahresachse.
@@ -152,88 +133,135 @@ useSeoMeta({
     <!-- ═══════════════ INTRO ═══════════════ -->
     <section class="intro">
       <UContainer class="relative z-10">
-        <div class="intro__top">
-          <!-- Textspalte -->
-          <div class="intro__body">
+        <!--
+          Text der alten Seite blog.eduard-andrae.de/persoenliches, Eddys eigener
+          Wortlaut. Was davon für die neue Seite angepasst ist (Links, ein Tippfehler):
+          docs/ueber-mich-einstieg.md.
+        -->
+
+        <!-- Block 1: Herkunft, rechts die Color-Run-Tafel bis zur Überschrift hochgezogen. -->
+        <div class="opening">
+          <div class="opening__head">
             <p class="kicker">
               <span class="intro__mark" aria-hidden="true" />Über mich
             </p>
 
             <h1 class="intro__title">
-              Erst Uhren.<br>Dann Startups.<br>Dann Marathon.
+              Wer schreibt hier?<br><em class="intro__title-turn">Und warum?</em>
             </h1>
-
-            <div class="intro__text">
-              <p>
-                Geboren 1966 in Nettetal am Niederrhein, gelernt habe ich ein Handwerk,
-                das Geduld verlangt: Uhrmacher. Acht Jahre stand ich im familiengeführten
-                Fachgeschäft, ab 1996 in der Geschäftsführung. Dann kam das Internet — und
-                ich habe schweren Herzens verkauft und neu angefangen.
-              </p>
-              <p>
-                Seit 2000 arbeite ich im Netz. Über den Schwarzwald, Gütersloh und Hamburg
-                bin ich in Bremen gelandet, wo ich mit meiner Frau Kathi lebe. Zwei
-                Unternehmen habe ich gegründet: 1Apreis.de, mein erstes Startup, und
-                trusted blogs, das ich bis heute führe.
-              </p>
-              <p>
-                Mit 40 habe ich das Rauchen aufgegeben — über 50 Zigaretten am Tag — und
-                mir vorgenommen, einen Marathon zu laufen. Neun Monate später bin ich in
-                Berlin ins Ziel gekommen. Seitdem läuft es, im Wortsinn.
-              </p>
-            </div>
           </div>
 
-          <!--
-            Das Porträt, das hier zwischenzeitlich vor der Uhr stand, ist auf
-            Eddys Wunsch auf die Startseite in den Kontaktbereich gewandert:
-            Uhr und Freisteller haben sich gegenseitig die Wirkung genommen.
-          -->
-          <div class="intro__visual">
-            <svg
-              class="intro__dial"
-              viewBox="-110 -110 220 220"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <circle r="104" class="intro__dial-ring" />
-              <circle r="86" class="intro__dial-ring intro__dial-ring--inner" />
+          <div class="prose opening__text">
+            <p class="prose__lead">
+              Ich heiße Eduard (Eddy) Andrae und stamme aus dem schönen
+              <a href="https://www.nettetal.de/" target="_blank" rel="noopener noreferrer">Nettetal</a>
+              am Niederrhein, wo ich 1966 geboren wurde. Na? Nachgerechnet? Ja genau: so alt bin
+              ich schon. Aber ich sag mal: je oller, je doller! Und außerdem werde ich 150 Jahre
+              alt, wie Du <NuxtLink to="/blog/ich-werde-150-jahre-alt">hier nachlesen</NuxtLink>
+              kannst. 😊
+            </p>
+            <p>
+              Eigentlich bin ich ja Uhrmachermeister, aber seit dem Jahr 2000 mache ich
+              <em>was mit Internet</em>, wie meine Mutter das gerne beschreibt, wenn sie gefragt
+              wird, was ihr Sohn beruflich macht. Wenn Dir diese Erklärung nicht reicht, findest
+              Du mehr Details weiter unten im <a href="#werdegang">Werdegang</a> und in meinem
+              <a
+                v-if="linkedInUrl"
+                :href="linkedInUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >LinkedIn-Profil</a><template v-else>LinkedIn-Profil</template>.
+              Meine beruflichen Stationen führten mich zunächst in den Schwarzwald, danach über
+              Gütersloh und Hamburg nach Bremen.
+            </p>
+            <p>
+              Hier habe ich Kathi getroffen, kennengelernt und geheiratet. Wir beide leben mit
+              <del>zwei Perserkatern</del> Perserkater Felix (leider mussten wir uns 2024 von
+              unserem geliebten Tyson verabschieden) in einem kleinen, aber feinen
+              Reihen-Eigenheim aka ‚Scheibchenvilla‘ am südlichen Bremer Stadtrand, im schönen
+              Arsten.
+            </p>
+          </div>
 
-              <g v-for="tick in TICKS" :key="tick.angle">
-                <line
-                  :transform="`rotate(${tick.angle})`"
-                  x1="0"
-                  y1="-104"
-                  x2="0"
-                  :y2="tick.major ? -93 : -99"
-                  :class="[
-                    'intro__tick',
-                    tick.major && 'intro__tick--major',
-                    tick.accent && 'intro__tick--accent',
-                  ]"
-                />
-              </g>
+          <CvPhotoPlate
+            class="opening__plate"
+            :photo="ABOUT_PHOTOS.colorRun"
+            :number="1"
+            sizes="100vw sm:420px lg:420px"
+            eager
+          />
+        </div>
 
-              <!-- Einziger Zeiger: die Sekunde, laufend -->
-              <line
-                x1="0"
-                y1="18"
-                x2="0"
-                y2="-88"
-                class="intro__hand intro__hand--second"
-              />
+        <!-- Block 2: Lageplan über die volle Breite, die Einladung liegt als Tafel darauf. -->
+        <div class="intro__map">
+          <CvArstenMap>
+            <div class="prose prose--note">
+              <p>
+                Übrigens: Wenn Du mal in Bremen bist und Lust hast, mit mir zu laufen, dann trau
+                Dich und <NuxtLink to="/kontakt">melde Dich einfach bei mir</NuxtLink>. Ich würde
+                mich freuen, wenn wir uns über das gemeinsame Hobby kennenlernen. Und ich biete
+                Dir bei Bedarf auch gern eine Übernachtungsmöglichkeit bei uns an.
+              </p>
+              <p>
+                Das ist wirklich ernst gemeint. Zum Beweis: unter der Überschrift
+                „<NuxtLink to="/blog/couch-running-eine-idee">Couch-Running</NuxtLink>“ habe ich
+                zu dieser Idee auch schon mal etwas hier im Blog geschrieben.
+              </p>
+            </div>
+          </CvArstenMap>
+        </div>
 
-              <!-- Zeigerkappe über den Zeigerenden, wie die Lagerschraube im Werk -->
-              <circle r="3.5" class="intro__cap" />
-              <circle r="1.2" class="intro__cap-pin" />
-            </svg>
+        <!-- Block 3: Laufen + Bloggen, gespiegelt zu Block 1. -->
+        <div class="running">
+          <CvPhotoPlate
+            class="running__plate"
+            :photo="ABOUT_PHOTOS.karstadtMarathon"
+            :number="3"
+            sizes="100vw sm:420px lg:420px"
+          />
+
+          <div class="prose running__text">
+            <h2 class="intro__subtitle">
+              Laufen <span class="intro__subtitle-plus" aria-hidden="true">+</span><span class="sr-only">und</span> Bloggen
+            </h2>
+            <p>
+              Mit dem Laufen begonnen habe ich erst mit 40 Jahren. Damals noch als Kettenraucher:
+              über 50 Kippen täglich, mehr als zwei Jahrzehnte lang. Wahnsinn. Damit sollte
+              Schluss sein…
+            </p>
+            <p class="prose__pull">
+              Statt einer neuen Schachtel Zigaretten kaufte ich also das erste Paar Laufschuhe.
+            </p>
+            <p>
+              Meine Absicht war, durch das Laufen meine „Gesundung“ zu beschleunigen und das
+              Nikotin noch schneller aus meinem Körper zu treiben. Wenn schon, denn schon!
+            </p>
+            <p>
+              Mein Ziel damals: wenigstens einmal in meinem Leben einen Marathon schaffen.
+            </p>
+            <p>
+              Zur gleichen Zeit (also 2006) habe ich auch mit dem Bloggen angefangen: Ich wollte
+              meine Verwandlung vom Kettenraucher zum Marathonläufer festhalten. Für später…
+            </p>
+            <p>
+              Mein Ziel habe ich 9 Monate später erreicht, als ich beim Berlin-Marathon nach rund
+              viereinhalb Stunden überglücklich über die Ziellinie gelaufen bin. Seitdem versuche
+              ich, mindestens einmal pro Jahr über offiziell vermessene Distanzen ins Ziel zu
+              laufen. Das ist mir bis heute auch ein paar mal gelungen. Und inzwischen bin ich
+              richtig verliebt in diese ganz besondere Atmosphäre bei Wettkämpfen.
+            </p>
+            <p>
+              Auf der Seite „<a
+                href="https://blog.eduard-andrae.de/statistik/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Statistisches</a>“ halte ich fest, wann, wo und wie weit ich gelaufen bin. Für
+              später, wie gesagt.
+            </p>
           </div>
         </div>
 
-        <!-- Fakten als Messwerte, nicht als Fließtext. Wieder über die volle
-             Breite, seit die Bildspalte weggefallen ist: In der schmalen
-             Textspalte brachen die fünf Zellen auf zwei Zeilen um und
-             hinterließen eine leere Restfläche. -->
+        <!-- Fakten als Messwerte, nicht als Fließtext: die Kurzfassung des Texts darüber. -->
         <dl class="facts">
           <div v-for="fact in CV_FACTS" :key="fact.label" class="facts__item">
             <dt class="facts__value">
@@ -475,7 +503,9 @@ useSeoMeta({
 .intro {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  /* `clip` statt `hidden`: `hidden` machte die Sektion zum Scroll-Container, und
+     die mitlaufende Karstadt-Tafel (position: sticky) bliebe dann stehen. */
+  overflow: clip;
   padding: clamp(3.5rem, 9vw, 6.5rem) 0 clamp(3rem, 6vw, 4.5rem);
   background:
     radial-gradient(85% 70% at 12% 0%, rgba(33, 164, 163, 0.07) 0%, transparent 55%),
@@ -483,145 +513,171 @@ useSeoMeta({
   border-bottom: 1px solid var(--color-graphite-700);
 }
 
-/* ── Kopf mit großer, angeschnittener Uhr ──────────────────────────────── */
-.intro__top {
-  position: relative;
+/*
+ * ── Raster des Einstiegs ────────────────────────────────────────────────
+ * Volle Containerbreite, 12 Spalten ab 1024 px. Block 1 (Text links, Tafel
+ * rechts) und Block 3 (Tafel links, Text rechts) sind gespiegelt, der Lageplan
+ * dazwischen läuft über alle Spalten. Darunter eine Spalte, die Tafeln stehen
+ * dann jeweils hinter ihrem Text. Konzept: docs/ueber-mich-einstieg.md.
+ */
+.opening,
+.running {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3rem);
 }
 
-.intro__body {
-  position: relative;
-  z-index: 1;
-  max-width: 40rem;
+@media (min-width: 1024px) {
+  .opening,
+  .running {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(1.5rem, 3vw, 2.5rem);
+    row-gap: 0;
+  }
+
+  .opening__head {
+    grid-column: 1 / 8;
+    grid-row: 1;
+  }
+  .opening__text {
+    grid-column: 1 / 8;
+    grid-row: 2;
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+  /* Bis zur Überschrift hochgezogen: Das Foto ist der erste Blickfang, nicht
+     ein Anhängsel unter dem Text. */
+  .opening__plate {
+    grid-column: 9 / 13;
+    grid-row: 1 / 3;
+    align-self: start;
+    margin-top: 0.5rem;
+  }
+
+  .running__plate {
+    grid-column: 1 / 5;
+    grid-row: 1;
+    align-self: start;
+    /* Klebt beim Lesen der langen Textspalte mit, statt oben allein zu stehen. */
+    position: sticky;
+    top: 6rem;
+  }
+  .running__text {
+    grid-column: 6 / 13;
+    grid-row: 1;
+  }
+}
+
+/* Einspaltig: Tafeln nicht über die ganze Breite ziehen, ein Hochformat-Foto
+   würde sonst mehr als einen Bildschirm füllen. */
+@media (max-width: 1023px) {
+  .opening__plate,
+  .running__plate {
+    max-width: 26rem;
+  }
+  .running__plate {
+    order: 2;
+  }
+}
+
+.intro__map {
+  margin-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+/* ── Typografie des Einstiegs ───────────────────────────────────────────── */
+.intro__title {
+  margin-top: 1.25rem;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  color: var(--color-steel-100);
+}
+
+/* Die zweite Frage kippt in Kursive und Akzent — die Antwort steht im Text. */
+.intro__title-turn {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--color-accent-300);
+}
+
+.intro__subtitle {
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.875rem, 4vw, 2.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--color-steel-100);
+}
+.intro__subtitle-plus {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--color-accent-400);
+}
+
+.prose {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 42rem;
+  font-size: var(--text-md);
+  line-height: 1.75;
+  color: var(--color-steel-200);
+}
+
+.prose__lead {
+  font-size: var(--text-lg);
+  line-height: 1.65;
+  color: var(--color-steel-100);
 }
 
 /*
- * Die Uhr ist bewusst größer als ihr Platz und läuft rechts aus dem Bild —
- * sichtbar bleibt etwas mehr als die Hälfte. Der Anschnitt gibt ihr Maßstab,
- * ohne dass sie mit dem Text um die Fläche konkurriert. Sie liegt hinter dem
- * Text, der auf der ruhigen linken Hälfte steht.
+ * Der Wendepunkt der Geschichte, groß gesetzt. Kein wiederholtes Zitat: Der Satz
+ * steht nur hier, die Hervorhebung ist reine Typografie.
  */
-.intro__visual {
-  position: absolute;
-  z-index: 0;
-  top: 50%;
-  right: 0;
-  translate: 0 -50%;
-  width: min(52vw, 44rem);
-  aspect-ratio: 1;
-  pointer-events: none;
+.prose__pull {
+  margin-block: 0.75rem;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--color-accent-500);
+  font-family: var(--font-display);
+  font-size: clamp(1.375rem, 2.6vw, 1.75rem);
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--color-steel-100);
 }
 
-.intro__dial {
-  position: absolute;
-  inset: 0;
-  /* Nach rechts herausgeschoben: gut ein Drittel liegt außerhalb. */
-  translate: 32% 0;
-  width: 100%;
-  aspect-ratio: 1;
-  opacity: 0.9;
+.prose--note {
+  max-width: none;
+  gap: 1rem;
+  font-size: var(--text-base);
+  line-height: 1.7;
 }
 
-/* Hochkant ist keine freie Spalte da — die Uhr wird zum Hintergrundmotiv oben
-   rechts und deutlich zurückgenommen, damit der Fließtext lesbar bleibt. */
-@media (max-width: 999px) {
-  .intro__visual {
-    top: 0;
-    translate: 0 -20%;
-    width: 115vw;
+.prose a {
+  color: var(--color-steel-100);
+  border-bottom: 1px solid var(--color-accent-500);
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.prose a:hover {
+  color: var(--color-accent-300);
+  border-bottom-color: var(--color-accent-300);
+}
+
+/* Eddys sichtbare Korrektur ("zwei Perserkatern") — durchgestrichen, aber lesbar. */
+.prose del {
+  color: var(--color-steel-500);
+  text-decoration-color: var(--color-brass-400);
+  text-decoration-thickness: 1.5px;
+}
+
+/* ── Auftritt beim Laden ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .opening__head,
+  .opening__text,
+  .opening__plate {
+    animation: var(--animate-rise);
   }
-  .intro__dial {
-    translate: 26% 0;
-    opacity: 0.4;
+  .opening__text {
+    animation-delay: 120ms;
   }
-}
-
-/*
- * Auf dem Smartphone entfällt die Uhr ganz (Eddys Wunsch, 30.08.2026): Auf
- * Telefonbreite deckt das 115vw große Zifferblatt den kompletten Intro-Text ab,
- * statt ihn nur zu hinterlegen — als Hintergrundmotiv taugt es dort nicht mehr.
- *
- * `display: none` statt `opacity: 0` oder `visibility: hidden`: Nur so hört auch
- * die Sekundenzeiger-Animation auf zu laufen, statt unsichtbar weiter jede
- * Frame-Zeit und Akku zu kosten. Die Uhr ist rein dekorativ (`aria-hidden`),
- * es geht also kein Inhalt verloren, und `.intro__visual` ist absolut
- * positioniert — das Ausblenden verschiebt nichts im Textfluss.
- */
-@media (max-width: 767px) {
-  .intro__visual {
-    display: none;
+  .opening__plate {
+    animation-delay: 220ms;
   }
-}
-
-/* ── Zifferblatt-Details ────────────────────────────────────────────────── */
-.intro__dial-ring {
-  fill: none;
-  stroke: var(--color-graphite-700);
-  stroke-width: 0.4;
-}
-.intro__dial-ring--inner {
-  stroke-dasharray: 1 5;
-  opacity: 0.7;
-}
-
-.intro__tick {
-  stroke: var(--color-steel-600);
-  stroke-width: 0.7;
-  opacity: 0.75;
-}
-.intro__tick--major {
-  stroke: var(--color-steel-600);
-  stroke-width: 1.4;
-}
-.intro__tick--accent {
-  stroke: var(--color-accent-500);
-  stroke-width: 2.4;
-}
-
-/* ── Zeiger ─────────────────────────────────────────────────────────────── */
-.intro__hand {
-  stroke-linecap: round;
-  /* Leichter Schatten, damit die Zeiger auch über hellen Bildstellen ablesbar
-     bleiben — auf dem hellblauen Hemd würden sie sonst verschwinden. */
-  filter: drop-shadow(0 1px 3px rgba(14, 15, 18, 0.85));
-}
-
-/*
- * Der Sekundenzeiger dreht um den Zifferblattmittelpunkt — der liegt in dieser
- * viewBox (-110 -110 220 220) bei den Nutzerkoordinaten 0 0.
- *
- * ACHTUNG, hier lag ein Fehler: `transform-origin: center` sieht richtig aus,
- * löst aber zu `110px 110px` auf. Die 50 % werden gegen die GRÖSSE der viewBox
- * (220) gerechnet, das Ergebnis aber im Nutzerkoordinatensystem angewendet — und
- * dort ist (110,110) nicht die Mitte, sondern unten rechts. Der Zeiger drehte
- * dadurch um einen Punkt am Zifferblattrand und flog aus dem Bild.
- * Bei einer auf 0 0 zentrierten viewBox muss der Ursprung explizit `0 0` sein.
- */
-.intro__hand--second {
-  stroke: var(--color-accent-300);
-  stroke-width: 1.6;
-  transform-box: view-box;
-  transform-origin: 0 0;
-  animation: clock-sweep 60s linear infinite;
-}
-
-@keyframes clock-sweep {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Sekundenzeiger anhalten, wenn reduzierte Bewegung gewünscht ist. Er bleibt
-   sichtbar, die Uhr wirkt dann nur stehengeblieben statt zu verschwinden. */
-@media (prefers-reduced-motion: reduce) {
-  .intro__hand--second {
-    animation: none;
-  }
-}
-
-.intro__cap {
-  fill: var(--color-steel-300);
-}
-.intro__cap-pin {
-  fill: var(--color-graphite-950);
 }
 
 .intro__mark {
@@ -678,24 +734,6 @@ useSeoMeta({
   font-size: var(--text-xs);
   line-height: 1.4;
   color: var(--color-steel-500);
-}
-
-.intro__title {
-  margin-top: 1.25rem;
-  font-size: clamp(2.25rem, 6vw, 3.75rem);
-  line-height: 0.98;
-  letter-spacing: -0.04em;
-  color: var(--color-steel-100);
-}
-
-.intro__text {
-  display: grid;
-  gap: 1.25rem;
-  margin-top: clamp(2rem, 4vw, 3rem);
-  max-width: 40rem;
-  font-size: var(--text-lg);
-  line-height: 1.75;
-  color: var(--color-steel-200);
 }
 
 /* ── Sektionen ──────────────────────────────────────────────────────────── */
