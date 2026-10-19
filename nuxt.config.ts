@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { IMAGE_PROXY_HOSTS } from './shared/utils/image-proxy-hosts'
 
 // Basis für Vercel Web Analytics, Herleitung am `$production`-Block unten. Den führenden
 // Slash ergänzt das Paket ebenso (`makeAbsolute`), Vercel liefert den Pfad nicht garantiert so.
@@ -212,11 +213,12 @@ export default defineNuxtConfig({
   // Phase B), eduard-andrae.de/www.eduard-andrae.de übernimmt die neue Nuxt-Seite.
   image: {
     /**
-     * `i.ytimg.com`: Vorschaubilder der YouTube-Platzhalter in Blogbeiträgen. Sie laufen
-     * über den Bild-Proxy, damit der Browser vor dem Klick nicht mit YouTube spricht
-     * (docs/blog-einbettungen.md).
+     * Neben WordPress nur Server, deren Bilder über den Proxy laufen MÜSSEN, damit der
+     * Browser ohne Klick keinen Drittanbieter anfragt. Die Liste steht in
+     * `shared/utils/image-proxy-hosts.ts`, weil `proxyForeignImages` dieselbe braucht:
+     * Für einen Host, der hier fehlt, gäbe `useImage()` still die Original-URL zurück.
      */
-    domains: ['blog.eduard-andrae.de', 'i.ytimg.com'],
+    domains: [...IMAGE_PROXY_HOSTS],
 
     /**
      * Provider-Optionen für Vercel. Greifen NUR im Vercel-Build; lokal läuft IPX.

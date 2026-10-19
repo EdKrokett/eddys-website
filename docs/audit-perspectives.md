@@ -346,3 +346,20 @@ wenn eine Ressource gezielt geleert, ersetzt oder neu gebaut wird.
   Falle: Ein Fix, der nur das HTML erneuert, sieht bei jeder Kontrolle per `curl` auf die
   URL richtig aus. Der Fehler überlebt seine eigene Verifikation. Prüfmethode: den Weg
   nachstellen, den ein Besucher nimmt, nicht den bequemsten.
+
+## Was tut der Helfer, wenn er nicht kann?
+
+Aus dem Bild-Proxy vom 19.10.2026 (`docs/error-catalog.md`). Anzuwenden, wenn ein fremder
+Helfer (Composable, Bibliotheksfunktion, Provider) eine Schutzwirkung liefern soll: Proxy,
+Escaping, Sanitizing, Umschreiben von URLs.
+
+- Was gibt der Helfer zurück, wenn die Eingabe außerhalb seiner Konfiguration liegt? Fehler,
+  leerer Wert oder **still das Original**? Der dritte Fall ist der gefährliche, weil das
+  Ergebnis plausibel aussieht. Prüfmethode: die Stelle im Quellcode unter `node_modules`
+  lesen, nicht die Doku; dort nach frühen `return`s mit der Eingabe suchen.
+- Hängen zwei Stellen an derselben Liste (Konfiguration und Code, der sie voraussetzt)?
+  Dann gehört die Liste in eine Datei, die beide importieren. Zwei Kopien laufen
+  auseinander, sobald jemand eine davon kürzt.
+- Ersetzt der Test den Helfer durch einen Stub? Dann prüft er nur den eigenen Code unter
+  der Annahme, dass der Helfer immer kann. Mindestens ein Fall gehört an den Rand dieser
+  Annahme: eine Eingabe, für die der echte Helfer nicht greift.

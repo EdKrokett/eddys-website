@@ -1005,3 +1005,36 @@ Vercel überhaupt einzeln cacht. Die Antwort stand im Build-Verzeichnis:
 
 **→ AUDIT-PERSPEKTIVE:** „In wie vielen Fassungen existiert das?" in
 `docs/audit-perspectives.md`.
+
+## Bild-Proxy reicht nicht freigegebene Hosts still durch
+
+**Gefunden:** 19.10.2026, beim Gegenlesen von `proxyForeignImages`, bevor die Änderung
+committet war.
+
+**FALSCH:**
+```ts
+// app/utils/foreign-images.ts — jedes fremde Bild an useImage(), egal welcher Host
+url.protocol = 'https:'
+return tag.replace(SRC_ATTRIBUTE, ` src="${escapeAttribute(proxy(url.toString()))}"`)
+// nuxt.config.ts: domains enthielt bewusst nur die noch erreichbaren Server
+```
+
+**RICHTIG:**
+```ts
+// shared/utils/image-proxy-hosts.ts ist die einzige Liste, nuxt.config.ts liest sie
+// (`domains: [...IMAGE_PROXY_HOSTS]`), und der Filter prüft vor dem Proxy-Aufruf:
+if (!IMAGE_PROXY_HOSTS.includes(url.hostname.toLowerCase())) return ''
+```
+
+**WARUM:** Die Annahme war, dass der Proxy einen nicht freigegebenen Host mit einem Fehler
+abweist (Vercel 400, IPX 403). Tatsächlich kommt die Anfrage nie beim Proxy an:
+`useImage()` vergleicht den Host vorher mit `image.domains` und gibt bei einem Fehlschlag
+die Eingabe-URL unverändert zurück (`@nuxt/image/dist/runtime/image.js`, `validateDomains`
+in beiden Providern). Für den Amazon-Zählpixel, tiger-balm-team.de und 1-2-sports.com stand
+damit `src="https://<fremder Server>/…"` im HTML, der Browser fragte dort direkt an, jetzt
+sogar per https. Die Tests sahen das nicht, weil sie `useImage()` durch einen Stub
+ersetzen, der jede URL brav in eine Proxy-URL verwandelt. Der Stub hatte genau das
+Verhalten, das der echte Helfer nicht hat.
+
+**→ AUDIT-PERSPEKTIVE:** „Was tut der Helfer, wenn er nicht kann?" in
+`docs/audit-perspectives.md`.

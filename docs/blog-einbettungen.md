@@ -79,12 +79,38 @@ Wiederholen, wenn sich an `guardEmbeds` etwas ändert: Liste der Beiträge per R
 holen (`/wp-json/wp/v2/posts?per_page=100&page=N&_fields=slug,content`), jeden aufrufen,
 `page.on('request')` auf Hosts außerhalb von `localhost`/`eduard-andrae.de` filtern.
 
-## Nicht abgedeckt: Bilder von fremden Servern
+## Bilder von fremden Servern (seit 19.10.2026)
 
-Etwa ein Dutzend `<img>` in alten Beiträgen zeigen auf fremde Server (Blogspot,
-Facebook-CDN, ggpht, tiger-balm-team.de, ein Amazon-Partner-Zählpixel). Auch die laden ohne
-Klick. Sie sind nicht Teil dieser Änderung. Lösung wäre, sie über den Bild-Proxy zu
-leiten oder in WordPress zu ersetzen (offen, Eddys Entscheidung).
+Zehn `<img>` in alten Beiträgen zeigten direkt auf fremde Server und luden ohne Klick
+(Eddys Freigabe, 19.10.2026). `proxyForeignImages(html, proxy)` in
+`app/utils/foreign-images.ts` leitet jedes `<img>` mit fremder Quelle über den Bild-Proxy.
+`srcset` und `sizes` fallen dabei weg, sonst lüde der Browser die Varianten weiter direkt.
+
+| Server | Bilder | Zustand (19.10.2026) | Behandlung |
+| --- | ---: | --- | --- |
+| 3.bp.blogspot.com | 4 | 3 erreichbar, 1 tot (404) | Proxy |
+| lh4.ggpht.com | 1 | erreichbar | Proxy |
+| static.xx.fbcdn.net | 2 | erreichbar (Facebook-Emojis, 16px) | Proxy |
+| www.1-2-sports.com | 1 | tot (404) | entfernt |
+| tiger-balm-team.de | 1 | Server antwortet nicht | entfernt |
+| www.assoc-amazon.de | 1 | Server antwortet nicht (Partner-Zählpixel) | entfernt |
+
+**Freigegeben ist nur, was in `shared/utils/image-proxy-hosts.ts` steht.** Dieselbe Liste
+speist `image.domains` in `nuxt.config.ts`. Ein fremdes Bild, dessen Server dort fehlt,
+entfernt `proxyForeignImages` aus dem HTML. Es dem Proxy trotzdem zu übergeben, wäre ein
+Leck: Für einen nicht freigegebenen Host gibt `useImage()` keine Proxy-URL zurück, sondern
+still die Original-URL (`validateDomains` in IPX und im Vercel-Provider,
+`@nuxt/image/dist/runtime/image.js`). Die drei entfernten Bilder waren ohnehin tot.
+
+Kommt ein neues fremdes Bild in einen Beitrag, fehlt es auf dieser Seite, bis sein Server
+in der Liste steht. Bilder aus der WordPress-Mediathek betrifft das nicht.
+
+Relative Pfade (`../wp-content/…`, zehnmal in Beiträgen von 2010/2011) und `file://`
+bleiben unangetastet: Sie zeigen auf die eigene Domain oder nirgendwohin, Daten fließen
+dabei an niemanden.
+
+Kosten: ein Bild ist eine Transformation, 31 Tage im CDN gehalten (`minimumCacheTTL`).
+Bei sechs erreichbaren Bildern fällt das im Hobby-Kontingent nicht ins Gewicht.
 
 ## Qualitäts-Check (Q1–Q6)
 

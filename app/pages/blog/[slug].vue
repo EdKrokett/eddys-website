@@ -13,19 +13,25 @@ if (status.value === 'error' || !post.value) {
 }
 
 /**
- * Fremde Einbettungen (YouTube, Vimeo, …) erst nach Klick: Die Datenschutzerklärung
- * sagt zu, dass ohne Zutun keine Verbindung zu Drittanbietern entsteht. Hier statt in
- * der Server-Route, weil nur `useImage()` die Vorschaubild-URL des jeweiligen
- * Bild-Providers kennt. Hintergrund: docs/blog-einbettungen.md.
+ * Ohne Klick keine Verbindung zu Drittanbietern, so sagt es die Datenschutzerklärung zu:
+ * Bilder von fremden Servern laufen über den eigenen Bild-Proxy, fremde Einbettungen
+ * (YouTube, Vimeo, …) werden zu Platzhaltern. Hier statt in der Server-Route, weil nur
+ * `useImage()` die URL-Form des jeweiligen Bild-Providers kennt.
+ * Hintergrund: docs/blog-einbettungen.md.
  */
 const img = useImage()
-const content = computed(() => guardEmbeds(post.value?.content, {
-  youtubeThumbnail: id => img(`https://i.ytimg.com/vi/${id}/hqdefault.jpg`, {
-    width: 640,
-    format: 'webp',
-    quality: 75,
-  }),
-}))
+const content = computed(() => {
+  const withProxiedImages = proxyForeignImages(post.value?.content, url =>
+    img(url, { width: 640, quality: 80 }))
+
+  return guardEmbeds(withProxiedImages, {
+    youtubeThumbnail: id => img(`https://i.ytimg.com/vi/${id}/hqdefault.jpg`, {
+      width: 640,
+      format: 'webp',
+      quality: 75,
+    }),
+  })
+})
 
 /** Ein Listener für alle Platzhalter, weil `v-html` keine Vue-Handler kennt. */
 function onContentClick(event: MouseEvent) {

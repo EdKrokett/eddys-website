@@ -1,4 +1,14 @@
 import { decodeHtmlEntities } from '#shared/utils/html-entities'
+import {
+  escapeAttribute,
+  escapeText,
+  isOwnHost,
+  matchesDomain,
+  normalizedHost,
+  parseAttributes,
+  parseUrl,
+  TAG_BODY,
+} from './html/wp-html'
 
 /**
  * Zwei-Klick-Lösung für Einbettungen in Blogbeiträgen.
@@ -21,8 +31,6 @@ type Embed
     | { kind: 'vimeo', src: string }
     | { kind: 'other', src: string, provider: string }
 
-const OWN_HOSTS = ['eduard-andrae.de']
-
 const YOUTUBE_HOSTS = ['youtube.com', 'youtube-nocookie.com']
 const YOUTUBE_ID = /^[\w-]{11}$/
 /**
@@ -42,15 +50,10 @@ const PROVIDER_NAMES: Record<string, string> = {
   'garmin.com': 'Garmin Connect',
 }
 
-/**
- * Attribute dürfen `>` enthalten, wenn es in Anführungszeichen steht (`title="a > b"`).
- * Ein schlichtes `[^>]*` endete dort und ließe den Rest des Tags im HTML stehen.
- */
-const IFRAME = /<iframe\b((?:[^>"']|"[^"]*"|'[^']*')*)>(?:[\s\S]*?<\/iframe>)?/gi
+const IFRAME = new RegExp(String.raw`<iframe\b${TAG_BODY}>(?:[\s\S]*?<\/iframe>)?`, 'gi')
 const FLASH_OBJECT = /<object\b[\s\S]*?<\/object>/gi
 const FLASH_EMBED = /<embed\b[^>]*>/gi
 const FLASH_YOUTUBE = /youtube(?:-nocookie)?\.com\/v\/([\w-]{11})/i
-const ATTRIBUTE = /([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g
 
 /**
  * Ersetzt fremde Einbettungen im Beitrags-HTML durch Platzhalter.
@@ -111,8 +114,8 @@ function classifyEmbed(rawSrc: string): Embed | null {
   const url = parseUrl(decodeHtmlEntities(rawSrc))
   if (!url) return null
 
-  const host = url.hostname.toLowerCase().replace(/^www\./, '')
-  if (matchesDomain(host, OWN_HOSTS)) return null
+  const host = normalizedHost(url)
+  if (isOwnHost(host)) return null
 
   if (matchesDomain(host, YOUTUBE_HOSTS)) {
     const id = url.pathname.match(/^\/(?:embed|v)\/([^/]+)\/?$/)?.[1]
@@ -176,27 +179,6 @@ function youtubeEmbedUrl(id: string, start: string | null): string {
   return url.toString()
 }
 
-function parseAttributes(raw: string): Record<string, string> {
-  const attributes: Record<string, string> = {}
-  for (const match of raw.matchAll(ATTRIBUTE)) {
-    const name = match[1]!.toLowerCase()
-    attributes[name] = match[2] ?? match[3] ?? match[4] ?? ''
-  }
-  return attributes
-}
-
-function parseUrl(src: string): URL | null {
-  const trimmed = src.trim()
-  if (!trimmed) return null
-  try {
-    // Protokoll-relative (`//www.youtube.com/…`) und relative Pfade auflösen. Relative
-    // Pfade landen dabei auf der eigenen Domain und bleiben so unangetastet.
-    return new URL(trimmed, 'https://blog.eduard-andrae.de')
-  } catch {
-    return null
-  }
-}
-
 function aspectRatio(width: string | undefined, height: string | undefined): string | null {
   const w = Number(width)
   const h = Number(height)
@@ -204,19 +186,7 @@ function aspectRatio(width: string | undefined, height: string | undefined): str
   return `${w} / ${h}`
 }
 
-function matchesDomain(host: string, domains: string[]): boolean {
-  return domains.some(domain => host === domain || host.endsWith(`.${domain}`))
-}
-
 function providerName(host: string): string {
   const known = Object.keys(PROVIDER_NAMES).find(domain => matchesDomain(host, [domain]))
   return known ? PROVIDER_NAMES[known]! : host
-}
-
-function escapeText(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-function escapeAttribute(value: string): string {
-  return escapeText(value).replace(/"/g, '&quot;')
 }
