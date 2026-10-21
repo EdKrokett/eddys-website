@@ -12,7 +12,7 @@
  * - Die Referenzen sind ausgeführte Arbeiten: Bildstreifen, Jahreszahl in Mono.
  * - Der Buchungslink sitzt auf einem Auftragsschein mit Abrisskante. Das ist das eine
  *   auffällige Element der Seite; Katalog-Nr. 76 ist die Auftragsnummer.
- * - Nur Teal. Messing gehört auf `/werkbank` dem Ausgestellten.
+ * - Nur Teal. Messing gehört auf `/trusted-blogs` dem Ausgestellten.
  */
 
 /**
@@ -355,7 +355,7 @@ useSeoMeta({
   background: var(--color-graphite-950);
 }
 
-/* Gleiche Reserve wie auf /werkbank: 4rem Header plus Puffer für den Schriftwechsel. */
+/* Gleiche Reserve wie auf /trusted-blogs: 4rem Header plus Puffer für den Schriftwechsel. */
 .section[id] {
   scroll-margin-top: 9rem;
 }
@@ -507,7 +507,7 @@ useSeoMeta({
 
 /*
   Gemeinsamer 3:1-Ausschnitt: Die Beitragsbilder reichen von gut 2:1 bis 5:1. Im
-  Ruhezustand gedämpft wie die Vitrinen auf /werkbank, damit drei farbige Fotos die
+  Ruhezustand gedämpft wie die Vitrinen auf /trusted-blogs, damit drei farbige Fotos die
   dunkle Seite nicht überstrahlen.
 */
 .work__frame {

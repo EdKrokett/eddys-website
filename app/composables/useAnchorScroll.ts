@@ -8,8 +8,8 @@
  * Höhe — auch die oberhalb des Ziels. Das Ziel wandert dadurch weg, und zwar in beide
  * Richtungen, je nachdem welche Blöcke wachsen und welche schrumpfen.
  *
- * Gemessen auf /werkbank#handwerk (12.09.2026, je vier Aufrufe): ohne Korrektur lag das
- * Ziel zwischen 54 und 140px unter dem Seitenrand, mit einmaliger Korrektur nach
+ * Gemessen auf /werkbank#handwerk (heute /trusted-blogs#handwerk; 12.09.2026, je vier
+ * Aufrufe): ohne Korrektur lag das Ziel zwischen 54 und 140px unter dem Seitenrand, mit einmaliger Korrektur nach
  * `document.fonts.ready` zwischen 58 und 250px. Der Header ist 64px hoch, alles darunter
  * verschwindet also hinter ihm.
  *

@@ -1,14 +1,15 @@
 <script setup lang="ts">
 /**
- * Die Werkbank: Eddys Arbeit mit KI und Automatisierung.
+ * Die Seite „trusted blogs“ (intern: Werkbank, bis 21.10.2026 auch der sichtbare Name):
+ * Eddys Arbeit mit KI und Automatisierung am Beispiel des Neubaus von trusted blogs.
  *
  * Konzept, Quellen und die Begründung für jede Zahl stehen in `docs/werkbank.md`.
  * Die Inhalte selbst liegen als Konstanten in `app/utils/werkbank.ts` — diese Seite
  * ist ein reiner Orchestrator ohne eigene Datenbeschaffung.
  *
  * ── Design-Richtung ────────────────────────────────────────────────────────────
- * Fortsetzung von „Präzisionswerk“, aber im Modus Innenansicht: `/ueber-mich` zeigt
- * das Zifferblatt, die Werkbank zeigt das offene Werk. Konkret heißt das hier:
+ * Fortsetzung von „Präzisionswerk“, aber im Modus Innenansicht: Die Seite zeigt das
+ * offene Werk, die sichtbare Mechanik. Konkret heißt das hier:
  *
  * - Mono trägt mehr als sonst. JetBrains Mono setzt ganze Datenblöcke, nicht nur Labels.
  * - Die Kette ist das Leitmotiv: Knoten auf einer Linie statt Karten im Raster.
@@ -35,7 +36,7 @@ const shotDialog = useTemplateRef<HTMLDialogElement>('shotDialog')
  */
 useAnchorScroll()
 
-const title = 'Werkbank — Eduard Andrae'
+const title = 'trusted blogs — Eduard Andrae'
 const description
   = 'Wie ich trusted blogs mit KI neu gebaut habe: Zahlen aus dem Repository, 19 Make-Szenarien, '
     + 'die Stellen, an denen es geklemmt hat, und warum KI eher eine Geige ist als ein Hammer.'
@@ -49,7 +50,7 @@ useSeoMeta({
   ogDescription: description,
   ogType: 'article',
   ogSiteName: 'Eduard Andrae',
-  ogUrl: `${siteUrl}/werkbank`,
+  ogUrl: `${siteUrl}/trusted-blogs`,
   ogImage: `${siteUrl}/images/og-startseite.jpg`,
   ogImageWidth: 1200,
   ogImageHeight: 630,
@@ -65,7 +66,7 @@ useSeoMeta({
     <section class="intro">
       <UContainer>
         <p class="kicker">
-          <span class="intro__mark" aria-hidden="true" />Werkbank
+          <span class="intro__mark" aria-hidden="true" />trusted blogs
         </p>
 
         <!--
@@ -271,7 +272,7 @@ useSeoMeta({
       jemand, der keinen Code schreibt, so etwas bauen? Das ist kein Anhang, das ist die
       These der Seite.
 
-      Die `id` ist ein öffentliches Sprungziel: /werkbank#handwerk wird von außen
+      Die `id` ist ein öffentliches Sprungziel: /trusted-blogs#handwerk wird von außen
       verlinkt. Beim Umbenennen brechen fremde Links, die niemand nachziehen kann.
     -->
     <section id="handwerk" class="section section--bordered section--muted reveal">
@@ -514,7 +515,7 @@ useSeoMeta({
           </dl>
 
           <p class="prose">
-            Das Zifferblatt auf der Seite „Über mich", die Bilderwand auf der Startseite,
+            Der Lageplan auf der Seite „Über mich", die Bilderwand auf der Startseite,
             die Zeichnung weiter oben und das Papier, auf dem Manfreds Zitat steht: alles
             in diesem Browserfenster ist so entstanden. Darunter liegen Nuxt 4, Tailwind
             und TypeScript, dazu der Blog, der weiter in WordPress wohnt und über eine
@@ -1017,7 +1018,7 @@ useSeoMeta({
     Abstand zum Header (4rem) beim Ankersprung, mit Reserve.
 
     9rem statt der rechnerisch nötigen 5rem, weil der Direktaufruf von
-    /werkbank#szenario anders landet als der Klick von /ueber-mich: Der Browser
+    /trusted-blogs#szenario anders landet als der Klick von /ueber-mich: Der Browser
     springt dabei, bevor Schriften und Bilder final sind, und liegt dadurch je nach
     Lauf 40 bis 60px zu tief (gemessen 12.09.2026: 51px, 57px, 74px gegenüber 112px
     beim Klickweg). Mit 9rem bleibt die Oberkante auch im ungünstigsten Fall unter

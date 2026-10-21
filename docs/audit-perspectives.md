@@ -363,3 +363,19 @@ Escaping, Sanitizing, Umschreiben von URLs.
 - Ersetzt der Test den Helfer durch einen Stub? Dann prüft er nur den eigenen Code unter
   der Annahme, dass der Helfer immer kann. Mindestens ein Fall gehört an den Rand dieser
   Annahme: eine Eingabe, für die der echte Helfer nicht greift.
+
+## Wer erwähnt, was ich gerade entferne?
+
+Aus dem Zifferblatt-Satz auf `/trusted-blogs` vom 21.10.2026 (`docs/error-catalog.md`).
+Anzuwenden, wenn ein sichtbares Element wegfällt, umzieht oder umbenannt wird: Grafik,
+Abschnitt, Seite, Seitenname.
+
+- Unter welchen **Wörtern** kennt ein Besucher das Element? Nicht nur der Name im Code
+  (dort: der „Bezel“ in `ueber-mich.vue`), sondern das, was im Text steht („Uhr“, „Zifferblatt“, „Werkbank“).
+  Prüfmethode: `grep -rni` nach jedem dieser Wörter über `app/` und `docs/`, Treffer in
+  Kommentaren von Treffern im Template trennen.
+- Steht ein Treffer im sichtbaren Text einer **anderen** Seite? Diese Stellen fallen beim
+  Umbau der eigenen Seite nicht auf, weil niemand sie dabei ansieht.
+- Stützt sich eine Begründung in `docs/` auf das Element (ein Name, eine Designentscheidung)?
+  Dann ist mit dem Element auch die Begründung weg und muss neu geschrieben werden, nicht nur
+  sprachlich geglättet.

@@ -1,5 +1,5 @@
 /**
- * Typen der Werkbank-Seite (`app/pages/werkbank.vue`).
+ * Typen der Werkbank-Seite (`app/pages/trusted-blogs.vue`).
  *
  * Konzept, Quellen und die Begründung für jede Zahl: `docs/werkbank.md`.
  */

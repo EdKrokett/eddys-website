@@ -1038,3 +1038,29 @@ Verhalten, das der echte Helfer nicht hat.
 
 **→ AUDIT-PERSPEKTIVE:** „Was tut der Helfer, wenn er nicht kann?" in
 `docs/audit-perspectives.md`.
+
+## Sichtbarer Text nennt ein Element, das es nicht mehr gibt
+
+**Gefunden:** 21.10.2026, bei der Umbenennung der Werkbank in „trusted blogs“.
+
+**FALSCH:**
+```vue
+<!-- app/pages/trusted-blogs.vue, Kapitel 05 „Diese Seite“ -->
+Das Zifferblatt auf der Seite „Über mich", die Bilderwand auf der Startseite, …
+```
+
+**RICHTIG:**
+```vue
+Der Lageplan auf der Seite „Über mich", die Bilderwand auf der Startseite, …
+```
+
+**WARUM:** Die animierte Uhr auf `/ueber-mich` ist am 19.10.2026 entfallen (Commit
+`e492144`). Der Commit hat die Über-mich-Seite, ihre Doku und sogar die Namensbegründung in
+`docs/werkbank.md` angefasst (dort aus „zeigt das Zifferblatt“ ein bildliches „ist das
+Zifferblatt“ gemacht), aber nicht den Fließtext einer **anderen** Seite, der die Uhr
+namentlich aufzählt. Kein Test und kein Lint sieht so etwas: Der Satz ist gültiges Deutsch
+und gültiges HTML. Gesucht wurde offenbar nach Code-Verweisen (Komponente, Pfad), nicht nach
+dem Wort, mit dem Besucher das Element kennen.
+
+**→ AUDIT-PERSPEKTIVE:** „Wer erwähnt, was ich gerade entferne?" in
+`docs/audit-perspectives.md`.

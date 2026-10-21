@@ -236,15 +236,16 @@ const columns = computed<string[][]>(() => {
         <!--
           Dritter Weg, aber bewusst KEIN dritter Button: Drei gleich starke Flächen
           nebeneinander nähmen dem Teal-Button seine Sonderstellung, und die dritte
-          bräche auf Tablet-Breite allein um. Als leise Mono-Zeile ist die Werkbank
-          oben sichtbar, ohne die Zwei-Türen-Logik zu brechen, die sich unten in
-          HomeDoors wiederholt. Ihr eigenes Gewicht bekommt sie dort im Band.
+          bräche auf Tablet-Breite allein um. Als leise Mono-Zeile ist die Seite
+          „trusted blogs“ oben sichtbar, ohne die Zwei-Türen-Logik zu brechen, die sich
+          unten in HomeDoors wiederholt. Ihr eigenes Gewicht bekommt sie dort im Band.
+          Der Name steht schon im Schlüssel, deshalb sagt der Satz danach „die Plattform“.
         -->
-        <NuxtLink to="/werkbank" class="hero__aside">
+        <NuxtLink to="/trusted-blogs" class="hero__aside">
           <Icon name="lucide:corner-down-right" class="hero__aside-mark size-3.5" />
           <span>
-            <span class="hero__aside-key">Werkbank</span>
-            Wie ich trusted blogs mit KI neu gebaut habe
+            <span class="hero__aside-key">trusted blogs</span>
+            Wie ich die Plattform mit KI neu gebaut habe
           </span>
         </NuxtLink>
       </div>

@@ -8,7 +8,7 @@ entstehen. Struktur folgt der groben Seitenplanung vom 26.08.2026.
 
 Zwei gleichwertige Einstiege: Über Mich, Zum Blog.
 
-Die Werkbank ist bewusst KEIN dritter Einstieg, sondern der Beleg unter beiden: im Hero als
+Die Seite „trusted blogs“ (`/trusted-blogs`, intern Werkbank) ist bewusst KEIN dritter Einstieg, sondern der Beleg unter beiden: im Hero als
 leise Mono-Zeile unter den Buttons, im Body als Band quer unter den zwei Türen
 (`HomeWerkbank.vue`). Ein dritter gleich starker Button hätte dem Teal-CTA seine
 Sonderstellung genommen; eine dritte Rasterzelle hätte die Symmetrie der Türen zerlegt.

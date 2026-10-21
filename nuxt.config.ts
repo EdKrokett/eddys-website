@@ -140,6 +140,14 @@ export default defineNuxtConfig({
     '/blog': { isr: 1800 },
     '/blog/**': { isr: 3600 },
 
+    /**
+     * Die Seite „trusted blogs“ hieß bis 21.10.2026 „Werkbank“ und lag unter /werkbank.
+     * Links darauf sind geteilt worden (u. a. /werkbank#handwerk); der Browser hängt den
+     * Anker an das Weiterleitungsziel an. Ohne diese Regel fiele /werkbank in die
+     * Catch-all-Route und landete per 301 dauerhaft auf dem Blog. Siehe docs/werkbank.md.
+     */
+    '/werkbank': { redirect: { to: '/trusted-blogs', statusCode: 301 } },
+
     '/api/blog': {
       headers: {
         'cache-control': 'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400',

@@ -1,7 +1,9 @@
-# Werkbank: Konzept, Belege und Zahlen
+# trusted blogs (intern: Werkbank): Konzept, Belege und Zahlen
 
-Stand 17.09.2026. Beschreibt `app/pages/werkbank.vue` — die Seite über Eddys Arbeit mit KI
-und Automatisierung.
+Stand 21.10.2026. Beschreibt `app/pages/trusted-blogs.vue` (Adresse `/trusted-blogs`) — die
+Seite über Eddys Arbeit mit KI und Automatisierung am Beispiel des Neubaus von trusted blogs.
+Bis 21.10.2026 hieß sie „Werkbank“ und lag unter `/werkbank`; Begründung der Umbenennung
+unter „Name“.
 
 ## Warum es diese Seite gibt
 
@@ -23,10 +25,30 @@ Jahre — das passt strukturell nicht hinein. Dazu war die Seite schon einmal �
 (siehe `ueber-mich-navigation.md`); ein fünftes Kapitel macht sie wieder länger. `/1apreis` ist
 der Präzedenzfall: eigene Geschichte, eigene Seite.
 
-**Warum „Werkbank":** Die Klammer zum Uhrmacher. `/ueber-mich` ist das Zifferblatt, die
-Außenansicht. Die Werkbank ist die Rückseite — offenes Werk, sichtbare Mechanik. Und sie vermeidet,
-dass auf einer Seite ohne ein einziges Buzzword plötzlich „KI & Automatisierung" als Überschrift
-steht.
+**Name „trusted blogs“ (Eddys Entscheidung, 21.10.2026):** Drei der fünf Kapitel (Der Neubau,
+Die Maschinen, Wo es klemmte) handeln direkt von trusted blogs, und die Startseite kündigte die
+Seite schon vorher mit „Wie ich trusted blogs mit KI neu gebaut habe“ an. Der bekannte Name sagt
+in der Navigation sofort, worum es geht; „Werkbank“ musste man erst entschlüsseln. Wie vorher
+vermeidet auch dieser Name, dass auf einer Seite ohne ein einziges Buzzword „KI &
+Automatisierung“ als Überschrift steht. Dass „trusted blogs“ in der Navigation direkt neben
+„Blog“ steht, hat Eddy bewusst in Kauf genommen.
+
+Die ursprüngliche Begründung für „Werkbank“ war die Klammer zum Uhrmacher: `/ueber-mich` als
+Zifferblatt, die Werkbank als offene Rückseite. Sie trägt nicht mehr, seit die Uhr auf
+`/ueber-mich` am 19.10.2026 entfallen ist (`ueber-mich-einstieg.md`).
+
+**Was die Umbenennung umfasst:**
+
+- Sichtbare Bezeichnung in Header, Footer, Startseiten-Hero, Startseiten-Band und auf der Seite
+  selbst (Kicker, `<title>`). Die Hero-Zeile und das Band sind umformuliert, nicht nur ersetzt,
+  sonst stünde „trusted blogs“ zweimal hintereinander.
+- Pfad `/werkbank` → `/trusted-blogs`, mit **301-Weiterleitung** in `routeRules`
+  (`nuxt.config.ts`). Ohne diese Regel fiele `/werkbank` in die Catch-all-Route
+  (`app/pages/[...slug].vue`) und landete dauerhaft auf dem Blog.
+- **Intern bleibt „Werkbank“:** Konstanten (`WERKBANK_*`), Komponenten (`HomeWerkbank.vue`,
+  `WerkbankChain.vue`), Typen, `app/utils/werkbank.ts`, der Bildordner
+  `public/images/werkbank/` und diese Datei heißen weiter so. Besucher sehen keinen dieser
+  Namen; ein Umbenennen wären rund hundert Änderungen ohne sichtbaren Nutzen.
 
 **Tonlage (Eddys Entscheidung, 12.09.2026):** Beleg mit leiser Tür am Ende. Erzählend, kein
 Verkaufs-CTA; der Schluss öffnet eine Tür, statt etwas zu verkaufen.
@@ -169,7 +191,7 @@ node -e "import('sharp').then(({default:s}) => s('roh.png')
 
 Beim Ersetzen `width`/`height` in `WERKBANK_STARTSEITE_SHOT` mitziehen, sonst reserviert der
 Browser den falschen Platz und das Layout springt beim Nachladen. Ebenso das Datum in der
-Bildunterschrift in `app/pages/werkbank.vue`.
+Bildunterschrift in `app/pages/trusted-blogs.vue`.
 
 **Fremde Inhalte im Bild.** Zu sehen sind die Blog-Titelbilder, die zum Aufnahmezeitpunkt auf
 der Startseite lagen. Öffentlich sichtbar und von den Blogs selbst dort eingestellt, aber
@@ -244,8 +266,13 @@ werden, ohne fremde Links zu brechen:
 
 | Anker | Ziel | Verlinkt von |
 | --- | --- | --- |
-| `/werkbank#handwerk` | Kapitel 02, „Eine Geige macht noch keine Musik" | extern, von Eddy geteilt |
-| `/werkbank#szenario` | Die Vitrine mit dem Make-Screenshot | Make-Zertifikat im Datenblatt auf `/ueber-mich` |
+| `/trusted-blogs#handwerk` | Kapitel 02, „Eine Geige macht noch keine Musik" | extern, von Eddy geteilt (als `/werkbank#handwerk`) |
+| `/trusted-blogs#szenario` | Die Vitrine mit dem Make-Screenshot | Make-Zertifikat im Datenblatt auf `/ueber-mich` |
+
+Die vor dem 21.10.2026 geteilten Links zeigen auf `/werkbank#…`. Sie funktionieren weiter, weil
+die 301-Weiterleitung den Pfad tauscht und der Browser den Anker an die neue Adresse anhängt
+(eine `Location` ohne eigenen Anker übernimmt den der ursprünglichen Anfrage). Die
+Weiterleitung deshalb **nicht entfernen**, solange solche Links im Umlauf sein können.
 
 Beide brauchen zweierlei: `scroll-margin-top: 9rem` (als `.section[id]`, damit ein
 künftiger Anker nichts Zusätzliches braucht) und `useAnchorScroll()`.
@@ -254,7 +281,7 @@ künftiger Anker nichts Zusätzliches braucht) und `useAnchorScroll()`.
 bevor die selbst gehosteten Schriften geladen sind. Sobald Fraunces und Manrope die
 Ersatzschrift ablösen, ändern die Textblöcke oberhalb des Ziels ihre Höhe, und das Ziel
 wandert weg — in beide Richtungen, je nachdem welche Blöcke wachsen und welche schrumpfen.
-Messreihen auf `/werkbank#handwerk` (12.09.2026, Header 64px):
+Messreihen auf `/werkbank#handwerk` (heute `/trusted-blogs#handwerk`; 12.09.2026, Header 64px):
 
 | Zustand | Position des Ziels |
 | --- | --- |

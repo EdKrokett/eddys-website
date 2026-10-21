@@ -28,7 +28,7 @@ Gedankenstrich als Satzverbinder, keine Antithesen-Paare).
 **Die beiden Anker heißen wie auf der WordPress-Seite** und dürfen nicht umbenannt werden:
 Alte Links auf `/kooperationen/#mediakit` oder `#trustedblogsbuchung` landen nach dem Wechsel
 auf dieser Seite und sollen ihr Ziel weiter treffen. Deshalb auch `useAnchorScroll()`, aus
-demselben Grund wie auf `/werkbank` (Schriftwechsel verschiebt das Ziel beim Direktaufruf).
+demselben Grund wie auf `/trusted-blogs` (Schriftwechsel verschiebt das Ziel beim Direktaufruf).
 
 ## Entscheidungen
 
@@ -80,7 +80,7 @@ angenommen werden.
 - **Auftragsschein** als einziges auffälliges Element: Schein mit Abrisskante und
   Katalog-Nr. 76 als Auftragsnummer, darauf der Buchungslink als Teal-Fläche mit dunkler
   Schrift (Kontrastregel aus `main.css`).
-- Nur Teal, kein Messing. Messing ist auf `/werkbank` dem Ausgestellten vorbehalten.
+- Nur Teal, kein Messing. Messing ist auf `/trusted-blogs` dem Ausgestellten vorbehalten.
 
 ## Qualitäts-Check (Q1–Q6)
 

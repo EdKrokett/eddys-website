@@ -124,7 +124,7 @@ export const CV_CERTIFICATES: CvCertificate[] = [
     issuer: 'Make',
     // Direkt auf die Szenario-Grafik, nicht an den Seitenanfang: Wer hier klickt,
     // will sehen, was mit Make gebaut wurde, und nicht erst dorthin scrollen.
-    story: { to: '/werkbank#szenario', label: 'Was damit gebaut wurde' },
+    story: { to: '/trusted-blogs#szenario', label: 'Was damit gebaut wurde' },
   },
   {
     year: '2024',
@@ -173,7 +173,7 @@ export const CV_SKILL_GROUPS: CvSkillGroup[] = [
    * Die einzige Gruppe, deren Werte NICHT aus dem team-neusta-Kompetenzprofil stammen:
    * Dort steht als einziger verwandter Eintrag „Prozessautomatisierung 2/5“, und das ist
    * seit dem Neubau von trusted blogs und dem Make-Advanced-Zertifikat überholt. Die
-   * Belege für diese Einschätzung stehen auf /werkbank.
+   * Belege für diese Einschätzung stehen auf /trusted-blogs.
    */
   {
     title: 'KI & Automatisierung',
@@ -195,7 +195,7 @@ export const CV_PROJECTS: CvProject[] = [
       'Blog-Suchmaschine, Marktplatz für Blog-Marketing und Blog-Magazin mit Statistik- und KI-Unterstützung. 2026 vollständig neu gebaut, ausschließlich mit KI.',
     url: 'https://www.trusted-blogs.com',
     story: {
-      to: '/werkbank',
+      to: '/trusted-blogs',
       label: 'Wie der Neubau entstanden ist',
     },
   },

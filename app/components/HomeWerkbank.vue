@@ -1,6 +1,10 @@
 <script setup lang="ts">
 /**
- * Das Werkbank-Band der Startseite — liegt quer unter den beiden Türen (HomeDoors).
+ * Das Band zur Seite „trusted blogs“ (intern: Werkbank) auf der Startseite — liegt quer
+ * unter den beiden Türen (HomeDoors).
+ *
+ * Name und Text: Der Kicker trägt den Namen, Text und Button sagen deshalb „die Plattform“
+ * und „Den Neubau ansehen“, statt „trusted blogs“ dreimal zu wiederholen.
  *
  * ── Warum ein Band und keine dritte Tür ────────────────────────────────────────
  * „Über mich" und „Blog" sind zwei gleichwertige Eingänge nebeneinander (Eddys
@@ -14,11 +18,11 @@
  * Scrollen nicht, dass es sie gibt.
  *
  * ── Design-Richtung ────────────────────────────────────────────────────────────
- * „Präzisionswerk", Modus offene Rückseite — dieselbe Sprache wie /werkbank:
+ * „Präzisionswerk", Modus offene Rückseite — dieselbe Sprache wie /trusted-blogs:
  * - Zahlen statt Liste. Die Türen tragen Aufzählungen, das Band trägt Kennzahlen.
  * - Die `index-rail` (Zifferblatt-Indexe) läuft als Trenner durch, nicht eine volle
  *   Linie: Sie ist das Motiv, das Startseite und Werkbank-Seite verbindet.
- * - Teal führt. KEIN Messing — das ist auf /werkbank dem Buch-Faksimile vorbehalten
+ * - Teal führt. KEIN Messing — das ist auf /trusted-blogs dem Buch-Faksimile vorbehalten
  *   und tritt dort genau einmal auf. Ein zweiter Auftritt hier nähme ihm die Wirkung.
  * - Der Teal-Schimmer liegt links unten, gegenläufig zum Kontaktband weiter oben,
  *   damit die beiden Flächen beim Scrollen nicht wie dieselbe Sektion wirken.
@@ -31,7 +35,7 @@
       <div class="bench__inner">
         <div class="bench__body">
           <p class="kicker">
-            <span class="bench__mark" aria-hidden="true" />Werkbank
+            <span class="bench__mark" aria-hidden="true" />trusted blogs
           </p>
 
           <h2 class="bench__title">
@@ -40,14 +44,14 @@
           </h2>
 
           <p class="bench__text">
-            Zwischen Februar und Mai 2026 habe ich trusted blogs von Grund auf neu
+            Zwischen Februar und Mai 2026 habe ich die Plattform von Grund auf neu
             gebaut, mit Claude Code als Werkzeug. Dazu neunzehn Make-Szenarien, die
-            heute laufen, ohne dass jemand sie anstößt. Auf der Werkbank stehen die
+            heute laufen, ohne dass jemand sie anstößt. Auf der eigenen Seite stehen die
             Zahlen dazu, und die Stellen, an denen es geklemmt hat.
           </p>
 
-          <NuxtLink to="/werkbank" class="bench__cta">
-            Werkbank ansehen
+          <NuxtLink to="/trusted-blogs" class="bench__cta">
+            Den Neubau ansehen
             <Icon name="lucide:arrow-right" class="bench__cta-icon size-4" />
           </NuxtLink>
         </div>
@@ -109,14 +113,14 @@
 .bench__title {
   margin-top: 1.25rem;
   /* Deckel bei 2,35rem statt 2,6rem — siehe Spaltenbreite oben: Der Titel ist
-     hier ein Anreißer, auf /werkbank steht derselbe Satz groß als H1. */
+     hier ein Anreißer, auf /trusted-blogs steht derselbe Satz groß als H1. */
   font-size: clamp(1.75rem, 3.4vw, 2.35rem);
   line-height: 1.14;
   color: var(--color-steel-100);
 }
 
 /* Zweite Zeile zurückgenommen: Sie ist die Pointe, nicht die Ansage — und sie
-   steht auf /werkbank als H1 gleichwertig, hier soll sie nachklingen. */
+   steht auf /trusted-blogs als H1 gleichwertig, hier soll sie nachklingen. */
 .bench__title-quiet {
   color: var(--color-steel-400);
 }
@@ -156,7 +160,7 @@
 
 /* ── Kennzahlen ─────────────────────────────────────────────────────────── */
 /*
- * Untereinander statt als Kachelraster wie auf /werkbank: Drei Werte in einer
+ * Untereinander statt als Kachelraster wie auf /trusted-blogs: Drei Werte in einer
  * schmalen Spalte lesen sich als Liste, und die Indexstriche zwischen ihnen
  * sind dasselbe Motiv wie die Zifferblatt-Rail dort.
  */
