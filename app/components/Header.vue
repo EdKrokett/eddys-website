@@ -13,7 +13,7 @@ const mobileOpen = ref(false)
 
 const links = [
   { to: '/ueber-mich', label: 'Über mich' },
-  { to: '/blog', label: 'Blog' },
+  { to: '/blog', label: 'Mein Blog' },
   { to: '/trusted-blogs', label: 'trusted blogs' },
   { to: '/kontakt', label: 'Kontakt' },
 ]
