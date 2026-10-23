@@ -78,7 +78,7 @@ useSeoMeta({
             <NuxtImg
               src="/images/eddy-portrait.png"
               alt="Eduard Andrae"
-              width="440"
+              width="544"
               densities="1x 2x"
               format="webp"
               quality="88"
@@ -187,8 +187,10 @@ useSeoMeta({
     radial-gradient(75% 130% at 78% 55%, rgba(33, 164, 163, 0.1) 0%, transparent 62%),
     var(--color-graphite-950);
   /* Viel Luft: Der Block steht sehr weit oben und braucht Abstand, damit er
-     nicht am Hero klebt. */
-  padding: clamp(4.5rem, 11vw, 9rem) 0;
+     nicht am Hero klebt. Als Variable, weil das Porträt denselben Wert
+     unten wieder aufhebt. */
+  --contact-pad: clamp(4.5rem, 11vw, 9rem);
+  padding: var(--contact-pad) 0;
 }
 
 .contact__inner {
@@ -198,7 +200,7 @@ useSeoMeta({
 }
 @media (min-width: 880px) {
   .contact__inner {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
   }
 }
 
@@ -257,11 +259,13 @@ useSeoMeta({
   align-items: flex-end;
 }
 
+/* So groß wie die Spalte erlaubt. Das Porträt steht auf der Unterkante des
+   Bands: Der negative Rand hebt das Section-Padding auf, der Anschnitt auf
+   Brusthöhe wirkt so gewollt statt abgeschnitten. */
 .contact__portrait {
-  width: min(100%, 22rem);
+  width: min(100%, 34rem);
   height: auto;
-  /* Kurzer Abriss unten, damit der Freisteller nicht abgeschnitten wirkt. */
-  mask-image: linear-gradient(to bottom, #000 90%, transparent 100%);
+  margin-bottom: calc(-1 * var(--contact-pad));
   filter: drop-shadow(0 18px 45px rgba(14, 15, 18, 0.7));
 }
 
@@ -270,7 +274,7 @@ useSeoMeta({
     justify-content: center;
   }
   .contact__portrait {
-    width: min(72%, 17rem);
+    width: min(100%, 26rem);
   }
 }
 </style>
