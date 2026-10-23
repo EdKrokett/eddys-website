@@ -251,7 +251,7 @@ Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualitä
 
 | Abschnitt | Inhalt | Visuelles Element |
 | --- | --- | --- |
-| Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces, Seitenzahl |
+| Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces, Seitenzahl; dahinter rechts das Räderwerk als Konstruktionszeichnung |
 | 01 Der Neubau | Wolffs Beschreibung, Startseiten-Screenshot, Kennzahlen | Vitrine mit Link nach außen + Balkenvergleich Altsystem / neues System |
 | 02 Das Handwerk | Die Geigen-These, Hardys Rolle, Wolffs zweiter Einwand | Statement-Satzbild mit Teal-Pointe |
 | 03 Die Maschinen | 19 Szenarien, 115 Module, 20 Dienste | Screenshot in der Vitrine + SVG-Kette |
@@ -326,6 +326,31 @@ Fortsetzung von „Präzisionswerk", aber im Modus Innenansicht:
   unterschiedlich stark gedämpfte Vitrinen läsen sich als Rangfolge zwischen den
   Beweisstücken. Weiter abdunkeln kommt nicht in Frage, ein zurechtretuschiertes Beweisstück
   ist keines mehr.
+
+### Das Räderwerk im Intro (seit 23.10.2026)
+
+Eddy war der Einstieg „zu schwarz“: Rechts neben Überschrift und Faksimile stand nur leere
+Grafitfläche. Dort liegt jetzt eine **Konstruktionszeichnung eines Räderwerks**
+(`app/components/WerkbankRaederwerk.vue`), rein dekorativ (`aria-hidden`).
+
+- **Warum ein Räderwerk.** Es verbindet die beiden Fäden der Seite: Uhrmacher-Herkunft
+  (Präzisionswerk) und das Thema Automatisierung. Die Räder drehen sich sehr langsam von
+  selbst, als Bild für den Satz im Intro, dass alles „automatisch abläuft, ohne dass jemand es
+  anstößt“. Als technische Zeichnung statt als Uhr, weil die Seite die Innenansicht zeigt:
+  Teilkreise, Mittellinien, eine Maßlinie, ein Schriftfeld. Kein Zifferblatt, das gab es auf
+  `/ueber-mich` und ist dort auf Eddys Wunsch entfallen.
+- **Nicht aufdringlich.** Haarlinien, gedämpftes Teal, Maske, die nach links und unten
+  ausblendet. Die Zeichnung beginnt erst rechts vom Fließtext und berührt die Überschrift
+  nicht. Auf schmalen Bildschirmen liegt sie noch schwächer hinter dem Text.
+- **Echte Geometrie.** Die Räder kämmen korrekt (gemeinsamer Modul, Achsabstand
+  `m·(z₁+z₂)/2`, Zahn greift in Lücke) und drehen im richtigen Übersetzungsverhältnis
+  gegeneinander. Rechnung in `app/utils/raederwerk.ts`, getestet in `raederwerk.spec.ts`.
+  Ein Ritzel, das unter seinem Rad auf derselben Welle sitzt, ist gestrichelt gezeichnet, wie
+  verdeckte Kanten in einer technischen Zeichnung.
+- **Bewegung.** Jede Welle ist ein eigenes HTML-Element, gedreht per CSS-`transform`. Damit
+  läuft die Drehung auf dem Compositor statt das SVG in jedem Frame neu zu zeichnen. Bei
+  `prefers-reduced-motion: reduce` steht das Werk still.
+- **Farbe.** Nur Teal und Stahl. Messing bleibt dem Ausgestellten vorbehalten (siehe oben).
 
 ## Der Werkzeugkasten
 

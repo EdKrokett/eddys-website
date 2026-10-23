@@ -64,7 +64,10 @@ useSeoMeta({
   <div>
     <!-- ═══════════════ INTRO ═══════════════ -->
     <section class="intro">
-      <UContainer>
+      <!-- Konstruktionszeichnung im Hintergrund, rechts angeschnitten. Siehe docs/werkbank.md. -->
+      <WerkbankRaederwerk />
+
+      <UContainer class="intro__content">
         <p class="kicker">
           <span class="intro__mark" aria-hidden="true" />trusted blogs
         </p>
@@ -589,10 +592,23 @@ useSeoMeta({
 .intro {
   position: relative;
   padding: clamp(3.5rem, 9vw, 6.5rem) 0 clamp(3rem, 7vw, 5rem);
+  /* Das Räderwerk ragt rechts über den Rand; ohne `clip` gäbe es eine waagerechte Scrollleiste. */
+  overflow-x: clip;
+  isolation: isolate;
   border-bottom: 1px solid var(--color-graphite-700);
+  /*
+    Zwei Lichtquellen: das bestehende Teal links oben hinter der Überschrift und ein zweites,
+    schwächeres rechts hinter dem Räderwerk. Damit steht das Werk nicht auf reinem Schwarz.
+  */
   background:
     radial-gradient(68% 120% at 18% 8%, rgba(33, 164, 163, 0.09) 0%, transparent 60%),
+    radial-gradient(45% 60% at 82% 40%, rgba(33, 164, 163, 0.06) 0%, transparent 70%),
     var(--color-graphite-950);
+}
+
+.intro__content {
+  position: relative;
+  z-index: 1;
 }
 
 .intro__mark {
