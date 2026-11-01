@@ -32,7 +32,7 @@ mehr stimmt:
 | „melde Dich einfach bei mir" (ohne Link) | Link auf `/kontakt` | Die Einladung soll einen direkten Weg haben. |
 | „aus meinen Körper" | „aus meinem Körper" | Tippfehler. |
 | Blog-Links auf `www.eduard-andrae.de/<slug>/` | `/blog/<slug>` | Beiträge laufen über die eigene Blogansicht. |
-| Statistik-Link | `blog.eduard-andrae.de/statistik/` | WordPress-Seite, keine Nuxt-Route. |
+| Statistik-Link | `/statistik` | Seit 01.11.2026 eigene Nuxt-Seite (`docs/statistik.md`); bis dahin `blog.eduard-andrae.de/statistik/`. |
 
 Die durchgestrichenen Stellen („zwei Perserkatern") bleiben als `<del>`: Das ist Eddys
 eigener Stil, die Korrektur sichtbar stehen zu lassen.

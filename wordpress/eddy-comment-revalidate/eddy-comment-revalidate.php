@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Inhalts-Webhook für eduard-andrae.de
- * Description: Meldet Änderungen an Kommentaren UND Beiträgen an die Nuxt-Seite, damit die betroffenen Seiten dort sofort neu gebaut werden statt auf den ISR-Ablauf zu warten.
- * Version:     1.1.0
+ * Description: Meldet Änderungen an Kommentaren, Beiträgen und Läufen an die Nuxt-Seite, damit die betroffenen Seiten dort sofort neu gebaut werden statt auf den ISR-Ablauf zu warten.
+ * Version:     1.2.0
  * Author:      Eduard Andrae
  * License:     GPL-2.0-or-later
  *
@@ -216,6 +216,23 @@ function eddy_cr_queue( $post_id, $scope = 'comment', $slug = '' ) {
 }
 
 /**
+ * Plant den Neubau von /statistik. Aufgerufen vom Plugin eddy-laufstatistik, sobald sich ein
+ * veröffentlichter Lauf ändert.
+ *
+ * Feste Argumente ohne Post-ID: Ein Lauf ist kein Beitrag, die Gegenstelle baut bei diesem
+ * Scope immer dieselbe Seite. Dadurch greift die Doppelt-Sperre von wp_schedule_single_event
+ * auch über verschiedene Läufe hinweg. Die 30 Sekunden Vorlauf fassen einen ganzen Import
+ * oder mehrere Bearbeitungen hintereinander zu einem einzigen Aufruf zusammen.
+ */
+function eddy_cr_queue_statistik() {
+	$args = array( 0, 'statistik', '' );
+
+	if ( ! wp_next_scheduled( EDDY_CR_EVENT, $args ) ) {
+		wp_schedule_single_event( time() + 30, EDDY_CR_EVENT, $args );
+	}
+}
+
+/**
  * Liest den Slug eines Beitrags direkt aus der Datenbank.
  *
  * get_post_field statt get_permalink: Gebraucht wird nur `post_name`, und der bleibt auch
@@ -241,7 +258,7 @@ add_action( EDDY_CR_EVENT, 'eddy_cr_send', 10, 3 );
  * Slug ist nur die Rückfallebene für Beiträge, die es dort nicht mehr gibt.
  *
  * @param int    $post_id Beitrag.
- * @param string $scope   'comment' oder 'post'.
+ * @param string $scope   'comment', 'post' oder 'statistik' (dann ist $post_id 0).
  * @param string $slug    Slug als Rückfallebene.
  * @return bool Ob der Aufruf erfolgreich war.
  */
@@ -266,7 +283,7 @@ function eddy_cr_send( $post_id, $scope = 'comment', $slug = '' ) {
 			'body'     => wp_json_encode(
 				array(
 					'postId' => (int) $post_id,
-					'scope'  => 'post' === $scope ? 'post' : 'comment',
+					'scope'  => in_array( $scope, array( 'post', 'statistik' ), true ) ? $scope : 'comment',
 					'slug'   => (string) $slug,
 				)
 			),

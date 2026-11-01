@@ -85,6 +85,11 @@
   --color-brass-300: #e6c894;
   --color-brass-400: #cfa864;
   --color-brass-500: #a8823f;
+  /* Messing als MARKE in Diagrammen (/statistik), neben accent-500 als Datenfarbe.
+     brass-400 fiel im Paletten-Validator (dataviz) durch: zu hell fürs Band auf Grafit
+     (L 0,75 statt 0,48–0,67) und zu wenig Buntheit. #bd8b30 besteht alle Prüfungen,
+     auch die Trennung zu accent-500 bei Farbsehschwäche (ΔE 14,2). Nie für Text. */
+  --color-brass-mark: #bd8b30;
 
   --ui-radius: 0.125rem;
 
@@ -420,6 +425,57 @@
     /* Die srcset-Breiten stammen aus WP; ohne Reset bleibt das <img width>-Attribut
        (z. B. 69) maßgeblich und das Bild winzig. */
     max-width: none;
+  }
+
+  /*
+   * Gutenberg-Spalten: Wie bei den Galerien kommen nur die Klassen, das Layout-CSS lädt
+   * WordPress nur auf der eigenen Seite. Ohne diese Regeln standen die Spalten hier
+   * untereinander (erster Fall: Halloween-Beitrag, 01.11.2026). Nachgebaut nach dem
+   * WordPress-Standard: ab 782px nebeneinander, darunter gestapelt, außer bei
+   * `is-not-stacked-on-mobile`. Eine im Editor gesetzte Spaltenbreite steht als
+   * Inline-`flex-basis` am Element und bleibt so wirksam.
+   */
+  .wp-content .wp-block-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25em 2em;
+  }
+  .wp-content .wp-block-columns.are-vertically-aligned-top { align-items: flex-start; }
+  .wp-content .wp-block-columns.are-vertically-aligned-center { align-items: center; }
+  .wp-content .wp-block-columns.are-vertically-aligned-bottom { align-items: flex-end; }
+  .wp-content .wp-block-column {
+    flex-basis: 100%;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+  .wp-content .wp-block-column.is-vertically-aligned-top { align-self: flex-start; }
+  .wp-content .wp-block-column.is-vertically-aligned-center { align-self: center; }
+  .wp-content .wp-block-column.is-vertically-aligned-bottom { align-self: flex-end; }
+  /* Absatzabstand wie im Fließtext; die Regel `.wp-content > * + *` greift nur eine Ebene tief */
+  .wp-content .wp-block-column > * + * {
+    margin-top: 1.35em;
+  }
+  .wp-content .wp-block-column > figure {
+    margin-block: 0;
+  }
+  .wp-content .wp-block-columns.is-not-stacked-on-mobile {
+    flex-wrap: nowrap;
+  }
+  .wp-content .wp-block-columns.is-not-stacked-on-mobile > .wp-block-column {
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+  @media (min-width: 782px) {
+    .wp-content .wp-block-columns {
+      flex-wrap: nowrap;
+    }
+    .wp-content .wp-block-column {
+      flex-basis: 0;
+      flex-grow: 1;
+    }
+    .wp-content .wp-block-column[style*='flex-basis'] {
+      flex-grow: 0;
+    }
   }
 
   /* Lightbox-Button gehört zu WPs Interaktivitäts-API, die hier nicht läuft. */

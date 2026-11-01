@@ -13,6 +13,8 @@
  * Bewusst NICHT unter /api/blog/: für diesen Pfad setzt nuxt.config.ts einen
  * `s-maxage`-Cache-Header, der auf einem Webhook nichts zu suchen hat.
  */
+import type { RevalidateScope } from '#server/utils/revalidate-guard'
+
 interface WpPostIdentity {
   id: number
   slug: string
@@ -46,6 +48,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Body ist kein gültiges JSON' })
   }
 
+  const scope = parseRevalidateScope(body?.scope)
+
+  // Ein Lauf ist kein Beitrag: Bei diesem Auslöser gibt es keine Post-ID nachzuschlagen,
+  // es wird immer dieselbe Seite neu gebaut (docs/statistik.md).
+  if (scope === 'statistik') {
+    return revalidateOrFail(statistikPaths(), config.revalidateBaseUrl, config.vercelBypassToken, { scope })
+  }
+
   const postId = parseWpPostId(body?.postId)
 
   if (postId === null) {
@@ -55,20 +65,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const scope = parseRevalidateScope(body?.scope)
   // Nur als Rückfallebene für gelöschte Beiträge gedacht, siehe unten.
   const fallbackSlug = parseWpSlug(body?.slug)
 
-  // Fehlt der Token, ist die Revalidierung wirkungslos: Vercel behandelt den Aufruf dann
-  // als ganz normalen Request und liefert die gecachte Seite aus. Das MUSS auffallen,
-  // sonst meldet der Webhook stillen Erfolg und der alte Stand bleibt trotzdem stehen.
-  const bypassToken = config.vercelBypassToken
-  if (!bypassToken) {
-    throw createError({
-      statusCode: 503,
-      message: 'VERCEL_BYPASS_TOKEN ist nicht gesetzt — Revalidierung nicht möglich',
-    })
-  }
+  assertBypassToken(config.vercelBypassToken)
 
   // 2. Den Slug NICHT aus dem Body nehmen, sondern bei WordPress holen. Der Body ist
   //    Fremdeingabe, und der Slug bestimmt die URL, die dieser Server gleich selbst
@@ -108,7 +108,33 @@ export default defineEventHandler(async (event) => {
     paths.push(...blogIndexPaths())
   }
 
-  const results = await revalidatePaths(paths, config.revalidateBaseUrl, bypassToken)
+  return revalidateOrFail(paths, config.revalidateBaseUrl, config.vercelBypassToken, { postId, scope })
+})
+
+/**
+ * Fehlt der Token, ist die Revalidierung wirkungslos: Vercel behandelt den Aufruf dann
+ * als ganz normalen Request und liefert die gecachte Seite aus. Das MUSS auffallen,
+ * sonst meldet der Webhook stillen Erfolg und der alte Stand bleibt trotzdem stehen.
+ */
+function assertBypassToken(bypassToken: string): void {
+  if (!bypassToken) {
+    throw createError({
+      statusCode: 503,
+      message: 'VERCEL_BYPASS_TOKEN ist nicht gesetzt — Revalidierung nicht möglich',
+    })
+  }
+}
+
+/** Baut die Pfade neu und wirft 502, sobald auch nur einer scheitert. */
+async function revalidateOrFail(
+  paths: string[],
+  baseUrl: string,
+  bypassToken: string,
+  meta: { postId?: number, scope: RevalidateScope },
+) {
+  assertBypassToken(bypassToken)
+
+  const results = await revalidatePaths(paths, baseUrl, bypassToken)
   const failed = results.filter(result => !result.ok)
 
   if (failed.length > 0) {
@@ -121,11 +147,10 @@ export default defineEventHandler(async (event) => {
 
   return {
     revalidated: true,
-    postId,
-    scope,
+    ...meta,
     paths: results.map(result => ({ path: result.path, vercelCache: result.vercelCache })),
   }
-})
+}
 
 /**
  * Holt Slug und Status zu einer Post-ID.

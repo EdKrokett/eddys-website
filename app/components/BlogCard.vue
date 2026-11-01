@@ -102,6 +102,8 @@ defineProps<{ post: WordPressBlogPost }>()
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Leicht über der Mitte, wie das Beitragsbild: bei Hochformaten sonst Köpfe abgeschnitten */
+  object-position: 50% 30%;
   display: block;
   filter: grayscale(0.15);
   transition: filter 400ms ease, scale 600ms cubic-bezier(0.16, 1, 0.3, 1);

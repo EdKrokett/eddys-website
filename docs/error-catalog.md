@@ -1064,3 +1064,107 @@ dem Wort, mit dem Besucher das Element kennen.
 
 **→ AUDIT-PERSPEKTIVE:** „Wer erwähnt, was ich gerade entferne?" in
 `docs/audit-perspectives.md`.
+
+## REST-API nimmt `meta` an, speichert es aber nicht
+
+**Gefunden:** 01.11.2026, beim Umzug der Laufstatistik aus TablePress (`docs/statistik.md`).
+
+**FALSCH:**
+```php
+// wordpress/eddy-laufstatistik/eddy-laufstatistik.php, Version 1.0.0
+register_post_type( 'lauf', array( 'show_in_rest' => true, 'supports' => array( 'title' ) ) );
+register_post_meta( 'lauf', 'datum', array( 'show_in_rest' => true, /* … */ ) );
+```
+
+**RICHTIG:**
+```php
+register_post_type( 'lauf', array( 'show_in_rest' => true, 'supports' => array( 'title', 'custom-fields' ) ) );
+```
+
+**WARUM:** `register_post_meta(..., 'show_in_rest' => true)` reicht nicht. Der REST-Controller
+eines Inhaltstyps registriert das Feld `meta` nur, wenn der Typ `custom-fields` unterstützt.
+Fehlt es, ignoriert `POST wp/v2/laeufe` das mitgeschickte `meta` kommentarlos und antwortet
+trotzdem 201. Der Import meldete 68-mal „angelegt“, und keiner der Läufe hatte ein Datum. Aufgefallen
+ist es erst daran, dass die öffentliche Liste leer blieb (sie sortiert nach `datum`). Das
+Import-Skript prüft seitdem das Echo der Antwort statt nur den Status.
+
+**→ AUDIT-PERSPEKTIVE:** „Hat der Server wirklich gespeichert, was ich geschickt habe?" in
+`docs/audit-perspectives.md`.
+
+## Python-Skripte warten bei jeder Anfrage an WordPress auf IPv6
+
+**Gefunden:** 01.11.2026, als der Import der Laufstatistik nach acht Minuten keine Zeile geschrieben hatte.
+
+**FALSCH:**
+```python
+urllib.request.urlopen('https://blog.eduard-andrae.de/wp-json/…', timeout=300)
+```
+
+**RICHTIG:**
+```python
+_getaddrinfo = socket.getaddrinfo
+socket.getaddrinfo = lambda host, port, family=0, *args, **kwargs: _getaddrinfo(host, port, socket.AF_INET, *args, **kwargs)
+```
+
+**WARUM:** `blog.eduard-andrae.de` löst auch auf eine IPv6-Adresse auf, über die keine
+Verbindung zustande kommt. Python probiert sie zuerst und wartet den Verbindungs-Timeout ab,
+bevor es IPv4 nimmt: gemessen 20,7 s statt 0,6 s für eine leere Liste. curl macht „Happy
+Eyeballs“ und zeigt das Problem nie, deshalb wirkte WordPress „einfach langsam“. Die
+Gedächtnisnotiz „Bild-Upload dauert pro Datei deutlich über eine Minute“ hat sehr
+wahrscheinlich dieselbe Ursache.
+
+**→ AUDIT-PERSPEKTIVE:** „Ist das Werkzeug langsam oder der Server?" in
+`docs/audit-perspectives.md`.
+
+## Emoji in einem Meta-Feld bricht das Speichern ab
+
+**Gefunden:** 01.11.2026, beim Import der Laufstatistik (Notiz „öhm, kein Kommentar 🙁“).
+
+**FALSCH:**
+```php
+'sanitize_callback' => 'sanitize_text_field',   // Plugin eddy-laufstatistik 1.0.1, Feld `notiz`
+```
+
+**RICHTIG:**
+```php
+function eddy_ls_sanitize_text( $value ) {
+	return wp_encode_emoji( trim( sanitize_text_field( (string) $value ) ) );
+}
+// beim Ausgeben: html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' )
+```
+
+**WARUM:** Die Tabelle `wp_postmeta` dieser Installation steht auf utf8 (3 Byte), Emojis
+brauchen utf8mb4 (4 Byte). WordPress fängt das bei Beiträgen selbst ab, indem es Emojis in
+HTML-Entitäten umwandelt; bei Meta-Feldern tut es das nicht. Die REST-API antwortete mit
+`rest_meta_database_error` (500), hatte den Lauf aber **schon angelegt**, nur ohne die
+restlichen Felder. Ein halber Datensatz blieb zurück und hätte beim nächsten Importlauf als
+„vorhanden“ gegolten. Im Eingabeformular wäre derselbe Fehler still geblieben:
+`update_post_meta()` gibt nur `false` zurück.
+
+**→ AUDIT-PERSPEKTIVE:** „Was passiert mit 4-Byte-Zeichen?" in `docs/audit-perspectives.md`.
+
+## Beitragsbild im Hochformat verliert die Köpfe
+
+**Gefunden:** 01.11.2026 von Eddy, am Halloween-Beitrag (Titelbild 1693 × 2000 px).
+
+**FALSCH:**
+```css
+/* app/pages/blog/[slug].vue — jedes Bild gleich behandelt */
+.post__hero-img { width: 100%; max-height: 30rem; object-fit: cover; }
+```
+
+**RICHTIG:**
+```vue
+<!-- Seitenverhältnis entscheidet (shared/utils/hero-bild.ts) -->
+<div v-if="heroBildFormat(post.featuredImageSize) === 'ganz'" class="post__hero--ganz">…</div>
+<NuxtImg v-else class="post__hero-img" … />  <!-- mit object-position: 50% 30% -->
+```
+
+**WARUM:** Das Banner ist am Desktop etwa 2,5 : 1. `object-fit: cover` mit Standardposition
+schneidet mittig zu; von einem Hochformat blieb ein Drittel aus der Bildmitte, also Bauch
+statt Gesicht. Bei Querformaten fiel das nie auf, deshalb blieb es unbemerkt, bis zum ersten
+Beitrag mit einem Personenfoto im Hochformat als Titelbild. Die Seite kannte die Abmessungen
+gar nicht, obwohl WordPress sie in `media_details` mitliefert.
+
+**→ AUDIT-PERSPEKTIVE:** „Was zeigt der Zuschnitt bei einem Hochformat?" in
+`docs/audit-perspectives.md`.

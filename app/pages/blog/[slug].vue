@@ -41,6 +41,9 @@ function onContentClick(event: MouseEvent) {
   if (placeholder instanceof HTMLElement) activateEmbed(placeholder)
 }
 
+/** Banner-Zuschnitt oder ganzes Bild, je nach Seitenverhältnis (shared/utils/hero-bild.ts). */
+const heroFormat = computed(() => heroBildFormat(post.value?.featuredImageSize))
+
 useSeoMeta({
   title: () => `${post.value?.title ?? 'Beitrag'} — Eduard Andrae`,
   description: () => post.value?.excerpt ?? '',
@@ -78,7 +81,34 @@ useSeoMeta({
 
     <!-- ═══════════════ BEITRAGSBILD ═══════════════ -->
     <UContainer v-if="post.featuredImage">
+      <!--
+        Hochformat und fast quadratische Bilder ganz zeigen statt beschneiden: Der mittige
+        Zuschnitt auf ein Banner ließ beim Halloween-Beitrag die Köpfe weg. Dahinter dieselbe
+        Datei unscharf als Füllung (gleiche URL, also kein zweiter Download).
+      -->
+      <div v-if="heroFormat === 'ganz'" class="post__hero post__hero--ganz">
+        <NuxtImg
+          :src="post.featuredImage"
+          alt=""
+          aria-hidden="true"
+          width="1200"
+          densities="1x 2x"
+          format="webp"
+          quality="78"
+          class="post__hero-fuellung"
+        />
+        <NuxtImg
+          :src="post.featuredImage"
+          :alt="post.title"
+          width="1200"
+          densities="1x 2x"
+          format="webp"
+          quality="78"
+          class="post__hero-bild"
+        />
+      </div>
       <NuxtImg
+        v-else
         :src="post.featuredImage"
         :alt="post.title"
         width="1200"
@@ -180,8 +210,41 @@ useSeoMeta({
   width: 100%;
   max-height: 30rem;
   object-fit: cover;
+  /* Leicht über der Mitte: Gesichter stehen meist im oberen Drittel */
+  object-position: 50% 30%;
   margin-top: clamp(2rem, 4vw, 3rem);
   border: 1px solid var(--color-graphite-700);
+}
+
+.post__hero--ganz {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: clamp(22rem, 52vw, 34rem);
+  margin-top: clamp(2rem, 4vw, 3rem);
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--color-graphite-700);
+  background: var(--color-graphite-950);
+}
+
+/* Dieselbe Datei, stark vergrößert, unscharf und abgedunkelt: füllt die Breite ohne neues Motiv */
+.post__hero-fuellung {
+  position: absolute;
+  inset: -10%;
+  z-index: -1;
+  width: 120%;
+  height: 120%;
+  object-fit: cover;
+  filter: blur(36px) saturate(0.8) brightness(0.45);
+}
+
+.post__hero-bild {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1.5rem 4rem rgba(0, 0, 0, 0.55);
 }
 
 /* Lesespalte bewusst schmal — Fließtext bleibt lesbar. */

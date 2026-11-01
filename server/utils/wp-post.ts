@@ -1,4 +1,5 @@
 import type { WordPressBlogPostDetail } from '#shared/types/wordpress'
+import { parseImageSize } from '#shared/utils/hero-bild'
 
 interface WpTerm {
   id: number
@@ -15,7 +16,7 @@ interface WpPost {
   excerpt: { rendered: string }
   date: string
   _embedded?: {
-    'wp:featuredmedia'?: Array<{ source_url: string }>
+    'wp:featuredmedia'?: Array<{ source_url: string, media_details?: { width?: unknown, height?: unknown } }>
     'wp:term'?: WpTerm[][]
   }
 }
@@ -66,6 +67,7 @@ export async function fetchWpPostBySlug(slug: string): Promise<WordPressBlogPost
       // Auch hier defensiv umschreiben: `image.domains` in nuxt.config.ts erlaubt
       // nur blog.eduard-andrae.de — eine Alt-Domain-URL würde NuxtImg blockieren.
       featuredImage: normalizeImageUrl(post._embedded?.['wp:featuredmedia']?.[0]?.source_url),
+      featuredImageSize: parseImageSize(post._embedded?.['wp:featuredmedia']?.[0]?.media_details),
       tags: terms
         .filter(term => term.taxonomy === 'post_tag')
         .map(tag => ({ id: tag.id, name: decodeHtmlEntities(tag.name), slug: tag.slug })),

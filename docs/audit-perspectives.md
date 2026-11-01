@@ -379,3 +379,46 @@ Abschnitt, Seite, Seitenname.
 - Stützt sich eine Begründung in `docs/` auf das Element (ein Name, eine Designentscheidung)?
   Dann ist mit dem Element auch die Begründung weg und muss neu geschrieben werden, nicht nur
   sprachlich geglättet.
+
+## Hat der Server wirklich gespeichert, was ich geschickt habe?
+
+Aus dem Laufstatistik-Import vom 01.11.2026 (`docs/error-catalog.md`). Anzuwenden auf jedes
+Skript und jeden Endpunkt, der über eine fremde API schreibt.
+
+- Wird nach dem Schreiben das **Echo** der Antwort mit dem Gesendeten verglichen, oder nur
+  der HTTP-Status? WordPress antwortet 201, auch wenn es Felder verworfen hat.
+- Gibt es einen **Probeschreibvorgang** mit einem einzelnen Datensatz, bevor eine Schleife
+  über alle läuft? Ein Fehler beim ersten Eintrag kostet dann einen Datensatz statt 68.
+- Bei WordPress-Meta konkret: Unterstützt der Inhaltstyp `custom-fields`?
+
+## Ist das Werkzeug langsam oder der Server?
+
+Aus dem IPv6-Hänger vom 01.11.2026 (`docs/error-catalog.md`).
+
+- Wenn ein Skript gegen WordPress langsam ist: dieselbe Anfrage einmal mit `curl` und einmal
+  aus dem Skript messen. Ist nur das Skript langsam, liegt es an der Verbindung, nicht an WordPress.
+- Löst der Host auf IPv6 auf (`socket.getaddrinfo`)? Ist diese Adresse von hier erreichbar?
+- Ist ein Timeout im Skript so großzügig gewählt, dass er ein Verbindungsproblem als
+  „dauert halt“ versteckt?
+
+## Was passiert mit 4-Byte-Zeichen?
+
+Aus dem Emoji-Abbruch beim Laufstatistik-Import vom 01.11.2026 (`docs/error-catalog.md`).
+Eddy schreibt Emojis in Notizen, Titel und Kommentare, das ist sein Stil.
+
+- Landet ein Freitextfeld in einer WordPress-Tabelle außerhalb von `wp_posts` (Meta, Optionen,
+  eigene Tabellen)? Dann ist der Zeichensatz utf8 statt utf8mb4 möglich: Emojis vorher mit
+  `wp_encode_emoji()` umwandeln und beim Ausgeben dekodieren.
+- Gibt es im Test oder Probelauf mindestens einen Wert mit Emoji?
+- Hinterlässt ein Fehler beim Schreiben einen **halben** Datensatz? WordPress legt den Beitrag
+  an, bevor es die Meta-Felder schreibt.
+
+## Was zeigt der Zuschnitt bei einem Hochformat?
+
+Aus dem Halloween-Titelbild vom 01.11.2026 (`docs/error-catalog.md`). Anzuwenden auf jedes
+`object-fit: cover` und jedes feste Seitenverhältnis für Bilder, die Eddy hochlädt.
+
+- Mit einem Hochformat (iPhone, 3 : 4) und einem Personenfoto testen, nicht nur mit dem
+  Landschaftsbild, das gerade zur Hand ist. Stehen die Köpfe noch im Ausschnitt?
+- Kennt die Komponente die Abmessungen des Bildes? WordPress liefert sie in `media_details`.
+- Sitzt `object-position` bewusst? Die Standardmitte trifft bei Personen den Oberkörper.

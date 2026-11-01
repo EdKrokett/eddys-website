@@ -249,11 +249,8 @@ useSeoMeta({
               richtig verliebt in diese ganz besondere Atmosphäre bei Wettkämpfen.
             </p>
             <p>
-              Auf der Seite „<a
-                href="https://blog.eduard-andrae.de/statistik/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >Statistisches</a>“ halte ich fest, wann, wo und wie weit ich gelaufen bin. Für
+              Auf der Seite „<NuxtLink to="/statistik">Statistisches</NuxtLink>“ halte ich
+              fest, wann, wo und wie weit ich gelaufen bin. Für
               später, wie gesagt.
             </p>
           </div>

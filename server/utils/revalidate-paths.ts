@@ -104,6 +104,11 @@ export function postPaths(slug: string): string[] {
   return [`/blog/${encoded}`, `/blog/${encoded}/_payload.json`]
 }
 
+/** Die Pfade der Laufstatistik (docs/statistik.md). */
+export function statistikPaths(): string[] {
+  return ['/statistik', '/statistik/_payload.json']
+}
+
 /** Die Pfade der Beitragsübersicht. */
 export function blogIndexPaths(): string[] {
   return ['/blog', '/blog/_payload.json']

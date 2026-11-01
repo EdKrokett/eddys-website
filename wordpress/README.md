@@ -32,6 +32,13 @@ Bei einem Update dasselbe ZIP neu hochladen — WordPress fragt, ob die vorhande
 ersetzt werden soll. Endpoint und Secret bleiben dabei erhalten, sie liegen in der
 Datenbank und nicht im Plugin.
 
+### Update auf Version 1.2
+
+Neu: `eddy_cr_queue_statistik()` und der Scope `statistik`, aufgerufen vom Plugin
+`eddy-laufstatistik` (unten). Nichts einzutragen; ZIP hochladen und ersetzen genügt. Die
+Nuxt-Seite muss vorher deployt sein, sonst behandelt eine alte Fassung von
+`server/api/revalidate.post.ts` die Meldung als Kommentar-Meldung ohne Post-ID und antwortet 400.
+
 ### Update von Version 1.0 auf 1.1
 
 Version 1.0 sprach noch `/api/revalidate-comments` an. Das Plugin stellt die gespeicherte
@@ -55,3 +62,32 @@ Das Plugin sendet nie synchron: Es plant den Aufruf über `wp_schedule_single_ev
 niemand beim Kommentieren oder Speichern auf einen fremden Server wartet. Ein Ergebnis
 erscheint auf der Einstellungsseite deshalb erst, wenn WP-Cron gelaufen ist — bei einem
 Klick auf *Jetzt testen* dagegen sofort, der sendet direkt und prüft dabei alle vier Pfade.
+
+## `eddy-laufstatistik/` — Laufstatistik
+
+Eddys Läufe als eigener Inhaltstyp „Lauf“ mit Eingabemaske in WP-Admin (Menüpunkt **Läufe**)
+und öffentlicher Leseschnittstelle `GET /wp-json/eddy-laufstatistik/v1/laeufe`. Ersetzt die
+TablePress-Tabelle; angezeigt wird auf `eduard-andrae.de/statistik`. Datenmodell, Regeln und
+Umzug: `docs/statistik.md`.
+
+### Paket bauen
+
+```bash
+cd wordpress && zip -r ~/Downloads/eddy-laufstatistik.zip eddy-laufstatistik
+```
+
+### Installieren
+
+WP-Admin → Plugins → Installieren → Plugin hochladen → das ZIP wählen → aktivieren. Keine
+Einstellungen. Danach erscheint links der Menüpunkt **Läufe**.
+
+Die Seite wird nach jeder Änderung an einem Lauf neu gebaut, wenn der Inhalts-Webhook ab
+Version 1.2 aktiv ist. Ohne ihn greift nur die ISR-Frist.
+
+### Prüfen
+
+```bash
+curl -s https://blog.eduard-andrae.de/wp-json/eddy-laufstatistik/v1/laeufe | head -c 300
+```
+
+Erwartet wird eine JSON-Liste. `rest_no_route` heißt: Plugin nicht aktiv.

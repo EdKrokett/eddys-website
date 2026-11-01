@@ -141,6 +141,13 @@ export default defineNuxtConfig({
     '/blog/**': { isr: 3600 },
 
     /**
+     * Laufstatistik. Neu gebaut wird sie vom Inhalts-Webhook (scope `statistik`), sobald sich
+     * in WordPress ein Lauf ändert; die Frist ist nur das Sicherheitsnetz. Filter und Suche
+     * liest die Seite ausschließlich clientseitig (siehe VORAUSSETZUNG oben). docs/statistik.md.
+     */
+    '/statistik': { isr: 86400 },
+
+    /**
      * Die Seite „trusted blogs“ hieß bis 21.10.2026 „Werkbank“ und lag unter /werkbank.
      * Links darauf sind geteilt worden (u. a. /werkbank#handwerk); der Browser hängt den
      * Anker an das Weiterleitungsziel an. Ohne diese Regel fiele /werkbank in die

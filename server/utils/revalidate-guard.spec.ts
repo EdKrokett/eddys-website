@@ -81,6 +81,15 @@ describe('parseRevalidateScope', () => {
     expect(parseRevalidateScope('post')).toBe('post')
   })
 
+  it('erkennt den Statistik-Auslöser', () => {
+    expect(parseRevalidateScope('statistik')).toBe('statistik')
+  })
+
+  it('nimmt keine Schreibvarianten des Statistik-Auslösers an', () => {
+    expect(parseRevalidateScope('Statistik')).toBe('comment')
+    expect(parseRevalidateScope(' statistik')).toBe('comment')
+  })
+
   it('fällt auf \'comment\' zurück, wenn das Feld fehlt', () => {
     // Die erste Plugin-Fassung kannte das Feld nicht. Ohne diesen Rückfall würde ein
     // nicht aktualisiertes WordPress plötzlich Fehler melden.

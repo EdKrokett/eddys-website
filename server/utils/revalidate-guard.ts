@@ -50,8 +50,11 @@ export function parseWpPostId(raw: unknown): number | null {
   return null
 }
 
-/** Was der Webhook auslöste — davon hängt ab, welche Pfade neu gebaut werden. */
-export type RevalidateScope = 'comment' | 'post'
+/**
+ * Was der Webhook auslöste — davon hängt ab, welche Pfade neu gebaut werden.
+ * 'statistik' kommt vom Plugin eddy-laufstatistik und trägt keine Post-ID (docs/statistik.md).
+ */
+export type RevalidateScope = 'comment' | 'post' | 'statistik'
 
 /**
  * Liest den Auslöser aus dem Webhook-Body.
@@ -62,7 +65,7 @@ export type RevalidateScope = 'comment' | 'post'
  * Validierungsfehler zu laufen.
  */
 export function parseRevalidateScope(raw: unknown): RevalidateScope {
-  return raw === 'post' ? 'post' : 'comment'
+  return raw === 'post' || raw === 'statistik' ? raw : 'comment'
 }
 
 /**

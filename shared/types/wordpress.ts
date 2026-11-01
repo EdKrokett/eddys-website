@@ -24,6 +24,11 @@ export interface WordPressBlogPost {
 
 export interface WordPressBlogPostDetail extends WordPressBlogPost {
   content: string
+  /**
+   * Abmessungen des Beitragsbilds in Pixeln, sofern WordPress sie liefert. Davon hängt ab,
+   * ob die Beitragsseite das Bild als Banner zuschneidet oder ganz zeigt (heroBildFormat).
+   */
+  featuredImageSize?: { width: number, height: number }
 }
 
 /**
