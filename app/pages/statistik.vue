@@ -97,8 +97,8 @@ useSeoMeta({
 
             <div class="kopf__text">
               <p>
-                Uhrmacher führen für jedes Chronometer ein Gangbuch, in dem seine Messwerte über
-                die Zeit stehen. Das hier ist meins.
+                Uhrmacher führ(t)en für Chronometer ein Gangbuch, in dem Messwerte über einen
+                längeren Zeitraum festgehalten werden. Das hier ist meins.
               </p>
               <p>
                 Im Januar 2006 habe ich als 40-jähriger Kettenraucher mit dem Laufen angefangen.

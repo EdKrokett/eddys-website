@@ -240,9 +240,12 @@ Besucher wartet nie auf WordPress.
 ### Voraussetzung, die erst geschaffen werden musste
 
 `/blog` las den Suchbegriff `?q=` über `route.query.q` **während des SSR**. Mit ISR wäre
-das ein echter Fehler gewesen: Laut der in Schicht 2 dokumentierten Vercel-Eigenheit
-teilen sich alle Query-Varianten einen Cache-Eintrag, solange `allowQuery` sie nicht
-einzeln freigibt — ein Besucher hätte die vorgefilterte Seite eines anderen bekommen.
+das ein echter Fehler gewesen: Mit `allowQuery: []` teilen sich alle Query-Varianten einen
+Cache-Eintrag, ein Besucher hätte die vorgefilterte Seite eines anderen bekommen.
+(Korrektur 01.11.2026: Hier stand, das sei ohne `allowQuery` schon so. Stimmt nicht, ohne
+die Angabe cacht Vercel jede Variante einzeln. Das hat die Payload-Revalidierung
+ausgehebelt, Herleitung in `docs/revalidierung.md`. Seitdem steht `allowQuery: []` bei
+jeder `isr`-Regel, und die Regel unten gilt erst recht.)
 
 Gelöst nicht über `allowQuery`, sondern indem `/blog` **query-unabhängig gerendert** wird:
 `app/pages/blog/index.vue` liest `?q=` jetzt in `onMounted`, also nach der Hydration. Die

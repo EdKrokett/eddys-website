@@ -133,19 +133,28 @@ export default defineNuxtConfig({
      *
      * VORAUSSETZUNG, die dafür geschaffen wurde: `/blog` las `?q=` im Setup und
      * renderte serverseitig gefiltert. Da alle Query-Varianten sich einen Cache-Eintrag
-     * teilen (siehe `allowQuery`-Hinweis unten), hätte das fremde Suchergebnisse
+     * teilen (`allowQuery: []`, siehe unten), hätte das fremde Suchergebnisse
      * ausgeliefert. `app/pages/blog/index.vue` liest den Parameter jetzt in `onMounted`.
      * Neue Seiten mit `isr`/`swr` dürfen im SSR-Pfad keine Query-Parameter lesen.
+     *
+     * `allowQuery: []` MUSS bei jeder `isr`-Regel stehen. Ohne die Angabe schreibt Nitro
+     * kein `allowQuery` in die Prerender-Config, und Vercel cacht dann JEDE Query-Variante
+     * als eigenen Eintrag. Der Browser lädt die Payload aber als
+     * `<pfad>/_payload.json?<buildId>`, der Webhook erneuert `<pfad>/_payload.json` — zwei
+     * Einträge, nur einer davon frisch. Folge am 01.11.2026: Das neue Beitragsbild blitzte
+     * aus dem HTML kurz auf und wurde beim Hydrieren vom alten aus der Payload ersetzt.
+     * Leer heißt: Query-Werte zählen nicht, ein Eintrag pro Pfad. Den Routing-Parameter
+     * `__isr_route` ergänzt Nitro selbst. Herleitung: docs/revalidierung.md.
      */
-    '/blog': { isr: 1800 },
-    '/blog/**': { isr: 3600 },
+    '/blog': { isr: { expiration: 1800, allowQuery: [] } },
+    '/blog/**': { isr: { expiration: 3600, allowQuery: [] } },
 
     /**
      * Laufstatistik. Neu gebaut wird sie vom Inhalts-Webhook (scope `statistik`), sobald sich
      * in WordPress ein Lauf ändert; die Frist ist nur das Sicherheitsnetz. Filter und Suche
      * liest die Seite ausschließlich clientseitig (siehe VORAUSSETZUNG oben). docs/statistik.md.
      */
-    '/statistik': { isr: 86400 },
+    '/statistik': { isr: { expiration: 86400, allowQuery: [] } },
 
     /**
      * Die Seite „trusted blogs“ hieß bis 21.10.2026 „Werkbank“ und lag unter /werkbank.

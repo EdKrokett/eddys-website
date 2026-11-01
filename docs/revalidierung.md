@@ -47,7 +47,7 @@ Eine Nuxt-Seite existiert am Edge **zweimal**:
 | Pfad | Wer ihn bekommt |
 |---|---|
 | `/blog/mein-beitrag` | wer die URL direkt aufruft oder neu lädt |
-| `/blog/mein-beitrag/_payload.json` | wer innerhalb der Seite dorthin klickt |
+| `/blog/mein-beitrag/_payload.json` | wer innerhalb der Seite dorthin klickt, und jeder Direktaufruf beim Hydrieren (Nachtrag unten) |
 
 Beide sind eigene Cache-Einträge, und beide enthalten dieselben Daten. Nachgewiesen am
 16.09.2026: Die Payload eines Beitrags enthält den kompletten Kommentarbaum samt
@@ -59,6 +59,39 @@ Navigieren auftritt und beim Nachprüfen per Direktaufruf verschwindet.
 
 `server/utils/revalidate-paths.ts` erzeugt deshalb immer beide Pfade zusammen
 (`postPaths`, `blogIndexPaths`).
+
+**Nachtrag 01.11.2026:** Die Payload holt nicht nur, wer innerhalb der Seite klickt. Auch
+beim Direktaufruf steht im HTML `<script id="__NUXT_DATA__" data-src="…/_payload.json?<buildId>">`,
+und der Browser lädt die Datei beim Hydrieren nach. Ist sie älter als das HTML, zeigt die
+Seite kurz den neuen Stand und springt dann auf den alten zurück.
+
+## Query-Werte zählen nicht: `allowQuery: []`
+
+Der Browser fragt die Payload **mit** Query an (`_payload.json?8b891b6b-…`, die Build-ID),
+der Webhook **ohne**. Steht in der `isr`-Regel kein `allowQuery`, schreibt Nitro auch keins
+in die Prerender-Config, und Vercel cacht dann jede Query-Variante als eigenen Eintrag.
+Der Webhook erneuerte also zuverlässig einen Eintrag, den kein Besucher bekommt.
+
+Gemessen am 01.11.2026 nach dem Tausch des Beitragsbilds bei „Bestzeit vom Gepäckträger“:
+
+| URL | `age` | Beitragsbild |
+|---|---|---|
+| `/blog/<slug>` | frisch | neu |
+| `/blog/<slug>/_payload.json` | 990 s (Webhook) | neu |
+| `/blog/<slug>/_payload.json?<buildId>` | 2482 s | **alt** |
+| `/blog/<slug>/_payload.json?pruefung=123` | 0 (MISS) | eigener Eintrag |
+
+Deshalb steht bei jeder `isr`-Regel in `nuxt.config.ts` `allowQuery: []`: Query-Werte
+zählen nicht, jeder Pfad hat genau einen Eintrag. Nitro ergänzt selbst `__isr_route`, das
+nur den Pfad enthält (Rewrite `(?<__isr_route>/blog/(?:.*))` in
+`.vercel/output/config.json`). Die Build-ID als Query braucht es für den Cache nicht, weil
+jedes Deployment seinen eigenen ISR-Cache mitbringt.
+
+Nebeneffekt: Geteilte Links mit `?fbclid=…` oder `?utm_source=…` legten bisher je einen
+eigenen Eintrag an, der vom Webhook nie erreicht wurde. Auch das ist damit weg.
+
+Abgesichert durch `server/utils/isr-route-rules.spec.ts`: Eine neue `isr`-Regel ohne
+`allowQuery: []` lässt den Test scheitern.
 
 ## Warum Kommentare nicht durch `withWpCache` laufen
 

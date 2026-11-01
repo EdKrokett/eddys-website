@@ -442,3 +442,16 @@ Aus dem Blog-Link beim Halloween-Lauf vom 01.11.2026 (`docs/error-catalog.md`).
   testen, nicht nur mit Altlinks.
 - Landet eine umgeschriebene Adresse nur deshalb richtig, weil das Ziel sie zufällig umleitet?
   Die Weiterleitungskette mit `curl -I` ansehen, nicht nur den Endstatus.
+
+## Fragt mein Test dieselbe URL an wie der Browser?
+
+Aus dem aufblitzenden Beitragsbild vom 01.11.2026 (`docs/error-catalog.md`).
+
+- Welche URL fordert der Browser wirklich an? Im HTML nachsehen (`data-src`, `<link rel="preload">`)
+  oder im Netzwerk-Tab, nicht aus dem Code ableiten. Query-Strings wie die Build-ID hängt
+  das Framework an, sie stehen in keiner eigenen Zeile.
+- Schlüsselt der Cache auf die volle URL oder nur den Pfad? Bei Vercel-ISR entscheidet
+  `allowQuery` in `.vercel/output/functions/*.prerender-config.json`. Fehlt es, ist jede
+  Query-Variante ein eigener Eintrag.
+- Zeigt die Seite nach dem Laden etwas anderes als im ersten Moment? Dann widersprechen sich
+  HTML und Payload. Beide Fassungen mit `curl -I` vergleichen, auf `age` achten.

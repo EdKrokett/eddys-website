@@ -1227,3 +1227,40 @@ neuen.
 
 **→ AUDIT-PERSPEKTIVE:** „Kennt die Umschreibung die neuen Adressen?" in
 `docs/audit-perspectives.md`.
+
+## Neues Beitragsbild blitzt auf und verschwindet wieder
+
+**Gefunden:** 01.11.2026, nach dem Tausch der Beitragsbilder bei den zwei neuesten Beiträgen.
+Beim Laden zeigte die Seite für einen Sekundenbruchteil das neue Bild, dann wieder das alte.
+
+**FALSCH:**
+```ts
+// nuxt.config.ts: kein allowQuery, also ein Cache-Eintrag pro Query-Variante
+'/blog/**': { isr: 3600 },
+```
+
+**RICHTIG:**
+```ts
+'/blog/**': { isr: { expiration: 3600, allowQuery: [] } },
+```
+
+**WARUM:** Das HTML kam frisch vom Webhook und zeigte das neue Bild. Beim Hydrieren lädt der
+Browser aber die Daten nach, und zwar von `<pfad>/_payload.json?<buildId>`. Der Webhook
+erneuerte `<pfad>/_payload.json` ohne Query. Ohne `allowQuery` sind das für Vercel zwei
+Einträge; der vom Browser genutzte blieb bis zum ISR-Ablauf alt und überschrieb das Bild.
+
+Die Doku nahm das Gegenteil an („alle Query-Varianten teilen sich einen Eintrag“), und der
+Webhook meldete für beide Pfade korrekt `REVALIDATED`. Geprüft wurde die Payload-URL so, wie
+sie im Code steht, nicht so, wie der Browser sie anfragt:
+
+```bash
+curl -sI "https://eduard-andrae.de/blog/<slug>/_payload.json"           # age: 990  → neu
+curl -sI "https://eduard-andrae.de/blog/<slug>/_payload.json?<buildId>" # age: 2482 → alt
+```
+
+Wächter: `server/utils/isr-route-rules.spec.ts` lässt jede `isr`-Regel ohne `allowQuery: []`
+scheitern. Zweiter Fall derselben Klasse nach der vergessenen Payload-Datei vom 16.09.2026,
+deshalb diesmal ein Test statt nur einer weiteren Regel.
+
+**→ AUDIT-PERSPEKTIVE:** „Fragt mein Test dieselbe URL an wie der Browser?" in
+`docs/audit-perspectives.md`.
