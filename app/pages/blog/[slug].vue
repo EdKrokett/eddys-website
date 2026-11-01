@@ -206,11 +206,16 @@ useSeoMeta({
   color: var(--color-steel-100);
 }
 
+/*
+ * Banner ab 16 : 9 (heroBildFormat): volle Breite, ganze Höhe. Bei 1200px sind das höchstens
+ * rund 700px, die 45rem greifen dann nie. Sie sind nur das Netz für Bilder ohne bekannte
+ * Abmessungen; dann schneidet `cover` leicht über der Mitte zu, wo meist die Gesichter sind.
+ */
 .post__hero-img {
   width: 100%;
-  max-height: 30rem;
+  height: auto;
+  max-height: 45rem;
   object-fit: cover;
-  /* Leicht über der Mitte: Gesichter stehen meist im oberen Drittel */
   object-position: 50% 30%;
   margin-top: clamp(2rem, 4vw, 3rem);
   border: 1px solid var(--color-graphite-700);

@@ -1168,3 +1168,9 @@ gar nicht, obwohl WordPress sie in `media_details` mitliefert.
 
 **→ AUDIT-PERSPEKTIVE:** „Was zeigt der Zuschnitt bei einem Hochformat?" in
 `docs/audit-perspectives.md`.
+
+**Nachtrag, derselbe Tag:** Die erste Korrektur schnitt Querformate ab 1,4 : 1 weiter auf
+30rem zu. Eddys gestaltetes Titelbild (16 : 9, Schrift bis an den oberen und unteren Rand)
+hätte dabei Kopfzeile und Datum verloren. Seitdem wird gar nicht mehr beschnitten: ab 1,7 : 1
+volle Breite und ganze Höhe, darunter ganz mit unscharfer Füllung. Lehre: Titelbilder sind
+nicht nur Fotos. Ein Zuschnitt, der bei Fotos „meist trägt“, zerstört Grafiken mit Text.
