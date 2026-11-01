@@ -218,6 +218,9 @@ export default defineNuxtConfig({
         'lucide:globe',
         'lucide:youtube',
         'lucide:instagram',
+        // Sortierrichtung im Protokoll auf /statistik, per Ausdruck gewählt
+        'lucide:arrow-up',
+        'lucide:arrow-down',
       ],
     },
   },

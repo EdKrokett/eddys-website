@@ -1174,3 +1174,56 @@ gar nicht, obwohl WordPress sie in `media_details` mitliefert.
 hätte dabei Kopfzeile und Datum verloren. Seitdem wird gar nicht mehr beschnitten: ab 1,7 : 1
 volle Breite und ganze Höhe, darunter ganz mit unscharfer Füllung. Lehre: Titelbilder sind
 nicht nur Fotos. Ein Zuschnitt, der bei Fotos „meist trägt“, zerstört Grafiken mit Text.
+
+## Statistik-Webhook wartet auf den nächsten Blogbesucher
+
+**Gefunden:** 01.11.2026 von Eddy: Eine Laufänderung von 9:41 Uhr war um 10:04 Uhr noch nicht sichtbar.
+
+**FALSCH:**
+```php
+// eddy-comment-revalidate 1.2
+wp_schedule_single_event( time() + 30, EDDY_CR_EVENT, array( 0, 'statistik', '' ) );
+```
+
+**RICHTIG:**
+```php
+// 1.3: einmal pro Anfrage, am Ende, nach dem Senden der Antwort an den Browser
+add_action( 'shutdown', 'eddy_cr_send_statistik_now', 100 );   // fastcgi_finish_request(), dann senden
+```
+
+**WARUM:** WP-Cron ist kein Zeitgeber, sondern läuft nur bei einem Seitenaufruf von
+WordPress. Beim Speichern selbst war die Meldung (30 Sekunden Vorlauf) noch nicht fällig;
+danach brauchte es einen weiteren Aufruf, und den gibt es auf einem Blog mit wenig Verkehr
+nicht zuverlässig. Der Neubau kam erst, als eine Abfrage von außen WordPress weckte. Der
+eigene Test am Mittag hatte das verdeckt: Dabei habe ich `wp-cron.php` von Hand aufgerufen.
+Die übrigen Meldungen (Kommentare, Beiträge) laufen weiter über WP-Cron mit 5 Sekunden
+Vorlauf und haben dieselbe Schwäche, fallen aber weniger auf, weil Kommentare von Besuchern
+kommen und damit selbst Verkehr erzeugen.
+
+**→ AUDIT-PERSPEKTIVE:** „Wer weckt WP-Cron?" in `docs/audit-perspectives.md`.
+
+## Neuer Blog-Link wird auf die alte Domain „korrigiert“
+
+**Gefunden:** 01.11.2026, an Eddys Blogpost-Link beim Halloween-Lauf.
+
+**FALSCH:**
+```ts
+// shared/utils/lauf.ts: jede eduard-andrae.de-Adresse galt als Altlast der WordPress-Domain
+const url = new URL(rewriteLegacyWpUrls(raw.trim()))
+// https://eduard-andrae.de/blog/<slug>  →  https://blog.eduard-andrae.de/blog/<slug>
+```
+
+**RICHTIG:**
+```ts
+const url = new URL(EIGENE_BLOGADRESSE.test(roh) ? roh : rewriteLegacyWpUrls(roh))
+```
+
+**WARUM:** `rewriteLegacyWpUrls` stammt aus der Zeit, als unter `eduard-andrae.de` nur alte
+WordPress-Links vorkommen konnten. Seit dort die Nuxt-Seite läuft, trägt Eddy neue Links
+genau so ein. Die Umschreibung erzeugte eine Adresse, die es nicht gibt; dass sie trotzdem
+irgendwo ankam, lag nur an der Slug-Vermutung von WordPress, und zwar auf dem WordPress-Blog
+statt auf der eigenen Seite. Der Test für die Umschreibung prüfte nur Altlinks, nie einen
+neuen.
+
+**→ AUDIT-PERSPEKTIVE:** „Kennt die Umschreibung die neuen Adressen?" in
+`docs/audit-perspectives.md`.

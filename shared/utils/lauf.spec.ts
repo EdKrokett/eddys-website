@@ -142,6 +142,11 @@ describe('parseLauf', () => {
     ])
   })
 
+  it('lässt Beitragslinks auf diese Seite unverändert', () => {
+    const url = 'https://eduard-andrae.de/blog/halloween-run-bremen-der-letzte-kilometer-ist-immer-der-laengste'
+    expect(parseLauf(roh({ links: [{ label: 'Blogpost', url }] }))?.links).toEqual([{ label: 'Blogpost', url }])
+  })
+
   it('kürzt überlange Titel, statt das Layout zu sprengen', () => {
     expect(parseLauf(roh({ titel: 'x'.repeat(500) }))?.titel).toHaveLength(200)
   })

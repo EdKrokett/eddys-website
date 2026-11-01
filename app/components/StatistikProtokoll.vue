@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Lauf } from '#shared/types/statistik'
-import type { ProtokollFilter } from '~/utils/statistik'
+import type { ProtokollFilter, SortFeld, SortRichtung } from '~/utils/statistik'
 
 /**
  * Die vollständige Liste, nach Jahr gruppiert, mit Filter und Freitextsuche. Das ist auch die
@@ -19,7 +19,42 @@ const filter = defineModel<ProtokollFilter>('filter', { required: true })
 const suche = defineModel<string>('suche', { required: true })
 
 const treffer = computed(() => filterLaeufe(props.laeufe, filter.value, suche.value))
-const gruppen = computed(() => gruppiereNachJahr(treffer.value))
+
+/**
+ * Sortierung. Nach Datum bleibt die Gruppierung nach Jahren (auf- oder absteigend). Nach
+ * Zielzeit wird daraus eine Rangliste ohne Jahresgruppen: Platzziffer und volles Datum je
+ * Zeile. Zusammen mit einem Distanzfilter ergibt das die Bestenliste dieser Distanz.
+ */
+const sortFeld = ref<SortFeld>('datum')
+const sortRichtung = ref<SortRichtung>('ab')
+
+function sortiereNach(feld: SortFeld) {
+  if (sortFeld.value === feld) {
+    sortRichtung.value = sortRichtung.value === 'auf' ? 'ab' : 'auf'
+    return
+  }
+  sortFeld.value = feld
+  // Natürliche erste Richtung: neueste zuerst bzw. schnellste zuerst
+  sortRichtung.value = feld === 'datum' ? 'ab' : 'auf'
+}
+
+const SORT_BESCHREIBUNG: Record<SortFeld, Record<SortRichtung, string>> = {
+  datum: { ab: 'neueste zuerst', auf: 'älteste zuerst' },
+  zeit: { auf: 'schnellste zuerst', ab: 'langsamste zuerst' },
+}
+
+const sortiert = computed(() => sortiereLaeufe(treffer.value, sortFeld.value, sortRichtung.value))
+const rangliste = computed(() => sortFeld.value === 'zeit')
+const gruppen = computed(() => rangliste.value
+  ? [{ jahr: null, laeufe: sortiert.value }]
+  : gruppiereNachJahr(sortiert.value, sortRichtung.value))
+
+/** Platz in der Rangliste; Einträge ohne Zeit bekommen keinen. */
+function platz(index: number, lauf: Lauf): string {
+  return lauf.sekunden ? `${index + 1}.` : ''
+}
+
+const vollesDatum = (lauf: Lauf) => `${formatTagMonat(lauf.datum)}${lauf.jahr}`
 
 function kennzeichen(lauf: Lauf): string[] {
   const liste: string[] = []
@@ -68,9 +103,33 @@ function zuruecksetzen() {
       </label>
     </div>
 
-    <p class="anzahl" aria-live="polite">
-      {{ treffer.length }} {{ treffer.length === 1 ? 'Eintrag' : 'Einträge' }}
-    </p>
+    <div class="zeile2">
+      <p class="anzahl" aria-live="polite">
+        {{ treffer.length }} {{ treffer.length === 1 ? 'Eintrag' : 'Einträge' }}
+        · {{ SORT_BESCHREIBUNG[sortFeld][sortRichtung] }}
+      </p>
+
+      <div class="sortierung" role="group" aria-label="Sortieren">
+        <span class="sortierung__label" aria-hidden="true">Sortieren</span>
+        <button
+          v-for="feld in (['datum', 'zeit'] as const)"
+          :key="feld"
+          type="button"
+          class="sortierung__knopf"
+          :aria-pressed="sortFeld === feld"
+          :aria-label="`Nach ${feld === 'datum' ? 'Datum' : 'Zielzeit'} sortieren${sortFeld === feld ? `, ${SORT_BESCHREIBUNG[feld][sortRichtung]}; erneut klicken kehrt die Richtung um` : ''}`"
+          @click="sortiereNach(feld)"
+        >
+          {{ feld === 'datum' ? 'Datum' : 'Zielzeit' }}
+          <Icon
+            v-if="sortFeld === feld"
+            :name="sortRichtung === 'auf' ? 'lucide:arrow-up' : 'lucide:arrow-down'"
+            class="sortierung__pfeil"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+    </div>
 
     <div v-if="!treffer.length" class="leer">
       <p>Kein Eintrag passt{{ suche.trim() ? ` zu „${suche.trim()}“` : '' }}.</p>
@@ -81,17 +140,19 @@ function zuruecksetzen() {
 
     <section
       v-for="gruppe in gruppen"
-      :key="gruppe.jahr"
+      :key="gruppe.jahr ?? 'rangliste'"
       class="jahrgang"
-      :aria-labelledby="`jahrgang-${gruppe.jahr}`"
+      :class="{ 'jahrgang--rangliste': rangliste }"
+      :aria-labelledby="gruppe.jahr ? `jahrgang-${gruppe.jahr}` : undefined"
+      :aria-label="gruppe.jahr ? undefined : 'Rangliste nach Zielzeit'"
     >
-      <h3 :id="`jahrgang-${gruppe.jahr}`" class="jahrgang__jahr">
+      <h3 v-if="gruppe.jahr" :id="`jahrgang-${gruppe.jahr}`" class="jahrgang__jahr">
         {{ gruppe.jahr }}
       </h3>
 
       <ol class="jahrgang__liste">
         <li
-          v-for="lauf in gruppe.laeufe"
+          v-for="(lauf, index) in gruppe.laeufe"
           :id="`lauf-${lauf.id}`"
           :key="lauf.id"
           class="eintrag"
@@ -101,7 +162,10 @@ function zuruecksetzen() {
             'eintrag--meilenstein': lauf.art === 'meilenstein',
           }"
         >
-          <span class="eintrag__datum">{{ formatTagMonat(lauf.datum) }}</span>
+          <span v-if="rangliste" class="eintrag__datum">
+            <span class="eintrag__platz">{{ platz(index, lauf) }}</span>{{ vollesDatum(lauf) }}
+          </span>
+          <span v-else class="eintrag__datum">{{ formatTagMonat(lauf.datum) }}</span>
 
           <div class="eintrag__text">
             <p class="eintrag__titel">
@@ -227,12 +291,64 @@ function zuruecksetzen() {
   border-color: var(--color-accent-500);
 }
 
-.anzahl {
+.zeile2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
   margin-top: 1rem;
+}
+
+.anzahl {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: 0.08em;
   color: var(--color-steel-500);
+}
+
+.sortierung {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sortierung__label {
+  margin-right: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-steel-500);
+}
+
+.sortierung__knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid transparent;
+  border-bottom-color: var(--color-graphite-600);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-steel-400);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.sortierung__knopf:hover {
+  color: var(--color-steel-100);
+}
+
+.sortierung__knopf[aria-pressed='true'] {
+  border-bottom-color: var(--color-accent-500);
+  color: var(--color-steel-100);
+}
+
+.sortierung__pfeil {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: var(--color-accent-300);
 }
 
 .leer {
@@ -260,6 +376,21 @@ function zuruecksetzen() {
   margin-top: 2rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--color-graphite-700);
+}
+
+/* Rangliste: keine Jahresspalte, dafür eine breitere Datumsspalte mit Platzziffer */
+.jahrgang--rangliste {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.jahrgang--rangliste .eintrag {
+  grid-template-columns: 8.5rem minmax(0, 1fr) 5.5rem 6.5rem;
+}
+
+.eintrag__platz {
+  display: inline-block;
+  min-width: 2.1rem;
+  color: var(--color-steel-200);
 }
 
 .jahrgang__jahr {
@@ -422,6 +553,15 @@ function zuruecksetzen() {
   .eintrag__distanz:empty,
   .eintrag__zeit:empty {
     display: none;
+  }
+
+  /* Rangliste: Platz und Datum über dem Titel statt in einer eigenen Spalte */
+  .jahrgang--rangliste .eintrag {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'datum datum'
+      'text text'
+      'distanz zeit';
   }
 }
 </style>

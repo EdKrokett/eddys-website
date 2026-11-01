@@ -2,9 +2,13 @@
 import type { ZeitstrahlMarke, ZeitstrahlModell } from '~/utils/statistik'
 
 /**
- * Alle Läufe seit 2006 als Indexstriche auf einer Achse, wie die Minutenteilung eines
- * Zifferblatts. Strichlänge = Distanz (Wurzel-Skala, siehe baueZeitstrahl), hohle Striche
- * = DNS/DNF, Messing-Rauten unter der Achse = Meilensteine.
+ * Alle Läufe seit 2006 als Indexstriche, wie die Minutenteilung eines Zifferblatts.
+ * Strichlänge = Distanz (Wurzel-Skala), hohle Striche = DNS/DNF, Messing-Rauten unter der
+ * Achse = Meilensteine.
+ *
+ * Die Achse ist nach Jahren gestaucht (baueZeitstrahl): Jedes Jahr ist ein Band, so breit wie
+ * seine Einträge. Die abwechselnd getönten Bänder machen sichtbar, dass hier Jahre nebeneinander
+ * stehen und keine maßstäbliche Zeitachse; leere Jahre sind schmale, schraffierte Streifen.
  *
  * Die Marken sind für Screenreader ausgeblendet: Dieselben Einträge stehen vollständig und
  * zugänglich im Protokoll darunter. Ein Klick auf eine Marke springt dorthin (`select`).
@@ -13,20 +17,6 @@ const props = defineProps<{ modell: ZeitstrahlModell }>()
 const emit = defineEmits<{ select: [id: number] }>()
 
 const aktiv = ref<ZeitstrahlMarke | null>(null)
-
-/**
- * Beschriftet: erstes Jahr, jedes fünfte und das letzte. Das letzte nur, wenn es mindestens
- * drei Jahre hinter dem letzten Fünferjahr liegt; „2025“ und „2026“ standen sonst übereinander.
- */
-const jahresLabels = computed(() => {
-  const { vonJahr, bisJahr } = props.modell
-  const letztesFuenferjahr = Math.floor(bisJahr / 5) * 5
-  return props.modell.ticks.filter(tick =>
-    tick.major
-    || tick.jahr === vonJahr
-    || (tick.jahr === bisJahr && bisJahr - letztesFuenferjahr >= 3),
-  )
-})
 
 const laeufe = computed(() => props.modell.marken.filter(m => m.typ !== 'meilenstein'))
 const meilensteine = computed(() => props.modell.marken.filter(m => m.typ === 'meilenstein'))
@@ -45,6 +35,17 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 <template>
   <figure class="strahl">
     <div class="strahl__flaeche" aria-hidden="true" @mouseleave="aktiv = null">
+      <!-- Jahresbänder hinter Plot, Achse und Meilensteinen -->
+      <div class="strahl__baender">
+        <span
+          v-for="(band, index) in modell.baender"
+          :key="band.jahr"
+          class="band"
+          :class="{ 'band--getoent': index % 2 === 0, 'band--leer': !band.anzahl }"
+          :style="{ left: `${band.startPct}%`, width: `${band.breitePct}%` }"
+        />
+      </div>
+
       <!-- Läufe über der Achse -->
       <div class="strahl__plot">
         <button
@@ -54,7 +55,7 @@ function beschreibe(marke: ZeitstrahlMarke): string {
           tabindex="-1"
           class="marke"
           :class="[`marke--${marke.typ}`, { 'marke--aktiv': aktiv === marke }]"
-          :style="{ 'left': `${marke.offsetPct}%`, '--h': `${marke.hoehePct}%` }"
+          :style="{ 'left': `${marke.offsetPct}%`, 'width': `${marke.slotPct}%`, '--h': `${marke.hoehePct}%` }"
           @mouseenter="aktiv = marke"
           @focus="aktiv = marke"
           @click="emit('select', marke.lauf.id)"
@@ -63,16 +64,7 @@ function beschreibe(marke: ZeitstrahlMarke): string {
         </button>
       </div>
 
-      <!-- Achse mit Jahresteilung -->
-      <div class="strahl__achse">
-        <span
-          v-for="tick in modell.ticks"
-          :key="tick.jahr"
-          class="tick"
-          :class="{ 'tick--major': tick.major }"
-          :style="{ left: `${tick.offsetPct}%` }"
-        />
-      </div>
+      <div class="strahl__achse" />
 
       <!-- Meilensteine unter der Achse -->
       <div class="strahl__meilensteine">
@@ -83,7 +75,7 @@ function beschreibe(marke: ZeitstrahlMarke): string {
           tabindex="-1"
           class="raute"
           :class="{ 'raute--aktiv': aktiv === marke }"
-          :style="{ left: `${marke.offsetPct}%` }"
+          :style="{ left: `${marke.offsetPct}%`, width: `${marke.slotPct}%` }"
           @mouseenter="aktiv = marke"
           @click="emit('select', marke.lauf.id)"
         >
@@ -93,11 +85,12 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 
       <div class="strahl__jahre">
         <span
-          v-for="tick in jahresLabels"
-          :key="tick.jahr"
+          v-for="label in modell.labels"
+          :key="label.text"
           class="jahr"
-          :style="{ left: `${tick.offsetPct}%` }"
-        >{{ tick.jahr }}</span>
+          :class="{ 'jahr--neben': !label.haupt, 'jahr--phase': label.text.includes('–') }"
+          :style="{ left: `${label.mittePct}%` }"
+        ><span class="jahr__lang">{{ label.text }}</span><span class="jahr__kurz">{{ label.kurz }}</span></span>
       </div>
 
       <!-- Tooltip oben neben der Marke: in der linken Hälfte rechts davon, sonst links.
@@ -124,7 +117,9 @@ function beschreibe(marke: ZeitstrahlMarke): string {
       <span class="legende__eintrag">
         <span class="legende__raute" aria-hidden="true" />Meilenstein
       </span>
-      <span class="legende__hinweis">Klick auf eine Marke springt zum Eintrag im Protokoll.</span>
+      <span class="legende__hinweis">
+        Jedes Jahr ist so breit wie seine Einträge. Klick auf eine Marke springt zum Eintrag im Protokoll.
+      </span>
     </figcaption>
   </figure>
 </template>
@@ -136,20 +131,42 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 
 .strahl__flaeche {
   position: relative;
-  /* Platz links/rechts, damit Marken am Rand und der Tooltip nicht anstoßen */
-  padding: 0 0.25rem;
+}
+
+/* Bänder reichen vom Plot bis unter die Meilensteine, nicht in die Jahreslabels */
+.strahl__baender {
+  position: absolute;
+  inset: 0 0 1.75rem 0;
+  pointer-events: none;
+}
+
+.band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.band--getoent {
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.band--leer {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0 1px,
+    transparent 1px 5px
+  );
 }
 
 .strahl__plot {
   position: relative;
-  height: clamp(150px, 26vw, 240px);
+  height: clamp(170px, 26vw, 260px);
 }
 
-/* Trefferfläche breiter als der Strich: 2px Strich, 12px greifbar */
+/* Trefferfläche = der ganze Platz des Eintrags; der Strich nimmt 60 % davon ein */
 .marke {
   position: absolute;
   bottom: 0;
-  width: 12px;
   height: 100%;
   transform: translateX(-50%);
   display: flex;
@@ -162,16 +179,15 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 
 .marke__strich {
   display: block;
-  width: 2px;
+  width: clamp(2px, 60%, 14px);
   height: var(--h);
   /* oberes Ende abgerundet, an der Achse gerade */
-  border-radius: 2px 2px 0 0;
-  background: var(--color-accent-500);
-  transition: background-color 0.15s, box-shadow 0.15s;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--color-accent-400), var(--color-accent-600));
+  transition: background-color 0.15s, box-shadow 0.15s, filter 0.15s;
 }
 
 .marke--ausfall .marke__strich {
-  width: 4px;
   background: transparent;
   border: 1px solid var(--color-steel-500);
   border-bottom: 0;
@@ -179,44 +195,32 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 
 .marke:hover .marke__strich,
 .marke--aktiv .marke__strich {
-  background: var(--color-accent-300);
-  box-shadow: 0 0 0 2px var(--color-graphite-900), 0 0 12px rgba(88, 197, 187, 0.45);
+  filter: brightness(1.25);
+  box-shadow: 0 0 14px rgba(88, 197, 187, 0.5);
 }
 
-.marke--ausfall.marke--aktiv .marke__strich {
-  background: transparent;
+.marke--ausfall.marke--aktiv .marke__strich,
+.marke--ausfall:hover .marke__strich {
+  filter: none;
+  box-shadow: none;
   border-color: var(--color-steel-200);
 }
 
 .strahl__achse {
   position: relative;
-  height: 10px;
-  border-top: 1px solid var(--color-steel-500);
-}
-
-.tick {
-  position: absolute;
-  top: 0;
-  width: 1px;
-  height: 5px;
-  background: var(--color-graphite-500);
-}
-
-.tick--major {
-  height: 10px;
-  background: var(--color-steel-400);
+  height: 1px;
+  background: var(--color-steel-500);
 }
 
 .strahl__meilensteine {
   position: relative;
-  height: 22px;
+  height: 26px;
 }
 
 .raute {
   position: absolute;
-  top: 4px;
-  width: 16px;
-  height: 16px;
+  top: 0;
+  height: 100%;
   transform: translateX(-50%);
   display: grid;
   place-items: center;
@@ -226,8 +230,8 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 }
 
 .raute__form {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   transform: rotate(45deg);
   background: var(--color-brass-mark);
   box-shadow: 0 0 0 2px var(--color-graphite-900);
@@ -240,22 +244,43 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 
 .strahl__jahre {
   position: relative;
-  height: 1.5rem;
+  height: 1.75rem;
 }
 
 .jahr {
   position: absolute;
-  top: 0.25rem;
+  top: 0.45rem;
   transform: translateX(-50%);
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
   font-variant-numeric: tabular-nums;
   color: var(--color-steel-400);
 }
 
-/* Erstes Label nicht über den linken Rand schieben */
-.jahr:first-child {
-  transform: none;
+.jahr--phase {
+  color: var(--color-steel-500);
+  letter-spacing: 0.04em;
+}
+
+.jahr__kurz {
+  display: none;
+}
+
+/* Auf schmalen Bildschirmen nur Rand- und starke Jahre, und die nur zweistellig („’11“),
+   sonst stoßen die Zahlen zusammen */
+@media (max-width: 639px) {
+  .jahr--neben {
+    display: none;
+  }
+
+  .jahr__lang {
+    display: none;
+  }
+
+  .jahr__kurz {
+    display: inline;
+  }
 }
 
 .tipp {
@@ -307,14 +332,13 @@ function beschreibe(marke: ZeitstrahlMarke): string {
 }
 
 .legende__strich {
-  width: 2px;
+  width: 6px;
   height: 14px;
   border-radius: 2px 2px 0 0;
   background: var(--color-accent-500);
 }
 
 .legende__strich--hohl {
-  width: 4px;
   background: transparent;
   border: 1px solid var(--color-steel-500);
   border-bottom: 0;
@@ -331,11 +355,5 @@ function beschreibe(marke: ZeitstrahlMarke): string {
   flex-basis: 100%;
   font-size: var(--text-xs);
   color: var(--color-steel-500);
-}
-
-@media (hover: none) {
-  .legende__hinweis {
-    display: none;
-  }
 }
 </style>

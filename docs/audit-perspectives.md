@@ -422,3 +422,23 @@ Aus dem Halloween-Titelbild vom 01.11.2026 (`docs/error-catalog.md`). Anzuwenden
   Landschaftsbild, das gerade zur Hand ist. Stehen die Köpfe noch im Ausschnitt?
 - Kennt die Komponente die Abmessungen des Bildes? WordPress liefert sie in `media_details`.
 - Sitzt `object-position` bewusst? Die Standardmitte trifft bei Personen den Oberkörper.
+
+## Wer weckt WP-Cron?
+
+Aus dem verspäteten Statistik-Neubau vom 01.11.2026 (`docs/error-catalog.md`).
+
+- Hängt eine sichtbare Aktualisierung an `wp_schedule_single_event`? Dann läuft sie erst beim
+  nächsten Aufruf von WordPress nach dem geplanten Zeitpunkt, nicht zu diesem Zeitpunkt.
+- Ist die Aufgabe beim auslösenden Aufruf schon fällig? Mit Vorlauf (`time() + n`) nie.
+- Hat der Test WP-Cron von Hand angestoßen (`wp-cron.php`)? Dann hat er genau das
+  übersprungen, was im echten Betrieb fehlt. Ohne fremden Aufruf testen.
+
+## Kennt die Umschreibung die neuen Adressen?
+
+Aus dem Blog-Link beim Halloween-Lauf vom 01.11.2026 (`docs/error-catalog.md`).
+
+- Schreibt eine Funktion Adressen einer Domain um, die inzwischen selbst wieder genutzt wird
+  (`eduard-andrae.de` nach dem Umzug)? Dann mit einer NEUEN, gültigen Adresse dieser Domain
+  testen, nicht nur mit Altlinks.
+- Landet eine umgeschriebene Adresse nur deshalb richtig, weil das Ziel sie zufällig umleitet?
+  Die Weiterleitungskette mit `curl -I` ansehen, nicht nur den Endstatus.

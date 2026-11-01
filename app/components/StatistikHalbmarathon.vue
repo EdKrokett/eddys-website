@@ -2,10 +2,14 @@
 import type { ZeitPlotModell } from '~/utils/statistik'
 
 /**
- * Alle Halbmarathons als Punkte: Zeit über Datum, mit der Zwei-Stunden-Linie als Referenz.
- * Je tiefer ein Punkt, desto schneller. Wettkämpfe gefüllt, Trainingsläufe hohl, die
- * Bestzeit in Messing. Beschriftet werden nur Bestzeit und letzter Lauf, alles andere
- * zeigt der Tooltip (und vollständig das Protokoll).
+ * Alle Halbmarathons, Zeit über Datum, gemessen an der Zwei-Stunden-Marke.
+ *
+ * Gestaltung „Abstand zur Marke“ (Eddys Wunsch nach mehr Fläche, 01.11.2026): Jeder Punkt hängt
+ * an einem Stiel, der an der Zwei-Stunden-Linie beginnt. Darunter (schneller) ist der Stiel
+ * teal, darüber gedämpft. Die Zone unter zwei Stunden ist als Fläche getönt, damit das Ziel
+ * auch ohne Lesen der Achse sichtbar ist. Wettkämpfe gefüllt, Trainingsläufe hohl, die
+ * Bestzeit in Messing mit Hof. Beschriftet werden nur Bestzeit und letzter Lauf, alles andere
+ * zeigt der Tooltip und vollständig das Protokoll.
  */
 const props = defineProps<{ modell: ZeitPlotModell }>()
 
@@ -14,6 +18,18 @@ const aktiv = ref<Punkt | null>(null)
 
 const letzter = computed(() => props.modell.punkte.at(-1) ?? null)
 const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
+
+/** Stiel von der Referenzlinie zum Punkt; ohne Referenz im Bereich vom unteren Rand. */
+function stiel(punkt: Punkt) {
+  const basis = props.modell.referenzPct ?? 0
+  return {
+    left: `${punkt.xPct}%`,
+    bottom: `${Math.min(basis, punkt.yPct)}%`,
+    height: `${Math.abs(punkt.yPct - basis)}%`,
+  }
+}
+
+const unterMarke = (punkt: Punkt) => props.modell.referenzPct !== null && punkt.yPct < props.modell.referenzPct
 </script>
 
 <template>
@@ -25,11 +41,21 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
           v-for="tick in modell.yTicks"
           :key="tick.sekunden"
           class="ytick"
+          :class="{ 'ytick--marke': tick.pct === modell.referenzPct }"
           :style="{ bottom: `${tick.pct}%` }"
         >{{ tick.label.replace(/:00$/, '') }}</span>
       </div>
 
       <div class="plot__flaeche">
+        <!-- Zone unter zwei Stunden -->
+        <div
+          v-if="modell.referenzPct !== null"
+          class="zone"
+          :style="{ height: `${modell.referenzPct}%` }"
+        >
+          <span class="zone__label">unter zwei Stunden</span>
+        </div>
+
         <span
           v-for="tick in modell.yTicks"
           :key="tick.sekunden"
@@ -41,7 +67,16 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
           v-if="modell.referenzPct !== null"
           class="referenz"
           :style="{ bottom: `${modell.referenzPct}%` }"
-        ><span class="referenz__label">2 Stunden</span></span>
+        />
+
+        <!-- Stiele zuerst, damit die Punkte darüber liegen -->
+        <span
+          v-for="punkt in modell.punkte"
+          :key="`s${punkt.lauf.id}`"
+          class="stiel"
+          :class="{ 'stiel--unter': unterMarke(punkt), 'stiel--aktiv': aktiv === punkt }"
+          :style="stiel(punkt)"
+        />
 
         <button
           v-for="punkt in modell.punkte"
@@ -63,9 +98,14 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
           <span
             v-if="beschriftet(punkt)"
             class="punkt__label"
-            :class="{ 'punkt__label--links': punkt.xPct > 80 }"
+            :class="{
+              'punkt__label--links': punkt.xPct > 80,
+              'punkt__label--best': punkt.bestzeit,
+              'punkt__label--letzter': !punkt.bestzeit,
+            }"
           >
-            {{ punkt.bestzeit ? 'Bestzeit' : punkt.lauf.jahr }} {{ formatDauer(punkt.sekunden) }}
+            <span class="punkt__label-art">{{ punkt.bestzeit ? 'Bestzeit' : punkt.lauf.jahr }}</span>
+            {{ formatDauer(punkt.sekunden) }}
           </span>
         </button>
 
@@ -97,7 +137,7 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
       <span class="legende__eintrag"><span class="legende__punkt" aria-hidden="true" />Wettkampf</span>
       <span class="legende__eintrag"><span class="legende__punkt legende__punkt--hohl" aria-hidden="true" />Trainingslauf</span>
       <span class="legende__eintrag"><span class="legende__punkt legende__punkt--best" aria-hidden="true" />Bestzeit</span>
-      <span class="legende__eintrag"><span class="legende__linie" aria-hidden="true" />zwei Stunden</span>
+      <span class="legende__eintrag"><span class="legende__zone" aria-hidden="true" />unter zwei Stunden</span>
     </figcaption>
   </figure>
 </template>
@@ -110,7 +150,7 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
 .plot__rahmen {
   display: grid;
   grid-template-columns: 3.25rem minmax(0, 1fr);
-  grid-template-rows: clamp(220px, 34vw, 340px) 1.75rem;
+  grid-template-rows: clamp(280px, 38vw, 420px) 2rem;
 }
 
 .plot__y {
@@ -119,7 +159,7 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
 
 .ytick {
   position: absolute;
-  right: 0.75rem;
+  right: 0.85rem;
   transform: translateY(50%);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
@@ -127,10 +167,35 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
   color: var(--color-steel-500);
 }
 
+.ytick--marke {
+  color: var(--color-steel-100);
+  font-weight: 600;
+}
+
+/* Fläche mit leichtem Licht von oben statt reinem Schwarz */
 .plot__flaeche {
   position: relative;
-  border-left: 1px solid var(--color-graphite-600);
   border-bottom: 1px solid var(--color-steel-500);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.008));
+}
+
+.zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(33, 164, 163, 0.2), rgba(33, 164, 163, 0.04));
+}
+
+.zone__label {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
 }
 
 .gitter {
@@ -138,35 +203,40 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
   left: 0;
   right: 0;
   height: 1px;
-  background: var(--color-graphite-700);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .referenz {
   position: absolute;
   left: 0;
   right: 0;
-  height: 0;
-  border-top: 1px dashed var(--color-steel-300);
+  height: 2px;
+  transform: translateY(1px);
+  background: var(--color-steel-200);
+  box-shadow: 0 0 18px rgba(88, 197, 187, 0.35);
 }
 
-/* Links am Anfang der Linie und knapp darunter: rechts liegen die jüngsten Läufe, und der
-   erste (Köln 2007, 2:01:11) sitzt direkt über der Linie */
-.referenz__label {
+.stiel {
   position: absolute;
-  left: 0.5rem;
-  top: 0.35rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-steel-300);
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--color-graphite-500);
+  transition: background-color 0.15s;
 }
 
-/* Trefferfläche 24px, sichtbarer Punkt 10px */
+.stiel--unter {
+  background: var(--color-accent-400);
+}
+
+.stiel--aktiv {
+  background: var(--color-steel-200);
+}
+
+/* Trefferfläche 32px, sichtbarer Punkt 16px */
 .punkt {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   transform: translate(-50%, 50%);
   display: grid;
   place-items: center;
@@ -176,47 +246,70 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
 }
 
 .punkt__form {
-  width: 10px;
-  height: 10px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--color-accent-500);
   /* 2px Ring in Flächenfarbe trennt überlappende Punkte */
   box-shadow: 0 0 0 2px var(--color-graphite-900);
-  transition: transform 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .punkt--training .punkt__form {
   background: var(--color-graphite-900);
-  border: 2px solid var(--color-accent-500);
+  border: 3px solid var(--color-accent-500);
 }
 
 .punkt--best .punkt__form {
+  width: 20px;
+  height: 20px;
   background: var(--color-brass-mark);
   border-color: var(--color-brass-mark);
+  box-shadow: 0 0 0 2px var(--color-graphite-900), 0 0 0 7px rgba(189, 139, 48, 0.28);
 }
 
 .punkt:hover .punkt__form,
 .punkt--aktiv .punkt__form {
-  transform: scale(1.35);
+  transform: scale(1.25);
+  box-shadow: 0 0 0 2px var(--color-graphite-900), 0 0 16px rgba(88, 197, 187, 0.6);
 }
 
 .punkt__label {
   position: absolute;
-  left: calc(100% - 0.25rem);
+  left: calc(100% - 0.2rem);
   top: 50%;
   transform: translateY(-50%);
-  padding: 0 0.3rem;
-  background: var(--color-graphite-900);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--color-graphite-600);
+  background: var(--color-graphite-950);
   white-space: nowrap;
   font-family: var(--font-mono);
-  font-size: var(--text-2xs);
+  font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
-  color: var(--color-steel-200);
+  color: var(--color-steel-100);
+}
+
+.punkt__label--best {
+  border-color: var(--color-brass-500);
+}
+
+.punkt__label-art {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-steel-400);
+}
+
+.punkt__label--best .punkt__label-art {
+  color: var(--color-brass-300);
 }
 
 .punkt__label--links {
   left: auto;
-  right: calc(100% - 0.25rem);
+  right: calc(100% - 0.2rem);
 }
 
 .tipp {
@@ -230,19 +323,19 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
   border: 1px solid var(--color-graphite-600);
   background: var(--color-graphite-950);
   pointer-events: none;
-  transform: translate(1rem, -0.5rem);
+  transform: translate(1.25rem, -0.5rem);
 }
 
 .tipp--links {
-  transform: translate(calc(-100% - 1rem), -0.5rem);
+  transform: translate(calc(-100% - 1.25rem), -0.5rem);
 }
 
 .tipp--unten {
-  transform: translate(1rem, 100%);
+  transform: translate(1.25rem, 100%);
 }
 
 .tipp--links.tipp--unten {
-  transform: translate(calc(-100% - 1rem), 100%);
+  transform: translate(calc(-100% - 1.25rem), 100%);
 }
 
 .tipp__datum,
@@ -266,7 +359,7 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
 
 .xtick {
   position: absolute;
-  top: 0.4rem;
+  top: 0.5rem;
   transform: translateX(-50%);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
@@ -294,8 +387,8 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
 }
 
 .legende__punkt {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--color-accent-500);
 }
@@ -309,19 +402,34 @@ const beschriftet = (punkt: Punkt) => punkt.bestzeit || punkt === letzter.value
   background: var(--color-brass-mark);
 }
 
-.legende__linie {
+.legende__zone {
   width: 18px;
-  border-top: 1px dashed var(--color-steel-300);
+  height: 12px;
+  border-top: 2px solid var(--color-steel-200);
+  background: linear-gradient(180deg, rgba(33, 164, 163, 0.35), rgba(33, 164, 163, 0.08));
 }
 
-/* Schmal: höher, damit sich die Punkte nicht stapeln; das Linien-Label übernimmt die Legende */
+/* Schmal: Punkte etwas kleiner, damit die Häufung 2011–2015 nicht zu einem Klumpen wird */
 @media (max-width: 639px) {
   .plot__rahmen {
     grid-template-columns: 2.5rem minmax(0, 1fr);
-    grid-template-rows: 320px 1.75rem;
+    grid-template-rows: 340px 2rem;
   }
 
-  .referenz__label {
+  .punkt__form {
+    width: 12px;
+    height: 12px;
+  }
+
+  .punkt--best .punkt__form {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Nur das Bestzeit-Schild bleibt; Zonen-Label und „letzter Lauf“ verdeckten hier Punkte.
+     Beides steht in Legende und Tooltip. */
+  .zone__label,
+  .punkt__label--letzter {
     display: none;
   }
 

@@ -111,12 +111,19 @@ function parseLinks(raw: unknown): LaufLink[] {
  * Die alte Tabelle verlinkt Urkunden und Beiträge noch auf `www.eduard-andrae.de`, wo seit
  * August 2026 die Nuxt-Seite läuft. `rewriteLegacyWpUrls` hebt sie auf blog.eduard-andrae.de
  * und https an (dort geprüft erreichbar, 01.11.2026).
+ *
+ * AUSNAHME `/blog/…`: Das ist schon eine Adresse dieser Seite (so trägt Eddy neue Läufe ein).
+ * Umgeschrieben wurde daraus `blog.eduard-andrae.de/blog/…`, eine Adresse, die es nicht gibt
+ * und die WordPress nur zufällig auf seinen eigenen Beitrag umleitete.
  */
+const EIGENE_BLOGADRESSE = /^https?:\/\/(?:www\.)?eduard-andrae\.de\/blog\//i
+
 function safeHttpUrl(raw: unknown): string | null {
   if (typeof raw !== 'string' || raw.trim() === '') return null
 
   try {
-    const url = new URL(rewriteLegacyWpUrls(raw.trim()))
+    const roh = raw.trim()
+    const url = new URL(EIGENE_BLOGADRESSE.test(roh) ? roh : rewriteLegacyWpUrls(roh))
     return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : null
   } catch {
     return null

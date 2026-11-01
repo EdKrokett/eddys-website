@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Inhalts-Webhook für eduard-andrae.de
  * Description: Meldet Änderungen an Kommentaren, Beiträgen und Läufen an die Nuxt-Seite, damit die betroffenen Seiten dort sofort neu gebaut werden statt auf den ISR-Ablauf zu warten.
- * Version:     1.2.0
+ * Version:     1.3.0
  * Author:      Eduard Andrae
  * License:     GPL-2.0-or-later
  *
@@ -216,20 +216,37 @@ function eddy_cr_queue( $post_id, $scope = 'comment', $slug = '' ) {
 }
 
 /**
- * Plant den Neubau von /statistik. Aufgerufen vom Plugin eddy-laufstatistik, sobald sich ein
+ * Meldet den Neubau von /statistik. Aufgerufen vom Plugin eddy-laufstatistik, sobald sich ein
  * veröffentlichter Lauf ändert.
  *
- * Feste Argumente ohne Post-ID: Ein Lauf ist kein Beitrag, die Gegenstelle baut bei diesem
- * Scope immer dieselbe Seite. Dadurch greift die Doppelt-Sperre von wp_schedule_single_event
- * auch über verschiedene Läufe hinweg. Die 30 Sekunden Vorlauf fassen einen ganzen Import
- * oder mehrere Bearbeitungen hintereinander zu einem einzigen Aufruf zusammen.
+ * Bewusst NICHT über WP-Cron wie die übrigen Meldungen (seit 1.3.0). WP-Cron läuft nur, wenn
+ * jemand WordPress aufruft. Version 1.2 plante die Meldung 30 Sekunden in die Zukunft; beim
+ * Speichern war sie damit noch nicht fällig und wartete auf den nächsten Besucher. Am
+ * 01.11.2026 kam eine Änderung von 9:41 Uhr erst um 10:04 Uhr an, und das auch nur, weil eine
+ * Abfrage von außen WordPress zufällig weckte.
+ *
+ * Jetzt wird pro Anfrage höchstens einmal gesendet, am Ende (`shutdown`). Mehrere geänderte
+ * Felder eines Speichervorgangs ergeben so einen Aufruf. Vorher schickt
+ * fastcgi_finish_request() die Antwort an den Browser, damit beim Speichern niemand auf Vercel
+ * wartet; ohne PHP-FPM wartet der Speichervorgang die paar Sekunden eben mit.
  */
 function eddy_cr_queue_statistik() {
-	$args = array( 0, 'statistik', '' );
+	static $vorgemerkt = false;
 
-	if ( ! wp_next_scheduled( EDDY_CR_EVENT, $args ) ) {
-		wp_schedule_single_event( time() + 30, EDDY_CR_EVENT, $args );
+	if ( $vorgemerkt ) {
+		return;
 	}
+
+	$vorgemerkt = true;
+	add_action( 'shutdown', 'eddy_cr_send_statistik_now', 100 );
+}
+
+function eddy_cr_send_statistik_now() {
+	if ( function_exists( 'fastcgi_finish_request' ) ) {
+		fastcgi_finish_request();
+	}
+
+	eddy_cr_send( 0, 'statistik', '' );
 }
 
 /**

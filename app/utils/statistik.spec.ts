@@ -15,6 +15,7 @@ import {
   internerBlogPfad,
   istMarathon,
   marathonReihe,
+  sortiereLaeufe,
 } from './statistik'
 
 let naechsteId = 1
@@ -165,6 +166,37 @@ describe('baueZeitstrahl', () => {
     expect(baueZeitstrahl([lauf({ datum: '2027-01-01' })], 2026)?.bisJahr).toBe(2027)
   })
 
+  it('gibt jedem Eintrag gleich viel Platz, nach Einträgen statt nach Tagen', () => {
+    // 21 Jahre: 9 mit zusammen 11 Einträgen (je Eintrag 1 + Rand 1), 12 leere zu je 0,5
+    // → 11 + 9 + 6 = 26 Einheiten
+    expect(new Set(modell.marken.map(m => m.slotPct))).toEqual(new Set([3.85]))
+  })
+
+  it('setzt Einträge desselben Jahres nebeneinander statt übereinander', () => {
+    const jahr2026 = modell.marken.filter(m => m.lauf.jahr === 2026).map(m => m.offsetPct)
+    expect(jahr2026).toHaveLength(2)
+    expect(jahr2026[1]! - jahr2026[0]!).toBeCloseTo(3.85, 1)
+  })
+
+  it('macht leere Jahre schmal und lässt die Bänder lückenlos aneinanderstoßen', () => {
+    const band = (jahr: number) => modell.baender.find(b => b.jahr === jahr)!
+    expect(band(2007).anzahl).toBe(0)
+    expect(band(2007).breitePct).toBeLessThan(band(2008).breitePct)
+    expect(band(2011).breitePct).toBeGreaterThan(band(2008).breitePct)
+    const letztes = modell.baender.at(-1)!
+    expect(letztes.startPct + letztes.breitePct).toBeCloseTo(100, 0)
+  })
+
+  it('fasst ruhige Phasen zu einem Label zusammen', () => {
+    expect(modell.labels.map(l => l.text)).toEqual(['2006–2010', '2011', '2012–2025', '2026'])
+    expect(modell.labels.find(l => l.text === '2026')?.haupt).toBe(true)
+    expect(modell.labels.find(l => l.text === '2011')?.haupt).toBe(false)
+  })
+
+  it('hat für schmale Bildschirme eine Kurzform', () => {
+    expect(modell.labels.map(l => l.kurz)).toEqual(['’06–’10', '’11', '’12–’25', '’26'])
+  })
+
   it('liefert null für eine leere Liste', () => {
     expect(baueZeitstrahl([], 2026)).toBeNull()
   })
@@ -234,7 +266,48 @@ describe('filterLaeufe', () => {
   })
 })
 
+describe('Filter „Andere Distanzen“', () => {
+  it('nimmt alles mit Distanz außer Halbmarathon und Marathon', () => {
+    expect(filterLaeufe(STATISTIK, 'andere', '').map(l => l.distanzKm)).toEqual([25, 72.7, 5])
+  })
+
+  it('lässt Meilensteine ohne Distanz weg', () => {
+    expect(filterLaeufe(STATISTIK, 'andere', '').some(l => l.art === 'meilenstein')).toBe(false)
+  })
+})
+
+describe('sortiereLaeufe', () => {
+  it('sortiert nach Zeit aufsteigend, Einträge ohne Zeit ans Ende', () => {
+    const liste = sortiereLaeufe(STATISTIK, 'zeit', 'auf')
+    expect(liste[0]?.titel).toBe('Waterfront Triathlon Bremen')
+    expect(liste.slice(-2).map(l => l.sekunden)).toEqual([null, null])
+  })
+
+  it('sortiert nach Zeit absteigend, Einträge ohne Zeit trotzdem am Ende', () => {
+    const liste = sortiereLaeufe(STATISTIK, 'zeit', 'ab')
+    expect(liste[0]?.titel).toBe('E.ON Supermarathon Rennsteiglauf')
+    expect(liste.at(-1)?.sekunden).toBeNull()
+  })
+
+  it('sortiert nach Datum in beide Richtungen', () => {
+    expect(sortiereLaeufe(STATISTIK, 'datum', 'auf')[0]?.datum).toBe('2006-01-28')
+    expect(sortiereLaeufe(STATISTIK, 'datum', 'ab')[0]?.datum).toBe('2026-10-31')
+  })
+
+  it('verändert die Eingabe nicht', () => {
+    const vorher = STATISTIK.map(l => l.id)
+    sortiereLaeufe(STATISTIK, 'zeit', 'auf')
+    expect(STATISTIK.map(l => l.id)).toEqual(vorher)
+  })
+})
+
 describe('gruppiereNachJahr', () => {
+  it('gruppiert aufsteigend, wenn gewünscht', () => {
+    const gruppen = gruppiereNachJahr(sortiereLaeufe(STATISTIK, 'datum', 'auf'), 'auf')
+    expect(gruppen[0]?.jahr).toBe(2006)
+    expect(gruppen.at(-1)?.jahr).toBe(2026)
+  })
+
   it('gruppiert absteigend nach Jahr', () => {
     const gruppen = gruppiereNachJahr(STATISTIK)
     expect(gruppen[0]?.jahr).toBe(2026)
@@ -280,6 +353,15 @@ describe('internerBlogPfad', () => {
     expect(internerBlogPfad('https://blog.eduard-andrae.de/projekt-marathon-mit-60-jetzt-wirds-ernst/'))
       .toBe('/blog/projekt-marathon-mit-60-jetzt-wirds-ernst')
     expect(internerBlogPfad('https://www.eduard-andrae.de/berlin-marathon-2011/')).toBe('/blog/berlin-marathon-2011')
+  })
+
+  it('erkennt Beitragslinks auf diese Seite, wie Eddy sie für neue Läufe einträgt', () => {
+    expect(internerBlogPfad('https://eduard-andrae.de/blog/halloween-run-bremen-der-letzte-kilometer-ist-immer-der-laengste'))
+      .toBe('/blog/halloween-run-bremen-der-letzte-kilometer-ist-immer-der-laengste')
+  })
+
+  it('hält eine Seite dieser Website nicht für einen Beitrag', () => {
+    expect(internerBlogPfad('https://eduard-andrae.de/statistik')).toBeNull()
   })
 
   it('lässt fremde und tiefere Links extern', () => {

@@ -69,8 +69,13 @@ bestehenden Inhalts-Webhook (`docs/revalidierung.md`) mit `scope: 'statistik'`. 
 `server/api/revalidate.post.ts` baut dann `/statistik` und `/statistik/_payload.json` neu, ohne
 die Post-ID bei WordPress nachzuschlagen (ein Lauf ist kein Beitrag).
 
-Das Laufstatistik-Plugin hat dafür keine eigene Webhook-Logik. Es ruft `eddy_cr_queue()` aus dem
-Webhook-Plugin auf, wenn es vorhanden ist. Fehlt das Webhook-Plugin, greift nur die ISR-Frist.
+Das Laufstatistik-Plugin hat dafür keine eigene Webhook-Logik. Es ruft
+`eddy_cr_queue_statistik()` aus dem Webhook-Plugin auf, wenn es vorhanden ist. Fehlt das
+Webhook-Plugin, greift nur die ISR-Frist (24 Stunden).
+
+Seit Webhook 1.3 wird die Meldung am Ende des Speichervorgangs gesendet, nicht über WP-Cron:
+Die Seite ist wenige Sekunden nach dem Speichern aktuell. Version 1.2 hing an WP-Cron und
+wartete auf den nächsten Blogbesucher, im Fall vom 01.11.2026 23 Minuten (`error-catalog.md`).
 
 ## Server-Route und Validierung
 
@@ -99,12 +104,21 @@ Zeit stehen. Die Seite ist Eddys Gangbuch als Läufer.
    zugänglich weiter unten. Beim Laden wachsen die Striche nacheinander, der Zeiger läuft ein.
 1. **Prüfschein:** Kernwerte in großen Mono-Ziffern: Marathons, Bestzeit Marathon und
    Halbmarathon, längster Lauf, Wettkämpfe im Ziel, Wettkampf-Kilometer.
-2. **Zeitstrahl:** 2006 bis heute; jeder Lauf ein Indexstrich, Länge proportional zur Distanz.
-   Meilensteine als Messing-Rauten, DNS/DNF als hohle Striche.
+2. **Zeitstrahl:** 2006 bis heute; jeder Lauf ein Indexstrich, Länge nach Distanz.
+   Meilensteine als Messing-Rauten, DNS/DNF als hohle Striche. **Nach Jahren gestaucht**
+   (Eddys Wunsch, 01.11.2026): Jedes Jahr ist ein Band, so breit wie seine Einträge plus Rand,
+   leere Jahre ein schraffierter Streifen. Innerhalb des Jahres stehen die Einträge mit gleichem
+   Abstand, nie übereinander; die Striche sind dadurch bis zu 14px breit statt 2px. Ruhige
+   Phasen (mehrere Jahre mit höchstens einem Eintrag) teilen sich ein Label, z. B. „2018–2024“;
+   auf dem Handy zweistellig („’18–’24“). Die Achse ist damit kategorial, nicht maßstäblich.
 3. **Die zehn Marathons:** Balken je Marathon, Bestzeit in Messing. Ersetzt das PNG von 2012.
-4. **Halbmarathon-Verlauf:** Zeiten über die Jahre mit der Zwei-Stunden-Linie.
-5. **Protokoll:** vollständige Liste nach Jahr gruppiert, Filter (Alle, Marathon, Halbmarathon,
-   Meilensteine) und Suche. Der Suchbegriff wird nur clientseitig gelesen, nie im SSR-Pfad
+4. **Halbmarathon-Verlauf, „Abstand zur Marke“:** Zeiten über die Jahre. Jeder Punkt (16px)
+   hängt an einem Stiel, der an der Zwei-Stunden-Linie beginnt: darunter teal, darüber gedämpft.
+   Die Zone unter zwei Stunden ist als Teal-Verlauf getönt.
+5. **Protokoll:** vollständige Liste, Filter (Alle, Marathon, Halbmarathon, Andere Distanzen,
+   Meilensteine) und Suche. „Andere Distanzen“ = alles mit Distanz außer 21,1 und 42,2 km.
+   Sortierung nach Datum (mit Jahresgruppen, auf- oder absteigend) oder nach Zielzeit
+   (Rangliste mit Platzziffer, Einträge ohne Zeit immer am Ende). Der Suchbegriff wird nur clientseitig gelesen, nie im SSR-Pfad
    (ISR-Regel in `nuxt.config.ts`).
 6. **Schluss:** das Motto „Es ist nicht die Zeit, die zählt, es ist deine Leidenschaft.“
 

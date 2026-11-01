@@ -32,6 +32,12 @@ Bei einem Update dasselbe ZIP neu hochladen — WordPress fragt, ob die vorhande
 ersetzt werden soll. Endpoint und Secret bleiben dabei erhalten, sie liegen in der
 Datenbank und nicht im Plugin.
 
+### Update auf Version 1.3
+
+Die Statistik-Meldung geht nicht mehr über WP-Cron, sondern direkt am Ende des
+Speichervorgangs (Begründung im Kommentar an `eddy_cr_queue_statistik()`). ZIP hochladen und
+ersetzen genügt.
+
 ### Update auf Version 1.2
 
 Neu: `eddy_cr_queue_statistik()` und der Scope `statistik`, aufgerufen vom Plugin

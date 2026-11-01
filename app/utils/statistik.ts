@@ -96,23 +96,63 @@ export type MarkenTyp = 'lauf' | 'ausfall' | 'meilenstein'
 export interface ZeitstrahlMarke {
   lauf: Lauf
   typ: MarkenTyp
-  /** Position auf der Achse, 0–100. */
+  /** Mitte der Marke auf der Achse, 0–100. */
   offsetPct: number
+  /** Breite des Platzes, der dieser Marke zusteht, 0–100. Daraus leitet sich die Strichbreite ab. */
+  slotPct: number
   /** Strichlänge, 0–100. Wurzel-Skala, damit 5 km neben 72,7 km noch sichtbar bleiben. */
   hoehePct: number
+}
+
+/** Ein Jahr auf der Achse. Breite nach Zahl der Einträge, nicht nach Kalenderlänge. */
+export interface ZeitstrahlBand {
+  jahr: number
+  startPct: number
+  breitePct: number
+  anzahl: number
+}
+
+/** Beschriftung unter der Achse: ein Jahr, oder eine ruhige Phase („2018–2024“) als Ganzes. */
+export interface ZeitstrahlLabel {
+  text: string
+  /** Für schmale Bildschirme: „’11“, „’18–’24“. Die vollen Zahlen stießen dort aneinander. */
+  kurz: string
+  mittePct: number
+  /** `true` = auch auf schmalen Bildschirmen zeigen. Nebenlabels kollidierten dort. */
+  haupt: boolean
 }
 
 export interface ZeitstrahlModell {
   vonJahr: number
   bisJahr: number
+  baender: ZeitstrahlBand[]
+  labels: ZeitstrahlLabel[]
+  /** Bandanfänge; das Zifferblatt im Seitenkopf zeichnet daraus seine Jahresteilung. */
   ticks: Array<{ jahr: number, offsetPct: number, major: boolean }>
   marken: ZeitstrahlMarke[]
 }
 
 /** Kürzester Strich, damit ein 5-km-Lauf nicht zum Punkt schrumpft. */
 const MIN_HOEHE = 12
+/** Rand je Jahresband, in Platz-Einheiten (ein Eintrag = 1). Trennt die Jahre sichtbar. */
+const BAND_RAND = 1
+/** Breite eines Jahres ohne Eintrag. Es bleibt sichtbar, kostet aber kaum Platz. */
+const LEERES_JAHR = 0.5
+/** Ab so vielen Einträgen bekommt ein Jahr auch auf dem Handy ein eigenes Label. */
+const HAUPTLABEL_AB = 5
 
 /**
+ * Der Zeitstrahl, gestaucht nach Aktivität (Eddys Wunsch, 01.11.2026). Eine lineare Zeitachse
+ * gab 2017–2024 mit zusammen sieben Einträgen genauso viel Platz wie 2010–2016 mit über
+ * vierzig; dort drängten sich 2px-Striche, die kaum zu treffen waren.
+ *
+ * Jetzt bekommt jedes Jahr ein Band, so breit wie seine Einträge (plus Rand). Innerhalb des
+ * Jahres stehen die Einträge in Datumsfolge mit gleichem Abstand, also nie übereinander.
+ * Die Achse ist damit kategorial nach Jahren, nicht mehr maßstäblich nach Tagen; die Bänder
+ * machen das sichtbar.
+ *
+ * Aufeinanderfolgende Jahre mit höchstens einem Eintrag teilen sich ein Label („2018–2024“).
+ *
  * @param bisJahr Referenzjahr aus dem SSR-Payload (`stand`), nie ein frisches `new Date()`.
  * @returns `null` bei leerer Liste.
  */
@@ -121,9 +161,19 @@ export function baueZeitstrahl(laeufe: readonly Lauf[], bisJahr: number): Zeitst
 
   const vonJahr = Math.min(...laeufe.map(lauf => lauf.jahr))
   const endJahr = Math.max(bisJahr, ...laeufe.map(lauf => lauf.jahr))
-  const start = Date.UTC(vonJahr, 0, 1)
-  const ende = Date.UTC(endJahr + 1, 0, 1)
-  const offset = (ms: number) => Math.round(((ms - start) / (ende - start)) * 10000) / 100
+  const rund = (wert: number) => Math.round(wert * 100) / 100
+
+  const sortiert = [...laeufe].sort((a, b) => a.datum.localeCompare(b.datum) || a.id - b.id)
+  const proJahr = new Map<number, Lauf[]>()
+  for (const lauf of sortiert) proJahr.set(lauf.jahr, [...(proJahr.get(lauf.jahr) ?? []), lauf])
+
+  const jahre = Array.from({ length: endJahr - vonJahr + 1 }, (_, i) => vonJahr + i)
+  const gewicht = (jahr: number) => {
+    const anzahl = proJahr.get(jahr)?.length ?? 0
+    return anzahl ? anzahl + BAND_RAND : LEERES_JAHR
+  }
+  const gesamt = jahre.reduce((summe, jahr) => summe + gewicht(jahr), 0)
+  const einheit = 100 / gesamt
 
   const maxKm = Math.max(...laeufe.map(lauf => lauf.distanzKm ?? 0))
   const hoehe = (km: number | null) => {
@@ -131,20 +181,77 @@ export function baueZeitstrahl(laeufe: readonly Lauf[], bisJahr: number): Zeitst
     return Math.max(MIN_HOEHE, Math.round((Math.sqrt(km) / Math.sqrt(maxKm)) * 100))
   }
 
-  const ticks = []
-  for (let jahr = vonJahr; jahr <= endJahr; jahr++) {
-    ticks.push({ jahr, offsetPct: offset(Date.UTC(jahr, 0, 1)), major: jahr % 5 === 0 })
-  }
+  const baender: ZeitstrahlBand[] = []
+  const marken: ZeitstrahlMarke[] = []
+  let position = 0
 
-  const marken = [...laeufe]
-    .sort((a, b) => a.datum.localeCompare(b.datum))
-    .map((lauf): ZeitstrahlMarke => {
-      const [j, m, t] = lauf.datum.split('-').map(Number) as [number, number, number]
+  for (const jahr of jahre) {
+    const eintraege = proJahr.get(jahr) ?? []
+    const breite = gewicht(jahr) * einheit
+    baender.push({ jahr, startPct: rund(position), breitePct: rund(breite), anzahl: eintraege.length })
+
+    eintraege.forEach((lauf, index) => {
       const typ: MarkenTyp = lauf.art === 'meilenstein' ? 'meilenstein' : lauf.ergebnis === 'finish' ? 'lauf' : 'ausfall'
-      return { lauf, typ, offsetPct: offset(Date.UTC(j, m - 1, t)), hoehePct: typ === 'meilenstein' ? 0 : hoehe(lauf.distanzKm) }
+      marken.push({
+        lauf,
+        typ,
+        offsetPct: rund(position + (BAND_RAND / 2 + index + 0.5) * einheit),
+        slotPct: rund(einheit),
+        hoehePct: typ === 'meilenstein' ? 0 : hoehe(lauf.distanzKm),
+      })
     })
 
-  return { vonJahr, bisJahr: endJahr, ticks, marken }
+    position += breite
+  }
+
+  return {
+    vonJahr,
+    bisJahr: endJahr,
+    baender,
+    labels: baueLabels(baender),
+    ticks: baender.map(band => ({ jahr: band.jahr, offsetPct: band.startPct, major: band.jahr % 5 === 0 })),
+    marken,
+  }
+}
+
+/** 2011 → „’11“ (typografischer Apostroph). */
+const kurzJahr = (jahr: number) => `’${String(jahr).slice(-2)}`
+
+function baueLabels(baender: readonly ZeitstrahlBand[]): ZeitstrahlLabel[] {
+  const labels: ZeitstrahlLabel[] = []
+  const mitte = (von: ZeitstrahlBand, bis: ZeitstrahlBand) =>
+    Math.round((von.startPct + (bis.startPct + bis.breitePct - von.startPct) / 2) * 100) / 100
+
+  let i = 0
+  while (i < baender.length) {
+    const band = baender[i]!
+    // Ruhige Phase: mindestens zwei aufeinanderfolgende Jahre mit höchstens einem Eintrag.
+    let ende = i
+    while (ende + 1 < baender.length && baender[ende + 1]!.anzahl <= 1 && band.anzahl <= 1) ende++
+
+    if (ende > i) {
+      const letztes = baender[ende]!
+      labels.push({
+        text: `${band.jahr}–${letztes.jahr}`,
+        kurz: `${kurzJahr(band.jahr)}–${kurzJahr(letztes.jahr)}`,
+        mittePct: mitte(band, letztes),
+        haupt: true,
+      })
+      i = ende + 1
+      continue
+    }
+
+    const randjahr = i === 0 || i === baender.length - 1
+    labels.push({
+      text: String(band.jahr),
+      kurz: kurzJahr(band.jahr),
+      mittePct: mitte(band, band),
+      haupt: randjahr || band.anzahl >= HAUPTLABEL_AB,
+    })
+    i++
+  }
+
+  return labels
 }
 
 /* ── Streudiagramm Zeit über Datum ─────────────────────────────────────── */
@@ -217,12 +324,13 @@ export function baueZeitPlot(
 
 /* ── Protokoll ──────────────────────────────────────────────────────────── */
 
-export type ProtokollFilter = 'alle' | 'marathon' | 'halbmarathon' | 'meilensteine'
+export type ProtokollFilter = 'alle' | 'marathon' | 'halbmarathon' | 'andere' | 'meilensteine'
 
 export const PROTOKOLL_FILTER: ReadonlyArray<{ wert: ProtokollFilter, label: string }> = [
   { wert: 'alle', label: 'Alle' },
   { wert: 'marathon', label: 'Marathon' },
   { wert: 'halbmarathon', label: 'Halbmarathon' },
+  { wert: 'andere', label: 'Andere Distanzen' },
   { wert: 'meilensteine', label: 'Meilensteine' },
 ]
 
@@ -230,6 +338,9 @@ export const PROTOKOLL_FILTER: ReadonlyArray<{ wert: ProtokollFilter, label: str
  * Filter nach Kategorie und Freitext. Anders als bei den Kennzahlen zeigt „Marathon“ hier alle
  * Einträge über 42,2 km, auch die Staffel: Die Liste soll nichts verstecken, die Markierung
  * am Eintrag erklärt, warum er nicht mitzählt.
+ *
+ * „Andere Distanzen“ ist alles mit Distanz außer 21,1 und 42,2 km: 5 bis 72,7 km, Triathlon-
+ * Laufanteile eingeschlossen. So deckt jeder Lauf genau einen der drei Distanzfilter ab.
  */
 export function filterLaeufe(laeufe: readonly Lauf[], filter: ProtokollFilter, suche: string): Lauf[] {
   const begriff = suche.trim().toLocaleLowerCase('de')
@@ -237,6 +348,7 @@ export function filterLaeufe(laeufe: readonly Lauf[], filter: ProtokollFilter, s
   return laeufe.filter((lauf) => {
     if (filter === 'marathon' && lauf.distanzKm !== MARATHON_KM) return false
     if (filter === 'halbmarathon' && lauf.distanzKm !== HALBMARATHON_KM) return false
+    if (filter === 'andere' && (lauf.distanzKm === null || lauf.distanzKm === MARATHON_KM || lauf.distanzKm === HALBMARATHON_KM)) return false
     if (filter === 'meilensteine' && lauf.art !== 'meilenstein') return false
     if (!begriff) return true
 
@@ -245,14 +357,44 @@ export function filterLaeufe(laeufe: readonly Lauf[], filter: ProtokollFilter, s
   })
 }
 
-/** Nach Jahr gruppiert, neuestes Jahr zuerst; innerhalb des Jahres die Reihenfolge der Eingabe. */
-export function gruppiereNachJahr(laeufe: readonly Lauf[]): Array<{ jahr: number, laeufe: Lauf[] }> {
+export type SortFeld = 'datum' | 'zeit'
+export type SortRichtung = 'auf' | 'ab'
+
+/**
+ * Datum: chronologisch. Zeit: Rangliste, schnellste zuerst bei `auf`. Einträge ohne Zeit (DNS,
+ * Meilensteine) stehen bei der Zeitsortierung IMMER am Ende, in beiden Richtungen; sonst
+ * führten sie die absteigende Liste an. Gleichstand: der frühere Lauf zuerst.
+ */
+export function sortiereLaeufe(laeufe: readonly Lauf[], feld: SortFeld, richtung: SortRichtung): Lauf[] {
+  const faktor = richtung === 'auf' ? 1 : -1
+
+  return [...laeufe].sort((a, b) => {
+    if (feld === 'zeit') {
+      if (a.sekunden === null || b.sekunden === null) {
+        if (a.sekunden === b.sekunden) return a.datum.localeCompare(b.datum)
+        return a.sekunden === null ? 1 : -1
+      }
+      return (a.sekunden - b.sekunden) * faktor || a.datum.localeCompare(b.datum)
+    }
+    return (a.datum.localeCompare(b.datum) || a.id - b.id) * faktor
+  })
+}
+
+/**
+ * Nach Jahr gruppiert, innerhalb des Jahres die Reihenfolge der Eingabe.
+ *
+ * @param richtung `ab` = neuestes Jahr zuerst (Standard), `auf` = ab dem ersten Lauf.
+ */
+export function gruppiereNachJahr(
+  laeufe: readonly Lauf[],
+  richtung: SortRichtung = 'ab',
+): Array<{ jahr: number, laeufe: Lauf[] }> {
   const gruppen = new Map<number, Lauf[]>()
   for (const lauf of laeufe) {
     gruppen.set(lauf.jahr, [...(gruppen.get(lauf.jahr) ?? []), lauf])
   }
   return [...gruppen.entries()]
-    .sort(([a], [b]) => b - a)
+    .sort(([a], [b]) => richtung === 'ab' ? b - a : a - b)
     .map(([jahr, eintraege]) => ({ jahr, laeufe: eintraege }))
 }
 
@@ -298,13 +440,21 @@ export function formatTagMonat(datum: string): string {
 
 /**
  * Ein Link auf einen Beitrag des eigenen Blogs wird zum internen Pfad `/blog/<slug>`, damit
- * der Besucher auf dieser Seite bleibt. Erkannt wird nur die Form „Domain + genau ein
- * Pfadsegment“; alles andere (Kategorien, Bilder, fremde Seiten) bleibt, wie es ist.
+ * der Besucher auf dieser Seite bleibt. Zwei Formen:
+ *
+ * - WordPress-Adresse: `blog.` oder `www.` plus genau ein Pfadsegment (die alte Tabelle).
+ * - Adresse dieser Seite: `eduard-andrae.de/blog/<slug>` (so trägt Eddy neue Läufe ein).
+ *
+ * Die nackte Domain mit einem Segment (`eduard-andrae.de/statistik`) ist eine Seite dieser
+ * Website und kein Beitrag, deshalb `null`. Alles andere (Kategorien, Bilder, fremde Seiten)
+ * bleibt ebenfalls, wie es ist.
  *
  * @returns den internen Pfad, oder `null` für einen externen Link.
  */
 export function internerBlogPfad(url: string | null): string | null {
   if (!url) return null
-  const match = /^https?:\/\/(?:www\.|blog\.)?eduard-andrae\.de\/([a-z0-9\-_%]+)\/?$/i.exec(url)
-  return match ? `/blog/${match[1]!.toLowerCase()}` : null
+  const wordpress = /^https?:\/\/(?:www\.|blog\.)eduard-andrae\.de\/([a-z0-9\-_%]+)\/?$/i.exec(url)
+  const eigen = /^https?:\/\/(?:www\.)?eduard-andrae\.de\/blog\/([a-z0-9\-_%]+)\/?$/i.exec(url)
+  const slug = wordpress?.[1] ?? eigen?.[1]
+  return slug ? `/blog/${slug.toLowerCase()}` : null
 }
