@@ -32,6 +32,9 @@ const year = new Date().getFullYear()
           <NuxtLink to="/blog" class="footer__link">
             Mein Blog
           </NuxtLink>
+          <NuxtLink to="/statistik" class="footer__link">
+            Statistik
+          </NuxtLink>
           <NuxtLink to="/trusted-blogs" class="footer__link">
             trusted blogs
           </NuxtLink>

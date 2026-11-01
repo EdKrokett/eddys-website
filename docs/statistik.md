@@ -147,12 +147,12 @@ Was das Skript dabei gelernt hat (Einzelheiten in `error-catalog.md`):
 - Das Plugin brauchte zwei Nachbesserungen: 1.0.1 (`custom-fields`, klassische Maske) und
   1.0.2 (Emojis in Notizen und Link-Bezeichnungen, Meta-Tabelle ist utf8).
 
-**Offen nach dem Deploy** (Reihenfolge wichtig):
-1. Inhalts-Webhook 1.2 einspielen (erst jetzt, sonst kennt die Gegenstelle `statistik` nicht).
-2. Redirection-Regel `blog.eduard-andrae.de/statistik/` → `https://eduard-andrae.de/statistik` (301).
-3. TablePress deaktivieren, nicht löschen, bis die neue Seite eine Woche läuft.
-4. Toter Link beim AOK-Halbmarathon 2009: `5-swb-marathon-in-bremen-2` gibt es nicht mehr, auch
-   nicht im Blog. Kandidat ist `5-swb-marathon-in-bremen` vom 03.08.2009; ob das der Bericht
-   ist, entscheidet Eddy.
+**Nach dem Deploy erledigt (01.11.2026):** Inhalts-Webhook 1.2 eingespielt und geprüft (eine
+Laufänderung baute `/statistik` binnen Sekunden neu). Redirection-Regel 7389
+`/statistik/` → `https://eduard-andrae.de/statistik` (301). Beim AOK-Halbmarathon 2009 den
+toten Berichtslink entfernt: Der Kandidat vom 03.08.2009 ist laut Eddy nicht der Bericht zu
+diesem Lauf, es bleibt nur der Fotolink. TablePress deaktiviert Eddy selbst.
+
+**Navigation:** „Statistik“ steht in Kopfzeile und Footer jeweils direkt nach „Mein Blog“.
 
 Der Link auf `/ueber-mich` zeigt seit 01.11.2026 auf `/statistik`.

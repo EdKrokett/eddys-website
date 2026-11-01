@@ -14,6 +14,8 @@ const mobileOpen = ref(false)
 const links = [
   { to: '/ueber-mich', label: 'Über mich' },
   { to: '/blog', label: 'Mein Blog' },
+  // Direkt nach dem Blog: beides erzählt vom Laufen (Eddys Wunsch, 01.11.2026).
+  { to: '/statistik', label: 'Statistik' },
   { to: '/trusted-blogs', label: 'trusted blogs' },
   { to: '/kontakt', label: 'Kontakt' },
 ]
