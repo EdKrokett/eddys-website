@@ -101,10 +101,10 @@ useSeoMeta({
                 längeren Zeitraum festgehalten werden. Das hier ist meins.
               </p>
               <p>
-                Im Januar 2006 habe ich als 40-jähriger Kettenraucher mit dem Laufen angefangen.
-                Das Ziel war, einmal im Leben einen Marathon zu überstehen. Neun Monate später war
-                ich in Berlin im Ziel, und seitdem halte ich hier fest, wann, wo und wie weit ich
-                gelaufen bin.
+                Im Januar 2006 habe ich als 40-Jähriger das Kettenrauchen eingestellt und mit dem
+                Laufen angefangen. Das Ziel war, einmal im Leben einen Marathon zu überstehen. Neun
+                Monate später war ich in Berlin im Ziel. Seitdem halte ich hier fest, wann, wo und
+                wie weit ich gelaufen bin.
               </p>
             </div>
           </div>
