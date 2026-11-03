@@ -1,6 +1,8 @@
 const CACHE_TTLS: Record<string, number> = {
   'blog-list': 1800,
   'blog-post': 3600,
+  // Sitemap: Google liest sie selten, eine Stunde Verzug für neue Beiträge ist egal.
+  'sitemap': 3600,
 }
 
 /**

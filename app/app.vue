@@ -1,3 +1,18 @@
+<script setup lang="ts">
+/**
+ * Canonical für jede Seite an einer Stelle, damit keine neue Seite es vergisst.
+ * Nur `route.path`: Die Query darf nicht einfließen, sonst rendert eine ISR-Seite je nach
+ * Aufruf anders (docs/performance.md). Fehlerseiten rendert app/error.vue ohne diese Datei.
+ * Hintergrund: docs/headless-wordpress.md, Schritt 1.
+ */
+const route = useRoute()
+const { url: siteUrl } = useSiteConfig()
+
+useHead({
+  link: [{ rel: 'canonical', href: () => canonicalUrl(siteUrl, route.path) }],
+})
+</script>
+
 <template>
   <UApp>
     <div class="shell">

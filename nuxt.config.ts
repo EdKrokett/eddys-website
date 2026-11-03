@@ -314,5 +314,12 @@ export default defineNuxtConfig({
     },
   },
 
-  sitemap: {},
+  /**
+   * Die festen Seiten findet das Modul selbst, die Beiträge nicht: `/blog/[slug]` ist
+   * dynamisch. Die Quelle liefert alle veröffentlichten Beiträge samt `lastmod`.
+   * docs/headless-wordpress.md, Schritt 1.
+   */
+  sitemap: {
+    sources: ['/api/__sitemap__/posts'],
+  },
 })
