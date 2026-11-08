@@ -62,20 +62,22 @@ export const KOOPERATION_WERBUNG_ARCHIV = 'https://blog.eduard-andrae.de/tag/wer
 /** Katalog-Nr. 76 ist Eddys Blog auf trusted blogs. */
 export const TRUSTED_BLOGS_KATALOG_NR = 76
 
-/** `ref=0000002D` ist Eddys Partner-Referral-ID und muss in der URL bleiben. */
+/** Eddys Partner-Referral-ID. Gehört an jeden Link auf trusted-blogs.com, den diese Seite setzt. */
+export const TRUSTED_BLOGS_REF = '0000002D'
+
 export const TRUSTED_BLOGS_BOOKING_URL
-  = `https://www.trusted-blogs.com/marktplatz/katalog/${TRUSTED_BLOGS_KATALOG_NR}?ref=0000002D`
+  = `https://www.trusted-blogs.com/marktplatz/katalog/${TRUSTED_BLOGS_KATALOG_NR}?ref=${TRUSTED_BLOGS_REF}`
 
 /**
  * Das Media-Kit auf trusted blogs, ersetzt das PDF aus der WordPress-Mediathek (Stand
- * 10.04.2025). Ohne Referral-ID: Die gehört an den Buchungslink.
+ * 10.04.2025). Mit Referral-ID wie der Buchungslink.
  *
  * Die Vorschau ist ein lokaler Screenshot, weil ein Bild direkt von trusted-blogs.com eine
  * Verbindung ohne Klick wäre. Beim Austausch Maße und Datum nachziehen und VORHER ansehen,
  * was darauf zu sehen ist: Ein Screenshot bleibt in der Git-Historie.
  */
 export const KOOPERATION_MEDIAKIT: KooperationMediakit = {
-  url: `https://www.trusted-blogs.com/mediakit/${TRUSTED_BLOGS_KATALOG_NR}`,
+  url: `https://www.trusted-blogs.com/mediakit/${TRUSTED_BLOGS_KATALOG_NR}?ref=${TRUSTED_BLOGS_REF}`,
   preview: {
     src: '/images/kooperationen/mediakit-vorschau.jpg',
     width: 1000,

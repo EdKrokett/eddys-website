@@ -49,8 +49,8 @@ Schlagwort-Archiv gibt es auf `/blog` nicht, deshalb führt er weiter auf
 Eddy sein Media-Kit direkt bei trusted blogs: `trusted-blogs.com/mediakit/76` (dieselbe
 Katalog-Nr. wie beim Buchungslink). Dort stehen Steckbrief, Themen, Kooperationsformate und
 die von trusted blogs geprüften Kennzahlen (Quelle DataForSEO); die Schaltfläche „Als PDF
-speichern“ erzeugt die Datei. Die Seite verlinkt deshalb nur noch dorthin, ohne Referral-ID
-(die gehört an den Buchungslink). Das alte PDF (`EduardAndrae_MediaKit.pdf`, Stand 10.04.2025,
+speichern“ erzeugt die Datei. Die Seite verlinkt deshalb nur noch dorthin, wie der
+Buchungslink mit Eddys Referral-ID (`?ref=0000002D`). Das alte PDF (`EduardAndrae_MediaKit.pdf`, Stand 10.04.2025,
 in der WordPress-Mediathek) wird nicht mehr verlinkt.
 
 **Vorschau als lokaler Screenshot.** `public/images/kooperationen/mediakit-vorschau.jpg`
@@ -81,7 +81,9 @@ Drittanbieter, und die Datenschutzerklärung sagt zu, dass eine Verbindung zu ve
 Angeboten erst beim Klick entsteht. Den Platz übernimmt der Auftragsschein.
 
 **Buchungslink** `trusted-blogs.com/marktplatz/katalog/76?ref=0000002D`: Katalog-Nr. 76 ist
-Eddys Blog, `0000002D` seine Partner-Referral-ID. Beides gehört zusammen in die URL.
+Eddys Blog, `0000002D` seine Partner-Referral-ID. Beides gehört zusammen in die URL. Die ID
+steht einmal als `TRUSTED_BLOGS_REF` in `app/utils/kooperationen.ts`; Buchungs- und
+Media-Kit-Link setzen sie daraus zusammen.
 
 **Navigation.** Kein fünfter Eintrag im Header: Die Seite richtet sich an eine bestimmte
 Gruppe (Marken, Agenturen), die über einen direkten Link, über trusted blogs oder über die
