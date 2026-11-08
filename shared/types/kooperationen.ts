@@ -24,14 +24,20 @@ export interface KooperationReferenz {
   image: string
 }
 
-/** Das Media-Kit als PDF in der WordPress-Mediathek. */
+/**
+ * Das Media-Kit auf trusted blogs. Dort pflegt Eddy es selbst, die Schaltfläche
+ * „Als PDF speichern“ erzeugt die Datei.
+ */
 export interface KooperationMediakit {
   url: string
-  fileName: string
-  pages: number
-  sizeKb: number
-  /** Stand laut PDF. Beim Austausch des PDFs mitziehen. */
-  stand: string
+  /** Lokaler, verkleinerter Screenshot der Media-Kit-Karte (Hergang: Doku). */
+  preview: {
+    src: string
+    width: number
+    height: number
+    /** Aufnahmedatum, wird unter der Vorschau angezeigt. */
+    aufgenommen: string
+  }
 }
 
 /** Ein Vorteil der Buchung über trusted blogs. */

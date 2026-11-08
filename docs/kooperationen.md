@@ -1,6 +1,6 @@
 # Kooperationen: Übernahme der WordPress-Seite
 
-Stand 19.10.2026. Beschreibt `app/pages/kooperationen.vue`, die Seite für Marken und
+Stand 08.11.2026. Beschreibt `app/pages/kooperationen.vue`, die Seite für Marken und
 Agenturen, die mit Eddy zusammenarbeiten wollen.
 
 ## Herkunft
@@ -22,7 +22,7 @@ Gedankenstrich als Satzverbinder, keine Antithesen-Paare).
 | Kopf | „Lust auf Kooperationen.“ plus Eddys Einleitung | — |
 | Bedingungen | Thematischer Fit, Vergütung, rechtlich sauber; danach der ❤️-Satz | — |
 | 01 Referenzen | Drei gekennzeichnete Beiträge, Link ins Werbung-Archiv | — |
-| 02 Media-Kit | Datenblatt-Link auf das PDF | `#mediakit` |
+| 02 Media-Kit | Vorschau-Screenshot plus Link auf das Media-Kit bei trusted blogs | `#mediakit` |
 | 03 Buchung | Vier Vorteile von trusted blogs, Auftragsschein mit Buchungslink | `#trustedblogsbuchung` |
 
 **Die beiden Anker heißen wie auf der WordPress-Seite** und dürfen nicht umbenannt werden:
@@ -45,15 +45,35 @@ Der „mehr“-Link der alten Seite zeigte auf das Schlagwort `werbung` (17 Beit
 Schlagwort-Archiv gibt es auf `/blog` nicht, deshalb führt er weiter auf
 `blog.eduard-andrae.de/tag/werbung/` (neuer Tab).
 
-**Media-Kit wird verlinkt, nicht ins Repo kopiert.** Das PDF enthält Postanschrift und
-Handynummer. Beides ist auf der WordPress-Seite schon öffentlich, im Git-Verlauf wäre es aber
-dauerhaft, auch nach einem Austausch. Der Link zeigt direkt auf
-`blog.eduard-andrae.de/wp-content/…`. Die alte Adresse über `www.eduard-andrae.de` ginge über
-zwei Weiterleitungen (308 auf die Apex-Domain, dann 301 der Catch-all-Route).
+**Media-Kit liegt bei trusted blogs, nicht als PDF in WordPress.** Seit November 2026 pflegt
+Eddy sein Media-Kit direkt bei trusted blogs: `trusted-blogs.com/mediakit/76` (dieselbe
+Katalog-Nr. wie beim Buchungslink). Dort stehen Steckbrief, Themen, Kooperationsformate und
+die von trusted blogs geprüften Kennzahlen (Quelle DataForSEO); die Schaltfläche „Als PDF
+speichern“ erzeugt die Datei. Die Seite verlinkt deshalb nur noch dorthin, ohne Referral-ID
+(die gehört an den Buchungslink). Das alte PDF (`EduardAndrae_MediaKit.pdf`, Stand 10.04.2025,
+in der WordPress-Mediathek) wird nicht mehr verlinkt.
 
-Das Datenblatt nennt den Stand aus dem PDF (10.04.2025). Wird das PDF ersetzt, bekommt es in
-WordPress eine neue Adresse: `KOOPERATION_MEDIAKIT` in `app/utils/kooperationen.ts` mit URL,
-Größe und Stand nachziehen.
+**Vorschau als lokaler Screenshot.** `public/images/kooperationen/mediakit-vorschau.jpg`
+(1000×1360) zeigt die Media-Kit-Karte verkleinert. Eine Live-Einbettung (iframe) scheidet aus:
+trusted-blogs.com sendet `X-Frame-Options: SAMEORIGIN`, und die Verbindung entstünde ohne
+Klick (siehe nächster Punkt). Aufgenommen am 08.11.2026 mit Chrome headless, Fenster 1280×2400
+bei doppelter Pixeldichte, Cookie-Banner nicht akzeptiert (es liegt außerhalb des Ausschnitts).
+Danach auf die Karte beschnitten, 2 px innerhalb ihres Rands, damit keine hellen Ecken auf der
+dunklen Seite stehen, und auf 1000 px Breite als JPEG (Fotos im Bild) verkleinert:
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --disable-gpu \
+  --hide-scrollbars --force-device-scale-factor=2 --window-size=1280,2400 \
+  --virtual-time-budget=15000 --screenshot=full2x.png https://www.trusted-blogs.com/mediakit/76
+sips --cropOffset 124 436 -c 2296 1688 full2x.png
+sips -Z 1360 -s format jpeg -s formatOptions 82 full2x.png --out mediakit-vorschau.jpg
+```
+
+Der Ausschnitt hängt am Layout der Media-Kit-Seite; ändert es sich, Versatz und Größe neu
+bestimmen. Die Kennzahlen auf dem Bild altern: Bei größeren Änderungen am Media-Kit den
+Screenshot neu aufnehmen und `KOOPERATION_MEDIAKIT.preview` (Maße, Aufnahmedatum) nachziehen.
+**Vor dem Ersetzen ansehen:** Das Bild zeigt Eddys Fotos aus dem Media-Kit, darunter eines mit
+einer zweiten Person. Alles öffentlich, aber ein Screenshot bleibt in der Git-Historie.
 
 **Kein trusted-blogs-Banner.** Die alte Seite hat das Partnerbild direkt von
 `trusted-blogs.com/banners/…` geladen. Hier wäre das eine automatische Verbindung zu einem
@@ -80,12 +100,16 @@ angenommen werden.
 - **Auftragsschein** als einziges auffälliges Element: Schein mit Abrisskante und
   Katalog-Nr. 76 als Auftragsnummer, darauf der Buchungslink als Teal-Fläche mit dunkler
   Schrift (Kontrastregel aus `main.css`).
+- **Datenblatt auf der Prüfplatte** für das Media-Kit: Der Screenshot liegt gedämpft auf einer
+  Platte mit vier Passermarken in Teal, die beim Hover nach außen fahren. Daneben die Eckdaten
+  als Spezifikationszeilen in Mono. Der Link ist nur umrandet, die Teal-Fläche bleibt dem
+  Auftragsschein.
 - Nur Teal, kein Messing. Messing ist auf `/trusted-blogs` dem Ausgestellten vorbehalten.
 
 ## Qualitäts-Check (Q1–Q6)
 
-1. **Externe Werte?** Keine zur Laufzeit. Alle Texte und URLs sind Konstanten. Die
-   Beitragsbilder kommen per `NuxtImg` von `blog.eduard-andrae.de` (in `image.domains`
+1. **Externe Werte?** Keine zur Laufzeit. Alle Texte und URLs sind Konstanten, die
+   Media-Kit-Vorschau ist eine lokale Datei mit festen Maßen. Die Beitragsbilder kommen per `NuxtImg` von `blog.eduard-andrae.de` (in `image.domains`
    freigegeben) und haben feste Maße, ein Ausfall lässt nichts springen.
 2. **Fehlgeschlagener Request?** Entfällt, die Seite holt keine Daten.
 3. **Leeres Ergebnis?** Entfällt, die Listen sind Literale.
@@ -98,3 +122,5 @@ angenommen werden.
 - Die WordPress-Seite `blog.eduard-andrae.de/kooperationen/` besteht weiter und ist damit
   doppelt vorhanden. Sinnvoll wäre eine Weiterleitung von dort hierher, sobald diese Seite live
   ist (Eddys Entscheidung, Änderung in WordPress).
+- Das alte Media-Kit-PDF liegt weiter in der WordPress-Mediathek und ist unter seiner Adresse
+  erreichbar. Löschen oder behalten ist Eddys Entscheidung (Änderung in WordPress).

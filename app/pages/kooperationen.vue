@@ -10,6 +10,7 @@
  *
  * - Die drei Bedingungen sind ein Prüfprotokoll: nummerierte Zeilen, Index-Häkchen.
  * - Die Referenzen sind ausgeführte Arbeiten: Bildstreifen, Jahreszahl in Mono.
+ * - Das Media-Kit liegt als verkleinerter Screenshot auf einer Prüfplatte mit Passermarken.
  * - Der Buchungslink sitzt auf einem Auftragsschein mit Abrisskante. Das ist das eine
  *   auffällige Element der Seite; Katalog-Nr. 76 ist die Auftragsnummer.
  * - Nur Teal. Messing gehört auf `/trusted-blogs` dem Ausgestellten.
@@ -162,38 +163,76 @@ useSeoMeta({
     <!-- ═══════════════ 02 · MEDIA-KIT ═══════════════ -->
     <section id="mediakit" class="section section--bordered reveal">
       <UContainer>
-        <SectionHead
-          kicker="02 · Media-Kit"
-          title="Steckbrief, Daten, Zahlen"
-          lead="Meinen Steckbrief und wichtige Daten, Zahlen und Fakten habe ich im Media-Kit hinterlegt. Du kannst es hier als PDF-Datei ansehen und herunterladen."
-        />
+        <div class="kit">
+          <div class="kit__main">
+            <SectionHead
+              kicker="02 · Media-Kit"
+              title="Steckbrief, Daten, Zahlen"
+              lead="Meinen Steckbrief und wichtige Daten, Zahlen und Fakten findest du in meinem Media-Kit. Ich pflege es direkt bei trusted blogs, die Kennzahlen dort sind geprüft. Mit einem Klick auf „Als PDF speichern“ nimmst du es als Datei mit."
+            />
 
-        <a
-          :href="KOOPERATION_MEDIAKIT.url"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="sheet"
-        >
-          <!-- Ein Blatt mit Eselsohr, rein typografisch gebaut. -->
-          <span class="sheet__doc" aria-hidden="true">
-            <span class="sheet__lines" />
-            <span class="sheet__type">PDF</span>
-          </span>
+            <dl class="spec">
+              <div class="spec__row">
+                <dt>Ort</dt>
+                <dd>trusted-blogs.com</dd>
+              </div>
+              <div class="spec__row">
+                <dt>Kennzahlen</dt>
+                <dd>geprüft von trusted blogs, Quelle DataForSEO</dd>
+              </div>
+              <div class="spec__row">
+                <dt>Als Datei</dt>
+                <dd>PDF über „Als PDF speichern“</dd>
+              </div>
+            </dl>
 
-          <span class="sheet__main">
-            <span class="sheet__name">{{ KOOPERATION_MEDIAKIT.fileName }}</span>
-            <span class="sheet__facts">
-              <span>{{ KOOPERATION_MEDIAKIT.pages }} Seite</span>
-              <span>{{ KOOPERATION_MEDIAKIT.sizeKb }} KB</span>
-              <span>Stand {{ KOOPERATION_MEDIAKIT.stand }}</span>
-            </span>
-          </span>
+            <a
+              :href="KOOPERATION_MEDIAKIT.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="kit__cta"
+            >
+              Media-Kit ansehen
+              <Icon name="lucide:arrow-up-right" class="kit__cta-icon size-4" />
+            </a>
+            <p class="kit__hint">
+              Öffnet trusted-blogs.com in einem neuen Tab
+            </p>
+          </div>
 
-          <span class="sheet__action">
-            Ansehen
-            <Icon name="lucide:arrow-up-right" class="sheet__icon size-4" />
-          </span>
-        </a>
+          <!--
+            Die Prüfplatte: verkleinerter Screenshot der Media-Kit-Karte (lokal, damit ohne
+            Klick keine Verbindung zu trusted-blogs.com entsteht). Klickbar wie der Link
+            daneben, aber für Tastatur und Screenreader ausgeblendet: Derselbe Link zweimal
+            hintereinander wäre dort nur Lärm.
+          -->
+          <figure class="plate" aria-hidden="true">
+            <a
+              :href="KOOPERATION_MEDIAKIT.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              tabindex="-1"
+              class="plate__link"
+            >
+              <NuxtImg
+                :src="KOOPERATION_MEDIAKIT.preview.src"
+                alt=""
+                :width="KOOPERATION_MEDIAKIT.preview.width"
+                :height="KOOPERATION_MEDIAKIT.preview.height"
+                sizes="320px"
+                format="webp"
+                quality="82"
+                loading="lazy"
+                class="plate__img"
+              />
+              <span class="plate__marks" />
+            </a>
+            <figcaption class="plate__caption">
+              <span>Vorschau</span>
+              <span>aufgenommen {{ KOOPERATION_MEDIAKIT.preview.aufgenommen }}</span>
+            </figcaption>
+          </figure>
+        </div>
       </UContainer>
     </section>
 
@@ -613,112 +652,167 @@ useSeoMeta({
 }
 
 /* ── Media-Kit ──────────────────────────────────────────────────────────── */
-.sheet {
+/* Rechte Spalte wie beim Auftragsschein darunter, damit beide Sektionen eine Achse teilen. */
+.kit {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1.25rem 1.5rem;
-  align-items: center;
-  margin-top: clamp(2rem, 4vw, 3rem);
-  max-width: 44rem;
-  padding: 1.5rem;
-  border: 1px solid var(--color-graphite-700);
-  background: var(--color-graphite-850);
-  transition: border-color 250ms ease;
+  gap: clamp(2.5rem, 6vw, 3.5rem);
 }
-@media (min-width: 640px) {
-  .sheet {
-    grid-template-columns: auto 1fr auto;
-    padding: 1.75rem 2rem;
+@media (min-width: 768px) {
+  .kit {
+    grid-template-columns: 1fr 17rem;
+    gap: 3.5rem;
+    align-items: center;
   }
 }
-.sheet:hover {
-  border-color: var(--color-accent-500);
+@media (min-width: 1024px) {
+  .kit {
+    grid-template-columns: 1fr 20rem;
+    gap: 4.5rem;
+  }
 }
 
-/* Blatt mit Eselsohr: Die Ecke ist ein Dreieck in Hintergrundfarbe plus eine Falz. */
-.sheet__doc {
-  position: relative;
-  display: block;
-  width: 3.25rem;
-  height: 4.25rem;
-  border: 1px solid var(--color-steel-500);
-  clip-path: polygon(0 0, calc(100% - 0.9rem) 0, 100% 0.9rem, 100% 100%, 0 100%);
-}
-.sheet__doc::after {
-  content: '';
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 0.9rem;
-  height: 0.9rem;
-  background: linear-gradient(225deg, transparent 50%, var(--color-steel-500) 50%, var(--color-steel-500) calc(50% + 1px), var(--color-graphite-700) calc(50% + 1px));
+.spec {
+  margin-top: clamp(1.75rem, 3.5vw, 2.25rem);
+  max-width: 34rem;
+  border-top: 1px solid var(--color-graphite-700);
 }
 
-.sheet__lines {
-  position: absolute;
-  inset: 1.1rem 0.55rem auto;
-  height: 1.3rem;
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--color-graphite-600) 0 1px,
-    transparent 1px 5px
-  );
+.spec__row {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-graphite-800);
 }
 
-.sheet__type {
-  position: absolute;
-  left: 0.5rem;
-  bottom: 0.4rem;
+.spec__row dt {
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--color-accent-300);
-}
-
-.sheet__main {
-  display: grid;
-  gap: 0.4rem;
-  min-width: 0;
-}
-
-.sheet__name {
-  font-family: var(--font-mono);
-  font-size: var(--text-base);
-  color: var(--color-steel-100);
-  overflow-wrap: anywhere;
-}
-
-.sheet__facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--color-steel-500);
-  font-variant-numeric: tabular-nums;
 }
 
-.sheet__action {
-  grid-column: 1 / -1;
+.spec__row dd {
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-steel-200);
+}
+
+/* Nur umrandet: Die Teal-Fläche gehört dem Auftragsschein, dem einen lauten Element. */
+.kit__cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: var(--text-sm);
-  font-weight: 600;
+  gap: 0.6rem;
+  margin-top: 1.75rem;
+  padding: 0.8rem 1.15rem;
+  border: 1px solid var(--color-accent-500);
   color: var(--color-accent-300);
+  font-size: var(--text-base);
+  font-weight: 600;
+  transition: background 200ms ease, color 200ms ease;
 }
-@media (min-width: 640px) {
-  .sheet__action {
-    grid-column: auto;
+.kit__cta:hover {
+  background: rgba(33, 164, 163, 0.1);
+  color: var(--color-accent-200);
+}
+
+.kit__cta-icon {
+  transition: translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kit__cta:hover .kit__cta-icon {
+  translate: 0.2rem -0.2rem;
+}
+
+.kit__hint {
+  margin-top: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--color-steel-600);
+}
+
+/* ── Prüfplatte ─────────────────────────────────────────────────────────── */
+.plate {
+  width: 100%;
+  max-width: 20rem;
+  margin: 0;
+}
+@media (min-width: 768px) {
+  .plate {
+    justify-self: end;
   }
 }
 
-.sheet__icon {
-  transition: translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+.plate__link {
+  position: relative;
+  display: block;
+  padding: 1.1rem;
+  border: 1px solid var(--color-graphite-700);
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(33, 164, 163, 0.06) 0%, transparent 70%),
+    var(--color-graphite-900);
+  transition: border-color 250ms ease;
 }
-.sheet:hover .sheet__icon {
-  translate: 0.2rem -0.2rem;
+
+/*
+  Im Ruhezustand gedämpft wie die Referenzbilder: Die helle Karte wäre auf der dunklen
+  Seite sonst die hellste Fläche überhaupt und würde dem Auftragsschein die Bühne nehmen.
+*/
+.plate__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: saturate(0.6) brightness(0.78);
+  box-shadow: 0 1.5rem 2.5rem -1.25rem rgba(0, 0, 0, 0.7);
+  transition: filter 300ms ease;
+}
+
+/*
+  Vier Passermarken als Hintergrundverläufe, je ein waagerechter und ein senkrechter
+  Haarstrich pro Ecke. Beim Hover fahren sie nach außen, als würde das Blatt ausgerichtet.
+*/
+.plate__marks {
+  --mark: var(--color-accent-400);
+  --len: 0.85rem;
+  position: absolute;
+  inset: 0.5rem;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--mark) 0 0) top left / var(--len) 1px,
+    linear-gradient(var(--mark) 0 0) top left / 1px var(--len),
+    linear-gradient(var(--mark) 0 0) top right / var(--len) 1px,
+    linear-gradient(var(--mark) 0 0) top right / 1px var(--len),
+    linear-gradient(var(--mark) 0 0) bottom left / var(--len) 1px,
+    linear-gradient(var(--mark) 0 0) bottom left / 1px var(--len),
+    linear-gradient(var(--mark) 0 0) bottom right / var(--len) 1px,
+    linear-gradient(var(--mark) 0 0) bottom right / 1px var(--len);
+  background-repeat: no-repeat;
+  transition: inset 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kit:hover .plate__link,
+.kit:has(.kit__cta:focus-visible) .plate__link {
+  border-color: var(--color-graphite-500);
+}
+.kit:hover .plate__img,
+.kit:has(.kit__cta:focus-visible) .plate__img {
+  filter: none;
+}
+.kit:hover .plate__marks,
+.kit:has(.kit__cta:focus-visible) .plate__marks {
+  inset: 0.2rem;
+}
+
+.plate__caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--color-steel-600);
 }
 
 /* ── Buchung ────────────────────────────────────────────────────────────── */
