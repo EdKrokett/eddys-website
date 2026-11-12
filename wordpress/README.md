@@ -97,3 +97,46 @@ curl -s https://blog.eduard-andrae.de/wp-json/eddy-laufstatistik/v1/laeufe | hea
 ```
 
 Erwartet wird eine JSON-Liste. `rest_no_route` heißt: Plugin nicht aktiv.
+
+## `eddy-headless-redirect/` — Headless-Weiterleitung
+
+Leitet Leser des WordPress-Frontends per 301 auf dieselbe Seite unter `eduard-andrae.de` um.
+REST-API, Admin, Login, Bilder, Feed, Vorschau und 404-Seiten bleiben unberührt. Konzept,
+Zuordnungstabelle und die Regel gegen die Endlosschleife: `docs/headless-wordpress.md`.
+
+### Paket bauen
+
+```bash
+cd wordpress && zip -r ~/Downloads/eddy-headless-redirect.zip eddy-headless-redirect
+```
+
+### Installieren
+
+1. WP-Admin → Plugins → Installieren → Plugin hochladen → das ZIP wählen → aktivieren.
+2. Einstellungen → Headless-Weiterleitung: Nach der ersten Aktivierung steht dort
+   **Testmodus**. Es wird noch niemand umgeleitet.
+
+### Prüfen
+
+```bash
+npm run check:headless
+```
+
+Im Testmodus wertet das Skript den Header `X-Eddy-Redirect` aus, im aktiven Betrieb die
+echte 301. Erwartet wird am Ende „Alles in Ordnung“. Einzelne Adresse von Hand:
+
+```bash
+curl -sI https://blog.eduard-andrae.de/impressum/ | grep -i x-eddy
+# X-Eddy-Redirect: https://eduard-andrae.de/impressum
+```
+
+Fehlt der Header ganz: Plugin nicht aktiv oder auf „Aus“. Angemeldet im Browser sieht man
+`X-Eddy-Redirect-Skip: angemeldet`; das ist richtig.
+
+### Stellungen
+
+| Stellung | Wirkung |
+|---|---|
+| Aus | Nichts. Notschalter, ohne das Plugin zu deaktivieren. |
+| Testmodus | Nur Header, keine Umleitung. |
+| Aktiv | 301 auf `eduard-andrae.de`. Browser merken sich eine 301 dauerhaft; ein Zurückschalten wirkt bei Besuchern, die schon umgeleitet wurden, erst nach dem Leeren des Browser-Caches. |

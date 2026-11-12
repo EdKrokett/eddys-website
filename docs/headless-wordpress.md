@@ -1,7 +1,9 @@
 # WordPress ohne eigenes Frontend („headless“)
 
-Stand: 03.11.2026. Konzept, abgestimmt mit Eddy. **Schritt 1 ist umgesetzt, Schritte 2 bis 4
-sind offen.** Wer hier weitermacht, beginnt bei Schritt 2.
+Stand: 12.11.2026. Konzept, abgestimmt mit Eddy. **Schritt 1 ist umgesetzt, Schritt 2 ist
+gebaut (Plugin `wordpress/eddy-headless-redirect/`, Prüfskript
+`scripts/check-headless-redirect.mjs`) und wartet auf Installation und Prüflauf.** Schritte 3
+und 4 sind offen.
 
 ## Ausgangslage
 
@@ -41,13 +43,19 @@ im Repo, per ZIP hochgeladen.
 | Aufruf | Ziel |
 |---|---|
 | Beitrag | `https://eduard-andrae.de/blog/<slug>` |
-| Startseite, Kategorie, Schlagwort, Datumsarchiv, Autor, Suche, Paginierung | `https://eduard-andrae.de/blog` |
+| Startseite, Kategorie, Schlagwort, Datumsarchiv, Autor, Paginierung | `https://eduard-andrae.de/blog` |
+| Suche `?s=<begriff>` | `https://eduard-andrae.de/blog?q=<begriff>` (die Blog-Übersicht liest `q`), leere Suche → `/blog` |
+| Kurzlink `?p=<id>` | wie der Beitrag, ohne Umweg über die WordPress-Adresse |
+| Anhangseite | der Beitrag, an dem der Anhang hängt, sonst `/blog` |
 | Seite `impressum` | `/impressum` |
 | Seite `disclaimer` („Haftung und Datenschutz“) | `/datenschutz` |
 | Seite `statistik` | `/statistik` (macht heute schon Redirection) |
-| Seiten `bildliches` (2015), `gewichtiges` (2016) | **offen, Eddy entscheidet**: `/blog`, `/ueber-mich` oder als Beitrag übernehmen |
+| Seite `gewichtiges` (2016, Gewicht und Lauf-km) | `/statistik` (Eddy, 12.11.2026) |
+| jede andere Seite, darunter `bildliches` (2015) | `/blog`. Eddy braucht „Bildliches“ nicht mehr (12.11.2026); die Seite darf in WordPress gelöscht werden, danach ist ihre Adresse eine 404. |
 | Feed (`is_feed()`) | keine Umleitung |
 | Vorschau (`is_preview()`) und angemeldete Nutzer | keine Umleitung, sonst funktioniert der Vorschau-Knopf für Entwürfe nicht |
+| Embed (`/<slug>/embed/`), Trackback, `robots.txt`, `favicon.ico`, Sitemaps | keine Umleitung: Maschinen-Abrufe, keine Leser |
+| Anfrage mit anderer Methode als GET/HEAD (Kommentarformular, XML-RPC) | keine Umleitung |
 | 404 | **keine Umleitung**, siehe Endlosschleife |
 | REST, Admin, Login, Cron, Uploads | erreichen `template_redirect` gar nicht oder sind ausgenommen |
 
@@ -94,14 +102,49 @@ Weiterleitung. Sauberer wäre, sie auf der Nuxt-Seite direkt auf `/blog/<slug>` 
 
 ### Schritt 2: Plugin bauen, mit Testmodus
 
-- Einstellung „Testmodus“: Das Plugin leitet nicht um, sondern setzt nur einen Header
+Plugin `wordpress/eddy-headless-redirect/`, Installation in `wordpress/README.md`.
+
+- Einstellung unter Einstellungen → Headless-Weiterleitung mit drei Stellungen: **Aus**,
+  **Testmodus** (Vorgabe nach der Aktivierung), **Aktiv**. „Aus“ ist der Notschalter, ohne
+  das Plugin deaktivieren zu müssen.
+- Testmodus: Das Plugin leitet nicht um, sondern setzt nur einen Header
   `X-Eddy-Redirect: <ziel>`. So lässt sich die Zuordnung prüfen, ohne Besucher umzuleiten.
-- Prüfskript: alle Beitrags-Links aus `/wp-json/wp/v2/posts?_fields=link` plus die Seiten
-  abrufen, Header mit dem erwarteten Ziel vergleichen. Jedes Ziel einmal auf
-  `eduard-andrae.de` aufrufen (muss 200 liefern, nicht 404 und nicht Weiterleitung).
+  Leitet es bewusst nicht um, nennt `X-Eddy-Redirect-Skip: <grund>` den Grund (`404`,
+  `feed`, `angemeldet`, `vorschau`, …). Den Grund-Header gibt es nur im Testmodus.
+- Haken `template_redirect` mit Priorität 1, also vor `redirect_canonical` und
+  `wp_old_slug_redirect` (beide Priorität 10). Dadurch springt `?p=123` direkt zur Nuxt-Seite.
+  Ein umbenannter Beitrag ist für WordPress zunächst eine 404; ihn löst erst
+  `wp_old_slug_redirect` auf den neuen Slug auf, danach greift das Plugin. Zwei Sprünge,
+  bewusst akzeptiert, weil das Plugin sonst eine 404 umleiten müsste.
+- Positivliste statt Ausnahmeliste: Umgeleitet wird nur, was `is_singular()`, `is_home()`,
+  `is_front_page()`, `is_archive()` oder `is_search()` ist. Alles andere bleibt unberührt.
+- Beitrags-Slugs werden einheitlich kodiert (`rawurlencode(rawurldecode(slug))`, große
+  Hex-Ziffern), damit das Ziel Zeichen für Zeichen dem Canonical der Nuxt-Seite entspricht
+  (`shared/utils/canonical-url.ts`).
+- Redirection läuft vor `template_redirect` (Haken `init`). Seine Regeln, etwa für
+  `/statistik/`, greifen also weiterhin zuerst und unabhängig vom Testmodus.
+- Prüfskript `scripts/check-headless-redirect.mjs`: alle Beitrags-Links aus
+  `/wp-json/wp/v2/posts?_fields=link` plus die Seiten abrufen, Header mit dem erwarteten
+  Ziel vergleichen. Jedes Ziel einmal auf `eduard-andrae.de` aufrufen (muss 200 liefern,
+  nicht 404 und nicht Weiterleitung) und dessen Canonical mit dem Ziel ohne Query
+  vergleichen. Das Skript wertet sowohl den Test-Header als auch eine echte 301 aus und
+  dient deshalb unverändert für Schritt 3.
 - Ausdrücklich testen: Vorschau eines Entwurfs, unbekannter Pfad (404, keine Umleitung),
   Feed, ein Beitrag mit Sonderzeichen-Slug
   (`zwischenbericht-1-madeira-beine-%e2%88%925-kg-und-die-geloeste-handbremse`).
+- **Reihenfolge:** Das Prüfskript erst laufen lassen, wenn der Fix für gecachte Fehlerseiten
+  (`app/plugins/data-error-status.server.ts`, `wpLoadErrorStatus`) live ist. Der erste Lauf
+  am 12.11.2026 hat ohne ihn 171 Beitragsseiten für eine Stunde auf 404 gesetzt
+  (`docs/error-catalog.md`). Das Skript ist seitdem gedrosselt und hat einen Notaus.
+
+**Befund aus dem ersten Prüflauf (12.11.2026):** Redirection-Regel 3 leitet
+`/halbmarathon-cuxhaven-2011/` auf `/halbmarathon-cuxhaven-2011-2/` um. Das sind zwei
+verschiedene Beiträge: die Ankündigung vom 11.01.2011 (ID 3332) und der Bericht vom
+16.04.2011 (ID 3704). Die Ankündigung ist dadurch schon heute über ihre WordPress-Adresse
+nicht erreichbar, auf `eduard-andrae.de/blog/halbmarathon-cuxhaven-2011` dagegen schon.
+Erledigt am 12.11.2026 auf Eddys Entscheidung: Regel 3 in Redirection **deaktiviert**, nicht
+gelöscht, damit sie sich mit einem Klick zurückholen lässt. Beide Beiträge sind seitdem
+unter ihrer eigenen Adresse erreichbar.
 
 ### Schritt 3: Scharf schalten
 
@@ -122,5 +165,7 @@ Weiterleitung. Sauberer wäre, sie auf der Nuxt-Seite direkt auf `/blog/<slug>` 
 
 ## Offene Entscheidungen für Eddy
 
-1. Ziel für die Seiten „Bildliches“ und „Gewichtiges“.
-2. Zeitpunkt der Umstellung (Schritt 3).
+1. Zeitpunkt der Umstellung (Schritt 3): Eddy entscheidet nach dem Ergebnis des Prüflaufs.
+
+Entschieden am 12.11.2026: „Gewichtiges“ → `/statistik`, „Bildliches“ wird nicht mehr
+gebraucht (fällt unter „jede andere Seite“ → `/blog`), Redirection-Regel 3 deaktiviert.
