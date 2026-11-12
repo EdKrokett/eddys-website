@@ -4,12 +4,19 @@ import type { WordPressBlogPostDetail } from '#shared/types/wordpress'
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data: post, status } = await useFetch<WordPressBlogPostDetail>(`/api/blog/${slug}`, {
+const { data: post, error } = await useFetch<WordPressBlogPostDetail>(`/api/blog/${slug}`, {
   key: `blog-post-${slug}`,
 })
 
-if (status.value === 'error' || !post.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Blogbeitrag nicht gefunden' })
+// 404 nur, wenn WordPress den Beitrag wirklich nicht kennt. Ein kurzer WordPress-Ausfall
+// wird 503, sonst cacht Vercel die 404 per ISR für eine Stunde (am 12.11.2026 bei 171
+// Beiträgen passiert, docs/error-catalog.md).
+if (!post.value) {
+  const statusCode = wpLoadErrorStatus(error.value)
+  throw createError({
+    statusCode,
+    statusMessage: statusCode === 404 ? 'Blogbeitrag nicht gefunden' : 'Blog vorübergehend nicht erreichbar',
+  })
 }
 
 /**

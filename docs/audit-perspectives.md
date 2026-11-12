@@ -455,3 +455,17 @@ Aus dem aufblitzenden Beitragsbild vom 01.11.2026 (`docs/error-catalog.md`).
   Query-Variante ein eigener Eintrag.
 - Zeigt die Seite nach dem Laden etwas anderes als im ersten Moment? Dann widersprechen sich
   HTML und Payload. Beide Fassungen mit `curl -I` vergleichen, auf `age` achten.
+
+## Was cacht die Seite, wenn ihre Datenquelle kurz weg ist?
+
+Aus den 171 gecachten 404-Seiten vom 12.11.2026 (`docs/error-catalog.md`).
+
+- Welchen Status liefert die Seite, wenn WordPress nicht antwortet? Lokal prüfen mit
+  `NUXT_PUBLIC_WORDPRESS_URL=https://wp-unerreichbar.invalid npx nuxt dev` und vorher
+  `.data/kv/wp-cache` beiseitelegen, sonst kommen die Daten aus dem lokalen Cache. Erwartet
+  wird 503, nie 404 und nie 200 mit Fehlerhinweis.
+- Wird irgendwo `status === 'error'` zu einer 404 oder einem leeren Ergebnis? Eine 404 nur
+  nach einer ausdrücklichen 404 der Quelle (`wpLoadErrorStatus`).
+- Ruft ein Skript viele Seiten der Live-Seite oder von WordPress ab? Dann gedrosselt und mit
+  Abbruch bei gehäuften 5xx-Antworten, und vorher überlegen, was ein Fehlschlag im Cache
+  hinterlässt.

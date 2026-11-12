@@ -274,6 +274,26 @@ keinen instanzlokalen `withWpCache`-Eintrag im SSR-Pfad haben. Sonst baut die
 Revalidierung die Seite mit alten Daten neu und schreibt den falschen Stand für eine
 weitere ISR-Periode fest.
 
+### Fehler gehören nicht in den Cache (12.11.2026)
+
+Vercel hält jede ISR-Antwort mit 200 oder 404 bis zum Ablauf fest. Eine 5xx gilt dagegen
+als gescheiterte Neuberechnung: Die letzte gute Fassung bleibt stehen, nach 30 Sekunden
+wird es erneut versucht. Eine Seite, die einen kurzen WordPress-Ausfall als 404 oder als
+200 mit Fehlerhinweis meldet, bleibt also bis zu eine Stunde (`/blog/**`) oder einen Tag
+(`/statistik`) kaputt. Am 12.11.2026 passierte genau das 171 Beitragsseiten
+(`docs/error-catalog.md`).
+
+Zwei Bausteine sorgen seitdem dafür, dass nur Fehler mit 5xx antworten:
+
+- `app/pages/blog/[slug].vue` wirft 404 nur, wenn die eigene API ausdrücklich 404 meldet
+  (`wpLoadErrorStatus` in `shared/utils/wp-load-error.ts`), sonst 503.
+- `app/plugins/data-error-status.server.ts` setzt den Status jeder Seite auf 503, wenn beim
+  Server-Rendering ein `useFetch`/`useAsyncData` gescheitert ist. Die Seite zeigt weiter
+  ihren eigenen Fehlerhinweis, wird aber nicht gecacht. Gilt automatisch für neue Seiten.
+
+**Regel für neue Seiten:** Einen Ladefehler nie selbst in 404 oder einen 200-Zustand
+übersetzen. Eine echte 404 nur nach einer ausdrücklichen 404 der Datenquelle.
+
 ## Schicht 5: Bild-Transformationen bei Vercel (11.09.2026)
 
 Am 10.09.2026 meldete Vercel, dass 75 % des Hobby-Kontingents für Image-Optimization-

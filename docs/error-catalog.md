@@ -1264,3 +1264,46 @@ deshalb diesmal ein Test statt nur einer weiteren Regel.
 
 **→ AUDIT-PERSPEKTIVE:** „Fragt mein Test dieselbe URL an wie der Browser?" in
 `docs/audit-perspectives.md`.
+
+## Kurzer WordPress-Ausfall wird als 404 gecacht
+
+**Gefunden:** 12.11.2026, beim ersten Lauf des Prüfskripts für die Headless-Weiterleitung
+(`scripts/check-headless-redirect.mjs`). Das Skript rief je sechs Seiten parallel bei
+WordPress und auf eduard-andrae.de ab. WordPress kam ins Straucheln, und 171 von 246
+Beitragsseiten antworteten danach mit 404 (`x-vercel-cache: HIT`, `age: 91`), obwohl
+`/api/blog/<slug>` dieselben Beiträge mit 200 lieferte. Behoben nach etwa zehn Minuten:
+alle 171 Pfade einzeln mit `x-prerender-revalidate` neu gebaut, danach 246 von 246 mit 200.
+
+**FALSCH:**
+```ts
+// app/pages/blog/[slug].vue
+const { data: post, status } = await useFetch(`/api/blog/${slug}`)
+if (status.value === 'error' || !post.value) {
+  throw createError({ statusCode: 404, statusMessage: 'Blogbeitrag nicht gefunden' })
+}
+```
+
+**RICHTIG:**
+```ts
+const { data: post, error } = await useFetch(`/api/blog/${slug}`)
+if (!post.value) {
+  const statusCode = wpLoadErrorStatus(error.value) // 404 nur nach echter 404, sonst 503
+  throw createError({ statusCode, statusMessage: … })
+}
+```
+Dazu `app/plugins/data-error-status.server.ts`: setzt jede Seite auf 503, deren Daten beim
+Server-Rendering fehlen.
+
+**WARUM:** Die Seite übersetzte *jeden* Ladefehler in „gibt es nicht“. Eine 404 ist für
+Vercel eine gültige Antwort und bleibt per ISR bis zum Ablauf stehen (`/blog/**`: eine
+Stunde). Eine 503 dagegen nicht: Vercel liefert weiter die letzte gute Fassung und versucht
+es nach 30 Sekunden erneut. Dieselbe Klasse, harmloser im Bild, bei `/blog` und
+`/statistik`: Sie zeigten bei einem Ladefehler einen Fehlerhinweis mit Status **200**, den
+ISR genauso festhielt, bei `/statistik` einen ganzen Tag.
+
+Aufgefallen ist es nur, weil das Prüfskript jedes Ziel auch selbst aufrief. Ein Crawler mit
+genug paralleler Last hätte denselben Effekt gehabt, ohne dass es jemand merkt. Das Skript
+läuft seitdem gedrosselt (zwei parallele Anfragen) und bricht nach drei 5xx-Antworten ab.
+
+**→ AUDIT-PERSPEKTIVE:** „Was cacht die Seite, wenn ihre Datenquelle kurz weg ist?" in
+`docs/audit-perspectives.md`.
