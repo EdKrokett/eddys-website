@@ -329,8 +329,12 @@ export default defineNuxtConfig({
    * Die festen Seiten findet das Modul selbst, die Beiträge nicht: `/blog/[slug]` ist
    * dynamisch. Die Quelle liefert alle veröffentlichten Beiträge samt `lastmod`.
    * docs/headless-wordpress.md, Schritt 1.
+   *
+   * `xsl: false`: Kein Stylesheet für die Browser-Ansicht. Chrome entfernt XSLT und warnt
+   * beim Aufruf (13.11.2026); Suchmaschinen lesen nur das XML und ignorieren das Stylesheet.
    */
   sitemap: {
     sources: ['/api/__sitemap__/posts'],
+    xsl: false,
   },
 })

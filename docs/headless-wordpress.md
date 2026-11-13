@@ -1,9 +1,7 @@
 # WordPress ohne eigenes Frontend („headless“)
 
-Stand: 12.11.2026. Konzept, abgestimmt mit Eddy. **Schritt 1 ist umgesetzt, Schritt 2 ist
-gebaut (Plugin `wordpress/eddy-headless-redirect/`, Prüfskript
-`scripts/check-headless-redirect.mjs`) und wartet auf Installation und Prüflauf.** Schritte 3
-und 4 sind offen.
+Stand: 12.11.2026. Konzept, abgestimmt mit Eddy. **Schritte 1 bis 3 sind umgesetzt** (seit 13.11.2026
+leitet WordPress per 301 um). Wer hier weitermacht, beginnt bei Schritt 4.
 
 ## Ausgangslage
 
@@ -146,9 +144,32 @@ Erledigt am 12.11.2026 auf Eddys Entscheidung: Regel 3 in Redirection **deaktivi
 gelöscht, damit sie sich mit einem Klick zurückholen lässt. Beide Beiträge sind seitdem
 unter ihrer eigenen Adresse erreichbar.
 
+**Prüflauf 12.11.2026 (Testmodus):** 272 Adressen, 252 Ziele, keine Fehler. 262 Zuordnungen
+über den Test-Header, eine echte 301 (`/statistik/`, von Redirection). Übersprungen: Vorschau
+eines Entwurfs, weil es keinen Entwurf gab. Abgedeckt ist sie trotzdem doppelt: anonym ist
+ein Entwurf eine 404 (Fall „Unbekannter Pfad“), angemeldet greift `angemeldet`. In Schritt 3
+einmal von Hand im Browser prüfen.
+
 ### Schritt 3: Scharf schalten
 
+**Stand 13.11.2026:** Eddy hat auf „Aktiv“ geschaltet. Prüflauf: 272 Adressen, 252 Ziele,
+keine Fehler, 263 echte Weiterleitungen (`x-redirect-by: Eddy Headless`, eine von
+Redirection). Ketten von Hand geprüft: Altlink `eduard-andrae.de/<slug>/` landet in zwei
+Sprüngen auf `/blog/<slug>` (200), ein unbekannter Pfad endet nach einem Sprung als
+WordPress-404, keine Schleife. Eddy hat die Vorschau eines Entwurfs geprüft (bleibt auf
+WordPress, funktioniert), die Domain-Property `eduard-andrae.de` in der Search Console
+angelegt und die Sitemap eingereicht.
+
+Bestätigt per manuell angelegtem TXT-Eintrag, **nicht** über IONOS Domain Connect: Der
+Assistent wollte dafür den Mail-Dienst der Domain abschalten und den MX-Eintrag löschen.
+Daran hängen die Weiterleitung `eddy@` und das Versandkonto `blog@` für FluentSMTP.
+
+Nebenbei: Das Stylesheet der Sitemap ist abgeschaltet (`sitemap.xsl: false` in
+`nuxt.config.ts`), weil Chrome XSLT entfernt und beim Aufruf warnte.
+
 - Testmodus aus, Stichproben, Prüfskript erneut.
+- Angemeldet in WP-Admin bei einem Entwurf auf „Vorschau“ klicken: Die Vorschau muss auf
+  blog.eduard-andrae.de bleiben.
 - Google Search Console: Property für `eduard-andrae.de` anlegen (falls nicht vorhanden),
   `https://eduard-andrae.de/sitemap.xml` einreichen. Ein vorübergehender Knick im Ranking ist
   möglich, 301 überträgt den Großteil.
@@ -163,9 +184,7 @@ unter ihrer eigenen Adresse erreichbar.
 - Bleibt: Akismet (prüft auch Kommentare, die über die Nuxt-Seite eingehen), FluentSMTP,
   Redirection, die eigenen Plugins, die AI-Plugins (Eddys Entscheidung).
 
-## Offene Entscheidungen für Eddy
+## Entscheidungen
 
-1. Zeitpunkt der Umstellung (Schritt 3): Eddy entscheidet nach dem Ergebnis des Prüflaufs.
-
-Entschieden am 12.11.2026: „Gewichtiges“ → `/statistik`, „Bildliches“ wird nicht mehr
+Keine offenen. Entschieden am 13.11.2026: Umstellung nach dem grünen Prüflauf. Am 12.11.2026: „Gewichtiges“ → `/statistik`, „Bildliches“ wird nicht mehr
 gebraucht (fällt unter „jede andere Seite“ → `/blog`), Redirection-Regel 3 deaktiviert.
