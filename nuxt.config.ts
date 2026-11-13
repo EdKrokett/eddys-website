@@ -248,6 +248,17 @@ export default defineNuxtConfig({
     domains: [...IMAGE_PROXY_HOSTS],
 
     /**
+     * Provider ohne Umrechnung: `<NuxtImg provider="none">` liefert die Datei aus `public/`
+     * unverändert. @nuxt/image registriert ihn nur, wenn dieser Schlüssel gesetzt ist.
+     *
+     * Gebraucht für Bilder, die breiter als 1536px ausgeliefert werden müssen (größter
+     * Eintrag in `screens` unten, mehr erlaubt Vercel nicht): die Lightbox der
+     * Explosionszeichnung auf /trusted-blogs, deren kleinste Beschriftung sonst unscharf
+     * wird. Kostet keine Vercel-Transformation.
+     */
+    none: {},
+
+    /**
      * Provider-Optionen für Vercel. Greifen NUR im Vercel-Build; lokal läuft IPX.
      */
     vercel: {

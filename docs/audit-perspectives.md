@@ -469,3 +469,14 @@ Aus den 171 gecachten 404-Seiten vom 12.11.2026 (`docs/error-catalog.md`).
 - Ruft ein Skript viele Seiten der Live-Seite oder von WordPress ab? Dann gedrosselt und mit
   Abbruch bei gehäuften 5xx-Antworten, und vorher überlegen, was ein Fehlschlag im Cache
   hinterlässt.
+
+## Steht, was im Template steht, auch auf der Seite?
+
+Aus dem Lightbox-Hinweis, der nie angezeigt wurde (13.11.2026, `docs/error-catalog.md`).
+
+- Hat eine Komponente, die ein leeres Element rendert (`<NuxtImg>`, `<NuxtPicture>`, `<Icon>`,
+  `<input>`), Kindelemente im Template? Die werden still verworfen. Suche:
+  `grep -rn -A3 "<NuxtImg" app | grep -v "/>"`, dann jeden Treffer ansehen, der nicht mit
+  `/>` endet.
+- Für jeden sichtbaren Text in einem Dialog oder Overlay: im Browser öffnen und nachsehen,
+  ob er erscheint. Ein geschlossener `<dialog>` taucht in keinem Seiten-Screenshot auf.

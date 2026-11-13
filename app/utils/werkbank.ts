@@ -2,6 +2,7 @@ import type {
   WerkbankBuild,
   WerkbankLesson,
   WerkbankMetric,
+  WerkbankPart,
   WerkbankScenario,
   WerkbankShot,
   WerkbankTool,
@@ -24,6 +25,14 @@ import type {
 
 /** Stichtag aller Kennzahlen auf dieser Seite. Als Anzeigeform, nicht als Date-Objekt. */
 export const WERKBANK_STICHTAG = '12. September 2026'
+
+/**
+ * Zweiter Stichtag, nur für das, was sich mit dem Umbau von „Promotion erstellen“
+ * geändert hat: die Szenarienzahl und die Modulzahl dieses Ablaufs. Alle übrigen Zahlen
+ * (Läufe, Operationen, Commits) stehen weiter auf `WERKBANK_STICHTAG`. Die Seite nennt
+ * beide Daten, damit keine Zahl einen Stand behauptet, den sie nicht hat.
+ */
+export const WERKBANK_UMBAU_STICHTAG = '13. November 2026'
 
 // ── Das Buch ───────────────────────────────────────────────────────────────────
 /**
@@ -86,7 +95,8 @@ export const WERKBANK_BUILDS: WerkbankBuild[] = [
  * stehen bleibt — die Startseite behauptete dann einen Stand, den es nicht mehr gibt.
  */
 const COMMITS_NEUBAU = '2.562'
-const SZENARIEN_AKTIV = '19'
+/** Aktive Szenarien laut Make am 13.11.2026, die fünf Unterszenarien eingeschlossen. */
+const SZENARIEN_AKTIV = '25'
 const OPERATIONEN_GELAUFEN = '29.110'
 
 export const WERKBANK_NEUBAU_METRIKEN: WerkbankMetric[] = [
@@ -98,7 +108,79 @@ export const WERKBANK_NEUBAU_METRIKEN: WerkbankMetric[] = [
 
 // ── Die Maschinen ──────────────────────────────────────────────────────────────
 /**
- * Drei der neunzehn Szenarien (Eddys Auswahl, 12.09.2026). Eine vollständige Tabelle
+ * Stückliste zu „Promotion erstellen“ seit dem Umbau am 13.11.2026: ein Orchestrator,
+ * fünf Unterszenarien und an Position 03 ein Mensch. Die Positionsnummern sind die der
+ * Explosionszeichnung (`WERKBANK_SCREENSHOT`).
+ *
+ * Die Modulzahlen sind die EINZIGE Quelle für die Gesamtzahl: Tabelle und Kennzahl
+ * rechnen daraus (`WERKBANK_PROMOTION_MODULE`), statt eine 129 ein zweites Mal zu
+ * pflegen. Vor dem Umbau war es ein einziges Szenario mit 116 Modulen; die Summe ist
+ * gestiegen, weil Prüfungen dazukamen.
+ */
+export const WERKBANK_PROMOTION_TEILE: WerkbankPart[] = [
+  {
+    pos: '01',
+    name: 'Orchestrator',
+    text: 'Nimmt den Auftrag von trusted blogs an und entscheidet, was als Nächstes läuft.',
+    modules: 22,
+  },
+  {
+    pos: '02',
+    name: 'Vorschau erstellen',
+    text: 'Claude liest den Artikel, schreibt Titel und Posts und prüft, ob das Artikelbild taugt.',
+    modules: 31,
+  },
+  {
+    pos: '03',
+    name: 'Freigabe',
+    text: 'Ich lese die Vorschau, ändere bei Bedarf und gebe frei. Ohne diesen Schritt geht nichts raus.',
+  },
+  {
+    pos: '04',
+    name: 'Bilder erstellen',
+    text: 'Aus dem Artikelfoto oder einem KI-Bild entstehen Kacheln im Quadrat- und Hochformat.',
+    modules: 18,
+  },
+  {
+    pos: '05',
+    name: 'Kanäle veröffentlichen',
+    text: 'Je ein Post für Pinterest (zweimal), X, Facebook und LinkedIn.',
+    modules: 27,
+  },
+  {
+    pos: '06',
+    name: 'Abschluss',
+    text: 'Eine Übersicht aller Posts geht als Mail an den Blogger.',
+    modules: 18,
+  },
+  {
+    pos: '07',
+    name: 'Status melden',
+    text: 'Jeder Schritt meldet sich bei trusted blogs zurück. So sehe ich im Admin, wo eine Promotion gerade steht.',
+    modules: 13,
+  },
+]
+
+/**
+ * Summe der Module und Zahl der Szenarien, gerechnet aus der Stückliste.
+ *
+ * PRE:  `modules` ist, wo gesetzt, eine ganze Zahl > 0
+ * POST: `modules` = Summe aller gesetzten `modules`; `scenarios` = Anzahl Teile mit `modules`
+ * INV:  Ein Teil ohne `modules` (die Freigabe) zählt in keiner der beiden Summen
+ */
+export function sumParts(parts: readonly WerkbankPart[]): { modules: number, scenarios: number } {
+  return parts.reduce(
+    (sum, part) => part.modules === undefined
+      ? sum
+      : { modules: sum.modules + part.modules, scenarios: sum.scenarios + 1 },
+    { modules: 0, scenarios: 0 },
+  )
+}
+
+export const WERKBANK_PROMOTION_SUMME = sumParts(WERKBANK_PROMOTION_TEILE)
+
+/**
+ * Drei Abläufe aus Make (Eddys Auswahl, 12.09.2026). Eine vollständige Tabelle
  * wäre eine Inventarliste, keine Aussage.
  *
  * Bewusst NICHT „die drei größten“: Auf Platz drei nach Modulzahl stünde
@@ -108,17 +190,32 @@ export const WERKBANK_NEUBAU_METRIKEN: WerkbankMetric[] = [
  *
  * Die Reihenfolge ist die der Aufzählung, nicht sortiert. Dass sie trotzdem von lang
  * nach kurz läuft, ist Zufall der Auswahl: Der Balken hinter dem Namen rechnet gegen
- * die größte Modulzahl DIESER Liste, nicht gegen alle neunzehn.
+ * die größte Modulzahl DIESER Liste, nicht gegen alle Szenarien.
+ *
+ * „Promotion erstellen“ mischt seit dem Umbau zwei Stände (Eddys Entscheidung,
+ * 13.11.2026): Module nach dem Umbau, Läufe und Operationen vom 12.09.2026, weil der neue
+ * Aufbau noch keine aussagekräftigen Zahlen hat. Der Vermerk in `note` macht das sichtbar.
  */
 export const WERKBANK_SZENARIEN: WerkbankScenario[] = [
-  { name: 'Promotion erstellen', modules: 115, runs: 482, operations: 13321 },
+  {
+    name: 'Promotion erstellen',
+    modules: WERKBANK_PROMOTION_SUMME.modules,
+    scenarios: WERKBANK_PROMOTION_SUMME.scenarios,
+    runs: 482,
+    operations: 13321,
+    note: 'umgebaut 11/2026',
+  },
   { name: 'KI-Blogpost erstellen', modules: 87, runs: 49, operations: 1437 },
   { name: 'Content-Versand', modules: 26, runs: 160, operations: 3327 },
 ]
 
 export const WERKBANK_MAKE_METRIKEN: WerkbankMetric[] = [
   { value: SZENARIEN_AKTIV, label: 'Szenarien, alle aktiv' },
-  { value: '115', label: 'Module im größten davon', accent: true },
+  {
+    value: String(WERKBANK_PROMOTION_SUMME.modules),
+    label: 'Module in „Promotion erstellen“, verteilt auf sechs Szenarien',
+    accent: true,
+  },
   { value: '20', label: 'angebundene Dienste' },
   { value: OPERATIONEN_GELAUFEN, label: 'Operationen gelaufen' },
 ]
@@ -215,22 +312,27 @@ export const WERKBANK_WERKZEUGKASTEN_URL
   = 'https://claude.ai/code/artifact/d767a008-a24c-47ef-8125-83b20d5e55e3'
 
 /**
- * Screenshot des Szenarios „Promotion erstellen".
+ * Explosionszeichnung von „Promotion erstellen“ (seit 13.11.2026, ersetzt den
+ * Make-Screenshot des alten Szenarios mit 116 Modulen). Name der Konstante bleibt, weil
+ * die Vitrine und der Anker `#szenario` daran hängen.
  *
  * `null` bedeutet: Die Vitrine wird gar nicht gerendert, statt eine 404-Lücke im Layout
- * zu hinterlassen. Vor dem Einsetzen eines neuen Bildes IMMER prüfen, ob Verbindungs-
- * namen, Webhook-Adressen oder Kundendaten darauf lesbar sind — ein Screenshot im Repo
- * bleibt in der Git-Historie, auch wenn er später ersetzt wird.
+ * zu hinterlassen. Vor dem Einsetzen eines neuen Bildes IMMER prüfen, ob Szenario-IDs,
+ * Webhook-Adressen, Datenspeicher- oder Tabellennamen darauf lesbar sind — ein Bild im
+ * Repo bleibt in der Git-Historie, auch wenn es später ersetzt wird. Diese Zeichnung
+ * nennt nur Baugruppen und Netzwerke.
  *
- * Ohne `href`, also mit Lightbox: 115 Module sind bei Seitenbreite nicht zu erkennen.
+ * Ohne `href`, also mit Lightbox: Die Beschriftungen sind bei Seitenbreite zu klein.
  */
 export const WERKBANK_SCREENSHOT: WerkbankShot | null = {
-  src: '/images/werkbank/promotion-erstellen.png',
-  width: 1606,
-  height: 1242,
+  src: '/images/werkbank/promotion-erstellen-explosionszeichnung.webp',
+  width: 3200,
+  height: 1800,
   alt:
-    'Das Make-Szenario „Promotion erstellen" in der Bearbeitungsansicht: eine Kette aus '
-    + 'über hundert Modulen, die sich mehrfach in parallel laufende Stränge verzweigt.',
+    'Technische Explosionszeichnung im Blaupausen-Stil: In der Mitte der Orchestrator '
+    + '‚Promotion erstellen‘, um ihn herum die Baugruppen Vorschau erstellen, menschliche '
+    + 'Freigabe, Bilder erstellen, Kanäle veröffentlichen (Pinterest, X, Facebook, LinkedIn) '
+    + 'und Abschluss mit Kachel und Mail. Eine Rückleitung meldet jeden Schritt an trusted blogs.',
 }
 
 /**
@@ -243,8 +345,8 @@ export const WERKBANK_SCREENSHOT: WerkbankShot | null = {
  * Pixeldichte, Cookie-Banner vorher abgelehnt (nicht akzeptiert, sonst löst der
  * Screenshot Conversion-Tracking aus). Hergang und Befehl: `docs/werkbank.md`.
  *
- * Als JPEG und nicht als PNG wie der Make-Screenshot: Die Startseite ist zu großen
- * Teilen ein Mosaik aus Fotos, und die bläht PNG auf das Siebenfache auf.
+ * Als JPEG und nicht als PNG: Die Startseite ist zu großen Teilen ein Mosaik aus Fotos,
+ * und die bläht PNG auf das Siebenfache auf.
  *
  * ACHTUNG beim Austausch: Das Bild zeigt die Blog-Titelbilder, die zum Aufnahmezeitpunkt
  * auf der Startseite lagen. Öffentlich sichtbare Inhalte, aber trotzdem fremde — vor dem

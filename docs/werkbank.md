@@ -1,6 +1,6 @@
 # trusted blogs (intern: Werkbank): Konzept, Belege und Zahlen
 
-Stand 21.10.2026. Beschreibt `app/pages/trusted-blogs.vue` (Adresse `/trusted-blogs`) — die
+Stand 13.11.2026 (Umbau von „Promotion erstellen“, siehe Abschnitt 3). Beschreibt `app/pages/trusted-blogs.vue` (Adresse `/trusted-blogs`) — die
 Seite über Eddys Arbeit mit KI und Automatisierung am Beispiel des Neubaus von trusted blogs.
 Bis 21.10.2026 hieß sie „Werkbank“ und lag unter `/werkbank`; Begründung der Umbenennung
 unter „Name“.
@@ -138,8 +138,8 @@ vielleicht nicht mehr gibt.
 
 **Er verlinkt nach außen, statt eine Lightbox zu öffnen** (Eddys Entscheidung, 17.09.2026;
 neuer Tab). Auf einer Seite, die nur aus Belegen besteht, ist „sieh selbst nach" die stärkste
-Form des Links. Ein Make-Szenario mit 115 Modulen ist bei Seitenbreite unlesbar und braucht
-Zoom; eine Website wird durch Zoom nicht aussagekräftiger, ihre Vergrößerung ist das Original.
+Form des Links. Die Explosionszeichnung in Kapitel 03 ist bei Seitenbreite zu klein beschriftet
+und braucht Zoom; eine Website wird durch Zoom nicht aussagekräftiger, ihre Vergrößerung ist das Original.
 Diesen Unterschied trägt das optionale `href` in `WerkbankShot`: gesetzt → Link, fehlt →
 Lightbox.
 
@@ -153,7 +153,7 @@ Playwright-Cache. Wichtig sind drei Dinge:
 2. **Viewport 1600×1000 bei `deviceScaleFactor: 2`**, danach mit `sharp` auf 2000px Breite.
    Das ist der sichtbare Bereich, so wie man die Seite beim Aufrufen sieht, kein
    Ganzseiten-Screenshot.
-3. **Als JPEG, nicht als PNG** wie der Make-Screenshot. Die Startseite ist zu großen Teilen ein
+3. **Als JPEG, nicht als PNG** wie der frühere Make-Screenshot. Die Startseite ist zu großen Teilen ein
    Fotomosaik; dieselbe Aufnahme wiegt als PNG 2,9 MB und als JPEG (q88, 4:4:4) 415 KB.
 
 Das Skript dazu, außerhalb des Repos in einem Wegwerf-Ordner (`npm i playwright-core`):
@@ -226,9 +226,70 @@ entsprechend mit.
 Angebundene Dienste (20): Google Sheets, HTTP, JSON, ai-tools, Placid, Cloudinary, OpenAI,
 Anthropic Claude, Brevo/Sendinblue, Notion, Apify, Scraptio, WordPress, Data Store u. a.
 
-**Die tragende Zahl ist nicht die Laufzahl, sondern 115 Module in einem Szenario.** Die Läufe
+**Die tragende Zahl ist nicht die Laufzahl, sondern die Modulzahl eines Ablaufs.** Die Läufe
 sind dreistellig, weil eine Promotion kein Massenprozess ist; die Komplexität eines einzelnen
-Ablaufs ist das Bemerkenswerte, und der Screenshot zeigt sie auf einen Blick.
+Ablaufs ist das Bemerkenswerte.
+
+#### Umbau von „Promotion erstellen“ (13.11.2026)
+
+Bis 12.11.2026 war „Promotion erstellen“ ein einziges Szenario mit 116 Modulen (am 12.09.2026
+noch 115), ausgelöst durch eine neue Tabellenzeile. Seit 13.11.2026:
+
+- **Auslöser** ist ein Klick auf „Promoten“ im Admin von trusted blogs.
+- **Aufbau:** Ein Orchestrator steuert fünf Unterszenarien, zusammen **129 Module**:
+  Orchestrator 22, Vorschau erstellen 31, Bilder erstellen 18, Kanäle veröffentlichen 27,
+  Abschluss 18, Status melden 13. Mehr als vorher, weil Prüfungen dazukamen. Gewonnen ist
+  Übersicht, keine Einsparung.
+- **Menschliche Freigabe** zwischen Vorschau und Veröffentlichung.
+- **Ergebnis:** fünf Posts (Pinterest zweimal, X, Facebook, LinkedIn) und eine Mail mit
+  Übersichtskachel an den Blogger.
+- **Make zeigt 25 aktive Szenarien** (26 insgesamt, das alte „Promotion erstellen“ ist
+  deaktiviert). Eddys Entscheidung: Die Seite nennt 25, gezählt wie Make, also mit den fünf
+  Unterszenarien.
+
+**Was sich auf der Seite geändert hat (Eddys Entscheidungen, 13.11.2026):**
+
+| Stelle | Vorher | Jetzt |
+| --- | --- | --- |
+| Szenarienzahl (Intro, Titel, Beschreibung, Startseiten-Band) | 19 | 25 |
+| Kennzahl 2 in Kapitel 03 | 115 · Module im größten davon | 129 · Module in „Promotion erstellen“, verteilt auf sechs Szenarien |
+| Tabellenzeile „Promotion erstellen“ | 115 Module | 129 in 6 Szenarien, Läufe/Operationen vom 12.09. bleiben, Vermerk „umgebaut 11/2026“ |
+| Bild | Make-Screenshot (PNG, 1606×1242) | Explosionszeichnung (WebP, 3200×1800) |
+| Erklärgrafik | `WerkbankChain.vue` (SVG-Kette, Auslöser „neue Zeile“) | entfällt, dafür Stückliste |
+
+Weil nur ein Teil der Make-Zahlen neu ist, nennt die Seite **zwei Stichtage**
+(`WERKBANK_STICHTAG`, `WERKBANK_UMBAU_STICHTAG`): im Intro-Vermerk und in der
+Tabellenbeschriftung. Läufe und Operationen des neuen Aufbaus sind noch nicht aussagekräftig;
+keine Zahl dafür erfinden, sondern beim nächsten Abruf aus Make übernehmen und dann den
+Vermerk prüfen.
+
+**Die Explosionszeichnung** (`public/images/werkbank/promotion-erstellen-explosionszeichnung.webp`)
+ist eine helle Lichtpause auf Papier. Sie nennt nur Baugruppen und Netzwerke: keine
+Szenario-IDs, Webhook-Adressen, Datenspeicher- oder Tabellennamen. Diese Regel gilt für jede
+künftige Fassung. Auf Eddys Wunsch liegt sie gedämpft wie die Startseiten-Vitrine (siehe
+Design-Richtung); der Auftrag hatte „kein Filter“ vorgeschlagen, die Regel „ein heller Block“
+hat Vorrang behalten. Eine dunkle Variante liegt bei Eddy auf dem Desktop, falls die Frage
+wieder aufkommt.
+
+- Vitrine mit `sizes="sm:100vw md:100vw lg:100vw xl:1280px"`. Ein bloßes `100vw` als erster
+  Eintrag erzeugt in @nuxt/image 2.1 die Kandidaten `1w`/`2w` (1×1 Pixel); die Breakpoints
+  müssen ausgeschrieben sein.
+- Lightbox mit `provider="none"` (Originaldatei): Vercel rechnet höchstens auf 1536px, darauf
+  werden die kleinsten Beschriftungen unscharf. Unter 768px Viewport bekommt das Bild in der
+  Lightbox eine feste Breite von 90rem, der Dialog scrollt. Nur so ist die Beschriftung auf dem
+  Handy lesbar.
+
+**Warum die Kette entfallen ist.** `WerkbankChain.vue` zeichnete den alten Ablauf nach, weil der
+Screenshot mit 115 Modulen unlesbar war: Der Screenshot bewies, *dass* es das gibt, die Kette
+erklärte, *wie*. Die Explosionszeichnung tut beides und ist lesbar. Die Kette zu aktualisieren
+hätte zwei Diagramme desselben Ablaufs hintereinander ergeben.
+
+**Die Stückliste.** Unter der Zeichnung stehen die Baugruppen als Stückliste
+(`WERKBANK_PROMOTION_TEILE`), mit denselben Positionsnummern 01–07 wie die Kreise in der
+Zeichnung. Die Freigabe (03) trägt statt einer Modulzahl „von Hand“ und ist in Stahl statt
+Teal gesetzt: Teal ist auf dieser Seite die Maschine. Die Summe 129 und die Zahl 6 werden aus
+der Liste gerechnet (`sumParts`) und speisen Tabelle und Kennzahl; die Tests in
+`werkbank.spec.ts` halten sie auf 129 und 6 fest.
 
 ### 4. Diese Website
 
@@ -254,7 +315,7 @@ Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualitä
 | Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces, Seitenzahl; dahinter rechts das Räderwerk als Konstruktionszeichnung |
 | 01 Der Neubau | Wolffs Beschreibung, Startseiten-Screenshot, Kennzahlen | Vitrine mit Link nach außen + Balkenvergleich Altsystem / neues System |
 | 02 Das Handwerk | Die Geigen-These, Hardys Rolle, Wolffs zweiter Einwand | Statement-Satzbild mit Teal-Pointe |
-| 03 Die Maschinen | 19 Szenarien, 115 Module, 20 Dienste | Screenshot in der Vitrine + SVG-Kette |
+| 03 Die Maschinen | 25 Szenarien, „Promotion erstellen“ als Beispiel (129 Module in 6 Szenarien), 20 Dienste | Explosionszeichnung in der Vitrine + Stückliste |
 | 04 Wo es klemmte | Lessons aus `tb26-code/docs/ai-lessons.md` | Werkzeugregal, typografisch |
 | 05 Diese Seite | Colophon zu eduard-andrae.de | Kennzahlenleiste |
 | Leise Tür | Werkzeugkasten-Link + Kontakt | — |
@@ -267,7 +328,7 @@ werden, ohne fremde Links zu brechen:
 | Anker | Ziel | Verlinkt von |
 | --- | --- | --- |
 | `/trusted-blogs#handwerk` | Kapitel 02, „Eine Geige macht noch keine Musik" | extern, von Eddy geteilt (als `/werkbank#handwerk`) |
-| `/trusted-blogs#szenario` | Die Vitrine mit dem Make-Screenshot | Make-Zertifikat im Datenblatt auf `/ueber-mich` |
+| `/trusted-blogs#szenario` | Die Vitrine mit der Explosionszeichnung (bis 12.11.2026: Make-Screenshot) | Make-Zertifikat im Datenblatt auf `/ueber-mich` |
 
 Die vor dem 21.10.2026 geteilten Links zeigen auf `/werkbank#…`. Sie funktionieren weiter, weil
 die 301-Weiterleitung den Pfad tauscht und der Browser den Anker an die neue Adresse anhängt
@@ -320,7 +381,8 @@ Fortsetzung von „Präzisionswerk", aber im Modus Innenansicht:
   Auf `/1apreis` ist Messing das Leitmotiv; hier bliebe es sonst ununterscheidbar.
 - **Ein heller Block in einer dunklen Seite.** Das Faksimile ist die einzige helle Fläche der
   ganzen Site. Maximaler Kontrast an genau einer Stelle — der Moment, den man mitnimmt.
-  Die beiden Screenshots sind ebenfalls helle, farbige Flächen und liegen deshalb im
+  Die beiden Vitrinenbilder (Startseiten-Screenshot, seit 13.11.2026 die Explosionszeichnung
+  statt des Make-Screenshots) sind ebenfalls helle Flächen und liegen deshalb im
   Ruhezustand gedämpft (`saturate(0.7) brightness(0.82)`); volle Helligkeit gibt es erst beim
   Überfahren oder bei Tastaturfokus. Bewusst **dieselben Werte für beide**: Zwei
   unterschiedlich stark gedämpfte Vitrinen läsen sich als Rangfolge zwischen den
@@ -393,9 +455,11 @@ daneben, nicht das Schloss davor.
    Programmierfehler, kein Laufzeitzustand.
 4. **Reaktive Kette?** Keine Reaktivität außer dem Lightbox-`ref` für den Screenshot. Kein
    `shallowRef`-Fallstrick.
-5. **Test, der einen Bug fände?** Die einzige Logik ist `scenarioBarWidth()` in
-   `app/utils/werkbank.ts` (Balkenbreite aus Modulzahl). Getestet in `werkbank.spec.ts`:
-   Happy Path mit konkretem Wert, `0`, negative Zahl, Wert über Maximum.
+5. **Test, der einen Bug fände?** Logik in `app/utils/werkbank.ts`: `barWidth()`
+   (Balkenbreite aus Modulzahl) und `sumParts()` (Modulsumme der Stückliste). Getestet in
+   `werkbank.spec.ts`: Happy Path mit konkretem Wert, `0`, negative Zahl, Wert über Maximum;
+   bei `sumParts` der Teil ohne Module (Freigabe) und die leere Liste. Dazu Festschreibungen
+   auf 129 Module, 6 Szenarien und 25 aktive Szenarien.
 6. **Pre/Postconditions** für `scenarioBarWidth(modules, max)`:
    ```
    PRE:  modules >= 0, max > 0

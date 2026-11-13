@@ -1307,3 +1307,36 @@ läuft seitdem gedrosselt (zwei parallele Anfragen) und bricht nach drei 5xx-Ant
 
 **→ AUDIT-PERSPEKTIVE:** „Was cacht die Seite, wenn ihre Datenquelle kurz weg ist?" in
 `docs/audit-perspectives.md`.
+
+---
+
+## Kindelemente in `<NuxtImg>` werden still verworfen
+
+**Gefunden:** 13.11.2026, in der Lightbox von `app/pages/trusted-blogs.vue`, beim Austausch
+des Make-Screenshots gegen die Explosionszeichnung. Der Fehler bestand seit dem 12.09.2026.
+
+**FALSCH:**
+```vue
+<NuxtImg :src="shot.src" class="shot__img">
+  <p class="shot__hint">
+    Klicken oder Escape zum Schließen
+  </p>
+</nuxtimg>
+```
+
+**RICHTIG:**
+```vue
+<NuxtImg :src="shot.src" class="shot__img" />
+<p class="shot__hint">
+  Klicken oder Escape zum Schließen
+</p>
+```
+
+**WARUM:** `<NuxtImg>` rendert ein `<img>`, und das ist ein leeres Element ohne Slot. Was
+zwischen Start- und End-Tag steht, landet nirgends: kein Build-Fehler, keine Warnung, kein
+Lint-Fund. Das kleingeschriebene `</nuxtimg>` fiel auch nicht auf, weil der Vue-Compiler es
+anstandslos als Ende der Komponente nimmt. Der Hinweis „Klicken oder Escape zum Schließen“
+stand zwei Monate im Code und nie auf der Seite.
+
+**→ AUDIT-PERSPEKTIVE:** „Steht, was im Template steht, auch auf der Seite?" in
+`docs/audit-perspectives.md`.

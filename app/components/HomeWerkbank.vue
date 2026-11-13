@@ -45,7 +45,7 @@
 
           <p class="bench__text">
             Zwischen Februar und Mai 2026 habe ich die Plattform von Grund auf neu
-            gebaut, mit Claude Code als Werkzeug. Dazu neunzehn Make-Szenarien, die
+            gebaut, mit Claude Code als Werkzeug. Dazu fünfundzwanzig Make-Szenarien, die
             heute laufen, ohne dass jemand sie anstößt. Auf der eigenen Seite stehen die
             Zahlen dazu, und die Stellen, an denen es geklemmt hat.
           </p>

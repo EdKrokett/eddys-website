@@ -5,18 +5,41 @@
  */
 
 /**
- * Ein Make-Szenario mit seinen Kennzahlen.
+ * Ein Make-Szenario (oder ein Ablauf aus mehreren) mit seinen Kennzahlen.
  *
  * `modules` ist die tragende Zahl, nicht `runs`: Eine Promotion ist kein Massenprozess,
  * die Laufzahlen sind dreistellig. Bemerkenswert ist die Komplexität eines einzelnen
- * Ablaufs — 115 Module in einer Kette, verdrahtet ohne eine Zeile Code.
+ * Ablaufs, verdrahtet ohne eine Zeile Code.
  */
 export interface WerkbankScenario {
   name: string
-  /** Anzahl der Module im Szenario — steuert auch die Balkenlänge in der Tabelle. */
+  /** Anzahl der Module, über alle Teile — steuert auch die Balkenlänge in der Tabelle. */
   modules: number
+  /** Auf wie viele Szenarien sich die Module verteilen. Fehlt es, ist es eines. */
+  scenarios?: number
   runs: number
   operations: number
+  /**
+   * Vermerk unter dem Namen, z. B. „umgebaut 11/2026“. Nötig, sobald die Zahlen einer
+   * Zeile nicht mehr alle denselben Stand haben.
+   */
+  note?: string
+}
+
+/**
+ * Eine Position der Stückliste zu „Promotion erstellen“.
+ *
+ * `pos` ist die Positionsnummer in der Explosionszeichnung (Kreis an der Baugruppe).
+ * Liste und Zeichnung müssen dieselben Nummern tragen, sonst lässt sich das eine nicht
+ * im anderen wiederfinden.
+ *
+ * `modules` fehlt genau bei der Freigabe: Dort arbeitet ein Mensch, kein Szenario.
+ */
+export interface WerkbankPart {
+  pos: string
+  name: string
+  text: string
+  modules?: number
 }
 
 /**
@@ -68,8 +91,8 @@ export interface WerkbankBuild {
  *
  * `href` unterscheidet die beiden Vitrinen der Seite. Ist es gesetzt, führt das Bild
  * nach außen zum Original; fehlt es, öffnet ein Klick die Lightbox. Das ist keine
- * Kosmetik, sondern folgt dem Inhalt: Ein Make-Szenario mit 115 Modulen ist bei
- * Seitenbreite unlesbar und braucht Zoom. Eine Website wird durch Zoom nicht
+ * Kosmetik, sondern folgt dem Inhalt: Die Beschriftungen der Explosionszeichnung sind
+ * bei Seitenbreite zu klein und brauchen Zoom. Eine Website wird durch Zoom nicht
  * aussagekräftiger — ihre Vergrößerung ist das Original.
  */
 export interface WerkbankShot {

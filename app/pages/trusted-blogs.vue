@@ -15,10 +15,12 @@
  * - Die Kette ist das Leitmotiv: Knoten auf einer Linie statt Karten im Raster.
  * - Teal führt (die Maschine). Messing bleibt dem Ausgestellten vorbehalten: dem Papier
  *   des Buches und den Winkeln der beiden Vitrinen. Nirgends sonst.
- * - Das Faksimile ist die einzige helle Fläche der ganzen Site. Die beiden Screenshots
- *   liegen deshalb gedämpft und gehen erst beim Überfahren auf volle Helligkeit; sonst
- *   stünden drei helle Flächen nebeneinander und keine wäre mehr der Moment, der hängen
- *   bleibt.
+ * - Das Faksimile ist die einzige helle Fläche der ganzen Site. Die beiden Vitrinenbilder
+ *   (Startseiten-Screenshot, Explosionszeichnung) liegen deshalb gedämpft und gehen erst
+ *   beim Überfahren auf volle Helligkeit; sonst stünden drei helle Flächen nebeneinander
+ *   und keine wäre mehr der Moment, der hängen bleibt.
+ * - Zur Explosionszeichnung gehört eine Stückliste. Ihre Positionsnummern stehen in
+ *   Kreisen wie in der Zeichnung, damit man jede Zeile dort wiederfindet.
  */
 const maxCommits = Math.max(...WERKBANK_BUILDS.map(build => build.commits))
 const maxModules = Math.max(...WERKBANK_SZENARIEN.map(scenario => scenario.modules))
@@ -38,7 +40,7 @@ useAnchorScroll()
 
 const title = 'trusted blogs — Eduard Andrae'
 const description
-  = 'Wie ich trusted blogs mit KI neu gebaut habe: Zahlen aus dem Repository, 19 Make-Szenarien, '
+  = 'Wie ich trusted blogs mit KI neu gebaut habe: Zahlen aus dem Repository, 25 Make-Szenarien, '
     + 'die Stellen, an denen es geklemmt hat, und warum KI eher eine Geige ist als ein Hammer.'
 
 const { url: siteUrl } = useSiteConfig()
@@ -90,12 +92,17 @@ useSeoMeta({
             Werkzeug. Seitdem kommen laufend neue Funktionen hinzu.
           </p>
           <p>
-            Dazu neunzehn Make-Szenarien: Alles, was regelmäßig wiederkehrt, läuft heute
+            Dazu fünfundzwanzig Make-Szenarien: Alles, was regelmäßig wiederkehrt, läuft heute
             automatisch ab, ohne dass jemand es anstößt. Für dieselben Aufgaben habe ich
             vorher jede Woche viele Stunden von Hand gebraucht.
           </p>
+          <!--
+            Zwei Stichtage, weil der Umbau von „Promotion erstellen“ nur einen Teil der
+            Make-Zahlen erneuert hat. Begründung an `WERKBANK_UMBAU_STICHTAG`.
+          -->
           <p class="intro__note">
             Zahlen aus dem Repository und aus Make.com, Stand {{ WERKBANK_STICHTAG }}.
+            Szenarienzahl und Umbau von „Promotion erstellen“: Stand {{ WERKBANK_UMBAU_STICHTAG }}.
           </p>
         </div>
 
@@ -350,8 +357,8 @@ useSeoMeta({
       <UContainer>
         <SectionHead
           kicker="03 · Die Maschinen"
-          title="Neunzehn Szenarien, die ihre Arbeit alleine machen"
-          lead="Make verbindet Dienste zu Ketten. Ein Szenario von neunzehn, stellvertretend gezeigt: Eine Zeile in einer Tabelle löst aus, am Ende steht ein fertiger Beitrag auf vier Netzwerken. Die anderen Szenarien erzeugen Bilder, verschicken Newsletter, holen Kennzahlen oder räumen hinterher auf."
+          title="Fünfundzwanzig Szenarien, die ihre Arbeit alleine machen"
+          lead="Make verbindet Dienste zu Ketten. Meine Szenarien erzeugen Bilder, verschicken Newsletter, holen Kennzahlen oder räumen hinterher auf. Eines davon zeige ich hier in seine Teile zerlegt."
         />
 
         <div class="section__body">
@@ -366,17 +373,38 @@ useSeoMeta({
             </div>
           </dl>
 
-          <WerkbankChain class="chain-block" />
+          <!--
+            Das Beispiel „Promotion erstellen“ (Umbau vom 13.11.2026). Bis dahin stand hier
+            eine nachgezeichnete Kette (`WerkbankChain`) mit dem alten Auslöser „neue
+            Zeile“. Die Explosionszeichnung erklärt denselben Ablauf lesbar und richtig;
+            zwei Diagramme desselben Ablaufs hintereinander wären eines zu viel.
+          -->
+          <p class="prose">
+            Ein Beispiel ist „Promotion erstellen“. Ein Klick auf „Promoten“ im Admin von
+            trusted blogs schickt die Adresse eines Blogartikels an Make. Am Ende stehen
+            fünf fertige Posts auf Pinterest, X, Facebook und LinkedIn, und der Blogger
+            bekommt eine Übersicht per Mail.
+          </p>
+
+          <p class="prose">
+            Lange war das ein einziges Szenario mit 116 Modulen. Es lief, war aber so groß
+            geworden, dass selbst Claude es nicht mehr am Stück lesen konnte. Im November
+            2026 habe ich es mit Claude zerlegt. Heute steuert ein Orchestrator fünf
+            Unterszenarien, jedes mit einer klaren Aufgabe. Zwischen Vorschau und
+            Veröffentlichung gebe ich jede Promotion von Hand frei.
+          </p>
 
           <!--
-            Die Vitrine erscheint nur, wenn der Screenshot wirklich im Repo liegt
+            Die Vitrine erscheint nur, wenn das Bild wirklich im Repo liegt
             (`WERKBANK_SCREENSHOT`). Sonst bliebe hier eine 404-Lücke im Layout stehen.
-          -->
-          <!--
+
             Sprungziel des Links am Make-Zertifikat auf /ueber-mich. Bewusst hier und
             nicht an der Sektion: Von dort aus soll man das Szenario sehen, nicht die
             Kapitelüberschrift. Die `id` hängt am selben `v-if` wie die Vitrine — ohne
-            Screenshot gibt es kein Ziel und der Link landet oben auf der Seite.
+            Bild gibt es kein Ziel und der Link landet oben auf der Seite.
+
+            `sizes`: Die Zeichnung ist 3200px breit, angezeigt wird sie höchstens in
+            Spaltenbreite. Ohne `sizes` lüde das Handy die volle Datei.
           -->
           <figure v-if="WERKBANK_SCREENSHOT" id="szenario" class="vitrine">
             <button
@@ -390,6 +418,7 @@ useSeoMeta({
                   :alt="WERKBANK_SCREENSHOT.alt"
                   :width="WERKBANK_SCREENSHOT.width"
                   :height="WERKBANK_SCREENSHOT.height"
+                  sizes="sm:100vw md:100vw lg:100vw xl:1280px"
                   format="webp"
                   quality="82"
                   loading="lazy"
@@ -405,15 +434,67 @@ useSeoMeta({
             </button>
 
             <figcaption class="vitrine__caption">
-              Dasselbe Szenario in echt: 115 Module, verdrahtet ohne eine Zeile Code.
+              „Promotion erstellen“ als Explosionszeichnung: Ein Orchestrator steuert fünf
+              Unterszenarien. An einer Stelle entscheidet ein Mensch.
             </figcaption>
           </figure>
 
-          <!-- Szenarientabelle: die fünf größten, nicht alle 19. -->
+          <!--
+            Stückliste zur Zeichnung. Die Positionsnummern sind die Kreise an den
+            Baugruppen der Zeichnung; die Modulsumme wird aus den Zeilen gerechnet
+            (`WERKBANK_PROMOTION_SUMME`), damit Liste, Tabelle und Kennzahl dieselbe Zahl
+            zeigen. Die Freigabe trägt statt einer Modulzahl „von Hand“.
+          -->
+          <div class="parts">
+            <p class="parts__head" aria-hidden="true">
+              <span>Pos.</span>
+              <span>Baugruppe</span>
+              <span class="parts__head-num">Module</span>
+            </p>
+
+            <ol class="parts__list">
+              <li
+                v-for="part in WERKBANK_PROMOTION_TEILE"
+                :key="part.pos"
+                class="part"
+                :class="{ 'part--manual': part.modules === undefined }"
+              >
+                <span class="part__pos">{{ part.pos }}</span>
+                <div class="part__main">
+                  <h3 class="part__name">
+                    {{ part.name }}
+                  </h3>
+                  <p class="part__text">
+                    {{ part.text }}
+                  </p>
+                </div>
+                <span v-if="part.modules !== undefined" class="part__modules">
+                  {{ part.modules }}<span class="sr-only"> Module</span>
+                </span>
+                <span v-else class="part__modules part__modules--manual">von Hand</span>
+              </li>
+            </ol>
+
+            <p class="parts__sum">
+              <span>Summe, {{ WERKBANK_PROMOTION_SUMME.scenarios }} Szenarien</span>
+              <span class="parts__sum-num">
+                {{ WERKBANK_PROMOTION_SUMME.modules }}<span class="sr-only"> Module</span>
+              </span>
+            </p>
+          </div>
+
+          <p class="prose">
+            Die Arbeit ist dieselbe geblieben. Sie ist jetzt auf Teile verteilt, die man
+            einzeln verstehen, testen und ändern kann. Zusammen sind es 129 Module,
+            dreizehn mehr als vorher, weil Prüfungen dazugekommen sind.
+          </p>
+
+          <!-- Szenarientabelle: drei ausgewählte Abläufe, nicht alle Szenarien. -->
           <div class="table-scroll">
             <table class="scenarios">
               <caption class="scenarios__caption">
-                Drei der neunzehn Szenarien, Stand {{ WERKBANK_STICHTAG }}
+                Drei Abläufe aus Make, Stand {{ WERKBANK_STICHTAG }}. Module von
+                „Promotion erstellen“ nach dem Umbau, Stand {{ WERKBANK_UMBAU_STICHTAG }}.
               </caption>
               <thead>
                 <tr>
@@ -435,6 +516,7 @@ useSeoMeta({
                 <tr v-for="scenario in WERKBANK_SZENARIEN" :key="scenario.name">
                   <th scope="row" class="scenarios__name">
                     {{ scenario.name }}
+                    <span v-if="scenario.note" class="scenarios__note">{{ scenario.note }}</span>
                     <span
                       class="scenarios__bar"
                       :style="{ width: `${barWidth(scenario.modules, maxModules)}%` }"
@@ -443,6 +525,9 @@ useSeoMeta({
                   </th>
                   <td class="scenarios__num scenarios__num--strong">
                     {{ scenario.modules }}
+                    <span v-if="scenario.scenarios" class="scenarios__split">
+                      in {{ scenario.scenarios }} Szenarien
+                    </span>
                   </td>
                   <td class="scenarios__num">
                     {{ scenario.runs.toLocaleString('de-DE') }}
@@ -568,21 +653,36 @@ useSeoMeta({
       Lightbox: liegt außerhalb der Sektionen, damit sie nicht von deren
       `transform`/`filter` eingefangen wird. Ein `<dialog>` in einem transformierten
       Vorfahren verliert seine Positionierung am Viewport.
+
+      `provider="none"` liefert die Originaldatei ohne Umrechnung. Vercel rechnet höchstens
+      auf 1536px (größter Eintrag in `image.screens`), und darauf werden die kleinsten
+      Beschriftungen der Zeichnung unscharf. Die Datei ist schon WebP, eine Umrechnung
+      brächte nichts. `loading="lazy"`: Im geschlossenen Dialog lädt das Bild erst beim
+      Öffnen, statt bei jedem Seitenaufruf 320 KB mitzuziehen.
+
+      Der Hinweis steht NEBEN dem Bild. Bis 13.11.2026 stand er als Kind in `<NuxtImg>`
+      und wurde nie angezeigt, weil die Komponente ein leeres `<img>` rendert
+      (`docs/error-catalog.md`).
     -->
-    <dialog v-if="WERKBANK_SCREENSHOT" ref="shotDialog" class="shot" @click="shotDialog?.close()">
+    <dialog
+      v-if="WERKBANK_SCREENSHOT"
+      ref="shotDialog"
+      class="shot"
+      aria-label="Explosionszeichnung „Promotion erstellen“, vergrößert"
+      @click="shotDialog?.close()"
+    >
       <NuxtImg
+        provider="none"
         :src="WERKBANK_SCREENSHOT.src"
         :alt="WERKBANK_SCREENSHOT.alt"
         :width="WERKBANK_SCREENSHOT.width"
         :height="WERKBANK_SCREENSHOT.height"
-        format="webp"
-        quality="88"
+        loading="lazy"
         class="shot__img"
-      >
-        <p class="shot__hint">
-          Klicken oder Escape zum Schließen
-        </p>
-      </nuxtimg>
+      />
+      <p class="shot__hint">
+        Klicken oder Escape zum Schließen
+      </p>
     </dialog>
   </div>
 </template>
@@ -1021,10 +1121,148 @@ useSeoMeta({
   color: var(--color-steel-500);
 }
 
-/* ── Kette ──────────────────────────────────────────────────────────────────── */
-.chain-block {
-  padding: clamp(1.25rem, 3vw, 2rem) 0;
-  border-block: 1px solid var(--color-graphite-800);
+/* ── Stückliste ─────────────────────────────────────────────────────────────── */
+/*
+  Die Liste zur Explosionszeichnung, gesetzt wie die Stückliste auf einem Zeichnungsblatt:
+  Positionsnummer im Kreis (dieselben Kreise wie in der Zeichnung), Baugruppe, Modulzahl
+  rechtsbündig, unten der Summenstrich als Doppellinie.
+
+  Kopf, Zeilen und Summe sind getrennte Grids mit denselben Spalten. Deshalb feste
+  Breiten für Nummer und Module statt `auto`: Sonst stünde jede Zahl an einer anderen
+  Kante, je nachdem wie breit „von Hand“ in ihrer Zeile ist.
+*/
+.parts {
+  --parts-cols: 2.25rem minmax(0, 1fr) 5rem;
+
+  max-width: 52rem;
+}
+@media (min-width: 640px) {
+  .parts {
+    --parts-cols: 3rem minmax(0, 1fr) 6rem;
+  }
+}
+
+.parts__head,
+.part {
+  display: grid;
+  grid-template-columns: var(--parts-cols);
+  gap: 0 clamp(0.85rem, 2vw, 1.5rem);
+}
+
+.parts__head {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-graphite-600);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-steel-600);
+}
+
+.parts__head-num {
+  text-align: right;
+}
+
+.part {
+  align-items: start;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid var(--color-graphite-800);
+}
+
+.part:last-child {
+  border-bottom: 0;
+}
+
+/* Der Kreis an der Baugruppe, wie in der Zeichnung. */
+.part__pos {
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--color-accent-600);
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-300);
+}
+
+.part__main {
+  /* Erste Textzeile auf die Mitte des Kreises bringen. */
+  padding-top: 0.3rem;
+}
+
+.part__name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  line-height: 1.3;
+  color: var(--color-steel-100);
+}
+
+.part__text {
+  margin-top: 0.4rem;
+  max-width: 34rem;
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  color: var(--color-steel-400);
+}
+
+.part__modules {
+  padding-top: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--color-accent-300);
+}
+
+/*
+  Die Freigabe: die eine Stelle, an der ein Mensch arbeitet. Teal ist auf dieser Seite die
+  Maschine, deshalb tritt hier Stahl an seine Stelle: gestrichelter Kreis wie der Stempel
+  in der Zeichnung, und statt einer Modulzahl der Vermerk „von Hand“ im Rahmen.
+*/
+.part--manual {
+  background: linear-gradient(90deg, rgba(232, 236, 240, 0.035) 0%, transparent 75%);
+}
+
+.part--manual .part__pos {
+  border-style: dashed;
+  border-color: var(--color-steel-400);
+  color: var(--color-steel-100);
+}
+
+.part__modules--manual {
+  justify-self: end;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--color-steel-500);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  color: var(--color-steel-200);
+}
+
+/* Summenstrich: Doppellinie, wie unter einer Rechnung auf dem Zeichnungsblatt. */
+.parts__sum {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.9rem;
+  border-top: 3px double var(--color-steel-500);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-steel-400);
+}
+
+.parts__sum-num {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-400);
 }
 
 /* ── Vitrine ────────────────────────────────────────────────────────────────── */
@@ -1194,6 +1432,18 @@ useSeoMeta({
   height: auto;
 }
 
+/*
+  Auf schmalen Bildschirmen wäre die Zeichnung auch vergrößert nur so breit wie das Handy
+  und die Beschriftungen blieben unlesbar. Dort bekommt sie eine feste Breite, bei der die
+  kleinste Schrift rund 10px misst, und der Dialog scrollt (`overflow: auto` oben).
+*/
+@media (max-width: 767px) {
+  .shot__img {
+    width: 90rem;
+    max-width: none;
+  }
+}
+
 .shot__hint {
   padding: 0.85rem 1rem;
   font-family: var(--font-mono);
@@ -1270,6 +1520,19 @@ useSeoMeta({
 
 .scenarios__num--strong {
   color: var(--color-accent-300);
+}
+
+/* Vermerk unter dem Namen („umgebaut 11/2026“) und Aufteilung unter der Modulzahl. */
+.scenarios__note,
+.scenarios__split {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  color: var(--color-steel-500);
 }
 
 /* ── Werkzeugregal ──────────────────────────────────────────────────────────── */
