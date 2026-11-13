@@ -223,6 +223,10 @@ es beantwortet.
 Angebundene Dienste (20): Google Sheets, HTTP, JSON, ai-tools, Placid, Cloudinary, OpenAI,
 Anthropic Claude, Brevo/Sendinblue, Notion, Apify, Scraptio, WordPress, Data Store u. a.
 
+Im **Werkzeugregal** steht seit 13.11.2026 nur noch Cloudinary („Speichert die Bilder
+inklusive Wasserzeichen und Texten.“, Eddys Wortlaut). Placid nutzt Eddy nicht mehr. Die
+Zahl der angebundenen Dienste (20) ist davon unberührt, bis Eddy eine neue nennt.
+
 **Die tragende Zahl ist nicht die Laufzahl, sondern die Modulzahl eines Ablaufs.** Die Läufe
 sind dreistellig, weil eine Promotion kein Massenprozess ist; die Komplexität eines einzelnen
 Ablaufs ist das Bemerkenswerte.
@@ -255,7 +259,9 @@ noch 115), ausgelöst durch eine neue Tabellenzeile. Seit 13.11.2026:
 | Erklärgrafik | `WerkbankChain.vue` (SVG-Kette, Auslöser „neue Zeile“) | entfällt, dafür Stückliste |
 
 Weil nur ein Teil der Make-Zahlen neu ist, nennt die Seite **zwei Stichtage**
-(`WERKBANK_STICHTAG`, `WERKBANK_UMBAU_STICHTAG`) im Intro-Vermerk. Läufe und Operationen des
+(12.09. und 13.11.2026). Seit 13.11.2026 stehen sie nur noch als Kommentar in
+`app/utils/werkbank.ts`, der Intro-Vermerk ist entfallen (siehe „Warum die Zahlen Konstanten
+sind“). Läufe und Operationen des
 neuen Aufbaus sind noch nicht aussagekräftig; keine Zahl dafür erfinden.
 
 **Die Explosionszeichnung** (`public/images/werkbank/promotion-erstellen-explosionszeichnung.webp`)
@@ -300,15 +306,21 @@ existiert; die Make-Zahlen kommen aus einer API, die einen Token bräuchte. Beid
 ziehen hieße, ein Geheimnis ins Deployment zu legen, um eine Zahl anzuzeigen, die sich monatlich
 kaum ändert.
 
-Deshalb: Konstanten in `app/utils/werkbank.ts`, jede mit Stichtag im Datenobjekt. Der Stichtag
-steht sichtbar auf der Seite — eine Zahl ohne Datum wäre die unehrlichere Lösung. Beim
-Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualität, die sie nicht hat.
+Deshalb: Konstanten in `app/utils/werkbank.ts`, mit den Stichtagen als Kommentar oben in der
+Datei. Beim Aktualisieren gilt: **Stichtag mitziehen.**
+
+**Kein sichtbarer Stichtag mehr (Eddys Entscheidung, 13.11.2026).** Bis dahin stand unter dem
+Intro der Vermerk „Zahlen aus dem Repository und aus Make.com, Stand …“, zuletzt mit zwei
+Daten. Eddy wollte den Einstieg kürzer; der Vermerk ist ersatzlos entfallen. Die frühere
+Begründung („eine Zahl ohne Datum wäre die unehrlichere Lösung“) ist damit bewusst
+zurückgestellt. Folge für die Pflege: Veraltete Zahlen fallen auf der Seite nicht mehr auf,
+also beim Aktualisieren alle Zahlen eines Abrufs gemeinsam erneuern.
 
 ## Seitenaufbau
 
 | Abschnitt | Inhalt | Visuelles Element |
 | --- | --- | --- |
-| Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces, Seitenzahl; dahinter rechts das Räderwerk als Konstruktionszeichnung |
+| Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces (seit 13.11.2026 flacher und ohne Seitenzahl im Blatt, Eddy fand es zu prominent); dahinter rechts das Räderwerk als Konstruktionszeichnung |
 | 01 Der Neubau | Wolffs Beschreibung, Startseiten-Screenshot, Kennzahlen | Vitrine mit Link nach außen + Balkenvergleich Altsystem / neues System |
 | 02 Das Handwerk | Die Geigen-These, Hardys Rolle, Wolffs zweiter Einwand | Statement-Satzbild mit Teal-Pointe |
 | 03 Die Maschinen | 25 Szenarien, „Promotion erstellen“ als Beispiel (129 Module in 6 Szenarien), 20 Dienste | Explosionszeichnung in der Vitrine + Stückliste, Werkzeugregal |

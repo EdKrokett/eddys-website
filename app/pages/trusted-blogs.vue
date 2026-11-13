@@ -95,14 +95,6 @@ useSeoMeta({
             automatisch ab, ohne dass jemand es anstößt. Für dieselben Aufgaben habe ich
             vorher jede Woche viele Stunden von Hand gebraucht.
           </p>
-          <!--
-            Zwei Stichtage, weil der Umbau von „Promotion erstellen“ nur einen Teil der
-            Make-Zahlen erneuert hat. Begründung an `WERKBANK_UMBAU_STICHTAG`.
-          -->
-          <p class="intro__note">
-            Zahlen aus dem Repository und aus Make.com, Stand {{ WERKBANK_STICHTAG }}.
-            Szenarienzahl und Umbau von „Promotion erstellen“: Stand {{ WERKBANK_UMBAU_STICHTAG }}.
-          </p>
         </div>
 
         <!--
@@ -128,7 +120,6 @@ useSeoMeta({
             <p class="folio__body">
               „{{ WERKBANK_ZITAT.body }}“
             </p>
-            <span class="folio__page" aria-hidden="true">175</span>
           </blockquote>
 
           <figcaption class="folio__credit">
@@ -697,28 +688,20 @@ useSeoMeta({
   color: var(--color-steel-300);
 }
 
-/*
-  Herkunftsangabe der Zahlen, als Fußnote gesetzt: Mono, klein, zurückgenommen. In der
-  schmaleren Laufweite passt sie auf eine Zeile, statt als zweiter Fließtextabsatz mit
-  den beiden Aussagen darüber um Aufmerksamkeit zu konkurrieren.
-*/
-.intro__note {
-  margin-top: 0.35rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  line-height: 1.6;
-  letter-spacing: 0.03em;
-  color: var(--color-steel-500);
-}
-
 /* ── Das Faksimile ──────────────────────────────────────────────────────────── */
 /*
   Die einzige helle Fläche der ganzen Website. Bewusst kein Kasten im Seitenstil,
   sondern eine Buchseite: warmer Papierton, Serifenschrift, Seitenzahl am Fuß. Der
   Kontrastbruch ist der Punkt — er markiert, dass hier jemand anderes spricht.
 */
+/*
+  Zurückgenommen am 13.11.2026 (Eddy: „zu prominent, zu viel Höhe“). Der Block bleibt die
+  helle Buchseite, ist aber flacher: weniger Innenabstand, kleinere Schrift, leiserer
+  Schatten, keine Seitenzahl mehr im Blatt (sie steht in der Quellenzeile darunter).
+  Gemessen bei 1440px: Blatt vorher 283px hoch, bei 390px 400px.
+*/
 .folio {
-  margin: clamp(2.75rem, 6vw, 4.5rem) 0 0;
+  margin: clamp(2.25rem, 5vw, 3.25rem) 0 0;
   max-width: 44rem;
 }
 
@@ -727,14 +710,14 @@ useSeoMeta({
   overflow: hidden;
   margin: 0;
   /* Links mehr Innenabstand als rechts: Der Bund braucht Platz, sonst klebt der Text daran. */
-  padding: clamp(2rem, 4.5vw, 3rem) clamp(1.75rem, 4vw, 3.25rem) clamp(2.75rem, 5vw, 3.5rem)
-    clamp(2.5rem, 5.5vw, 4.25rem);
+  padding: clamp(1.15rem, 2.5vw, 1.6rem) clamp(1.25rem, 3vw, 2.25rem) clamp(1.25rem, 2.75vw, 1.75rem)
+    clamp(1.85rem, 4vw, 3rem);
   background: #f2ece1;
   color: #221f1a;
   border: 1px solid var(--color-brass-500);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 26px 60px rgba(8, 9, 11, 0.6);
+    0 12px 30px rgba(8, 9, 11, 0.45);
 }
 
 /*
@@ -766,9 +749,9 @@ useSeoMeta({
   top: -0.06em;
   right: 0.14em;
   font-family: var(--font-display);
-  font-size: clamp(6rem, 13vw, 9.5rem);
+  font-size: clamp(4rem, 8vw, 6rem);
   line-height: 1;
-  color: rgba(120, 100, 66, 0.11);
+  color: rgba(120, 100, 66, 0.09);
   user-select: none;
 }
 
@@ -776,31 +759,19 @@ useSeoMeta({
   position: relative;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+  font-size: clamp(1.1rem, 1.9vw, 1.3rem);
   line-height: 1.25;
   color: #14120f;
 }
 
 .folio__body {
   position: relative;
-  margin-top: 1rem;
+  margin-top: 0.6rem;
   font-family: var(--font-display);
-  font-size: var(--text-md);
-  line-height: 1.66;
+  font-size: var(--text-base);
+  line-height: 1.6;
   /* Etwas weicher als die Überschrift, wie Buchsatz auf getöntem Papier. */
   color: #3a352c;
-}
-
-/* Seitenzahl unten mittig, wie im Buch. */
-.folio__page {
-  position: absolute;
-  bottom: 1.15rem;
-  left: 50%;
-  translate: -50% 0;
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  letter-spacing: 0.18em;
-  color: #8a8070;
 }
 
 .folio__credit {

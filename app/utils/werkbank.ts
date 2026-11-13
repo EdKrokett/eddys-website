@@ -17,21 +17,18 @@ import type {
  * bräuchte. Beides zur Laufzeit zu holen hieße, ein Geheimnis ins Deployment zu legen,
  * um eine Zahl anzuzeigen, die sich monatlich kaum ändert.
  *
- * Dafür gilt: JEDE Zahl hier hat einen Stichtag, und der steht sichtbar auf der Seite.
- * Beim Aktualisieren den Stichtag MITZIEHEN — sonst behauptet die Seite eine
- * Aktualität, die sie nicht hat.
+ * Dafür gilt: JEDE Zahl hier hat einen Stichtag (Liste unten). Auf der Seite steht er
+ * seit 13.11.2026 nicht mehr (Eddys Entscheidung). Beim Aktualisieren den Stichtag hier
+ * trotzdem MITZIEHEN, damit nachvollziehbar bleibt, wie alt jede Zahl ist.
  */
 
-/** Stichtag aller Kennzahlen auf dieser Seite. Als Anzeigeform, nicht als Date-Objekt. */
-export const WERKBANK_STICHTAG = '12. September 2026'
-
-/**
- * Zweiter Stichtag, nur für das, was sich mit dem Umbau von „Promotion erstellen“
- * geändert hat: die Szenarienzahl und die Modulzahl dieses Ablaufs. Alle übrigen Zahlen
- * (Läufe, Operationen, Commits) stehen weiter auf `WERKBANK_STICHTAG`. Die Seite nennt
- * beide Daten, damit keine Zahl einen Stand behauptet, den sie nicht hat.
+/*
+ * Stichtage der Zahlen (seit 13.11.2026 nicht mehr auf der Seite, Eddys Entscheidung;
+ * Begründung in `docs/werkbank.md`):
+ * - 12.09.2026: Commits, Dateien, Operationen, angebundene Dienste
+ * - 13.11.2026: Szenarienzahl (25) und alles zum Umbau von „Promotion erstellen“
+ * Beim Aktualisieren einer Zahl das Datum hier mitziehen.
  */
-export const WERKBANK_UMBAU_STICHTAG = '13. November 2026'
 
 // ── Das Buch ───────────────────────────────────────────────────────────────────
 /**
@@ -220,10 +217,8 @@ export const WERKBANK_WERKZEUGE: WerkbankTool[] = [
     role: 'Der Tresor und die Werkstatt. Jede Änderung bleibt nachvollziehbar und umkehrbar.',
   },
   {
-    name: 'Placid & Cloudinary',
-    role:
-      'Ergänzen Wasserzeichen und Texte in den Bildern, die sonst jedes Mal jemand von '
-      + 'Hand einsetzen müsste.',
+    name: 'Cloudinary',
+    role: 'Speichert die Bilder inklusive Wasserzeichen und Texten.',
   },
 ]
 
