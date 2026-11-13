@@ -33,8 +33,8 @@ const shotDialog = useTemplateRef<HTMLDialogElement>('shotDialog')
 
 /**
  * Hält den Ankersprung auf dem Ziel, während die Schriften nachladen. Betrifft die
- * beiden öffentlichen Sprungziele `#handwerk` und `#szenario`; Begründung und Messwerte
- * stehen in `app/composables/useAnchorScroll.ts`.
+ * öffentlichen Sprungziele `#handwerk`, `#maschinen` und `#szenario`; Begründung und
+ * Messwerte stehen in `app/composables/useAnchorScroll.ts`.
  */
 useAnchorScroll()
 
@@ -353,7 +353,11 @@ useSeoMeta({
     </section>
 
     <!-- ═══════════════ 03 · DIE MASCHINEN ═══════════════ -->
-    <section class="section section--bordered reveal">
+    <!--
+      `id` seit 13.11.2026 ein öffentliches Sprungziel (/trusted-blogs#maschinen), von Eddy
+      zum Teilen gedacht. Nicht umbenennen, sonst brechen fremde Links.
+    -->
+    <section id="maschinen" class="section section--bordered reveal">
       <UContainer>
         <SectionHead
           kicker="03 · Die Maschinen"
@@ -886,7 +890,10 @@ useSeoMeta({
 
 /* ── Sektionsrahmen ─────────────────────────────────────────────────────────── */
 .section {
-  padding: clamp(3.5rem, 8vw, 6rem) 0;
+  /* Als Variable, weil der Sprungziel-Abstand unten mit demselben Wert rechnet. */
+  --section-pad: clamp(3.5rem, 8vw, 6rem);
+
+  padding: var(--section-pad) 0;
 }
 
 .section--bordered + .section--bordered {
@@ -894,13 +901,23 @@ useSeoMeta({
 }
 
 /*
-  Sprungziel-Abstand für jede Sektion mit `id`, gleiche Begründung wie bei `.vitrine`:
-  4rem Header plus Reserve, weil der Direktaufruf eines Ankers landet, bevor die
-  Schriften final sind. Als Attributselektor, damit ein künftiger Anker nichts
-  Zusätzliches braucht.
+  Sprungziel-Abstand für jede Sektion mit `id`. Ziel (Eddys Vorgabe, 13.11.2026): Nach dem
+  Sprung steht der Kicker („03 · Die Maschinen“) direkt unter dem Header, nicht eine
+  Bildschirmhöhe tiefer.
+
+  Gerechnet wird ab der Oberkante der Sektion, und darüber liegt noch ihr Innenabstand.
+  Deshalb: 4rem Header + 1.5rem Luft − Innenabstand. Auf breiten Bildschirmen wird der
+  Wert negativ (−0.5rem), das ist gewollt: Die Sektion beginnt dann knapp über dem
+  Fensterrand, ihr Kicker sitzt trotzdem unter dem Header.
+
+  Bis 13.11.2026 standen hier pauschal 9rem als Reserve gegen das Verrutschen beim
+  Nachladen der Schriften. Das hält inzwischen `useAnchorScroll()` stabil; mit Reserve
+  und Innenabstand lag der Kicker rund 240px unter dem Fensterrand.
+
+  Als Attributselektor, damit ein künftiger Anker nichts Zusätzliches braucht.
 */
 .section[id] {
-  scroll-margin-top: 9rem;
+  scroll-margin-top: calc(4rem + 1.5rem - var(--section-pad));
 }
 
 .section--muted {

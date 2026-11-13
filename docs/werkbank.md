@@ -322,12 +322,13 @@ Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualitä
 
 ### Öffentliche Sprungziele
 
-Zwei Anker auf dieser Seite werden von außen verlinkt und dürfen **nicht umbenannt**
+Drei Anker auf dieser Seite werden von außen verlinkt und dürfen **nicht umbenannt**
 werden, ohne fremde Links zu brechen:
 
 | Anker | Ziel | Verlinkt von |
 | --- | --- | --- |
 | `/trusted-blogs#handwerk` | Kapitel 02, „Eine Geige macht noch keine Musik" | extern, von Eddy geteilt (als `/werkbank#handwerk`) |
+| `/trusted-blogs#maschinen` | Kapitel 03, „Fünfundzwanzig Szenarien, die ihre Arbeit alleine machen" | extern, von Eddy geteilt (seit 13.11.2026) |
 | `/trusted-blogs#szenario` | Die Vitrine mit der Explosionszeichnung (bis 12.11.2026: Make-Screenshot) | Make-Zertifikat im Datenblatt auf `/ueber-mich` |
 
 Die vor dem 21.10.2026 geteilten Links zeigen auf `/werkbank#…`. Sie funktionieren weiter, weil
@@ -335,8 +336,19 @@ die 301-Weiterleitung den Pfad tauscht und der Browser den Anker an die neue Adr
 (eine `Location` ohne eigenen Anker übernimmt den der ursprünglichen Anfrage). Die
 Weiterleitung deshalb **nicht entfernen**, solange solche Links im Umlauf sein können.
 
-Beide brauchen zweierlei: `scroll-margin-top: 9rem` (als `.section[id]`, damit ein
-künftiger Anker nichts Zusätzliches braucht) und `useAnchorScroll()`.
+Alle brauchen zweierlei: einen Abstand nach oben (`scroll-margin-top`) und
+`useAnchorScroll()`.
+
+**Abstand der Kapitel-Anker (`.section[id]`, seit 13.11.2026).** Eddys Vorgabe: Nach dem
+Sprung steht der Kicker („03 · Die Maschinen") direkt unter dem Header. Der Wert ist
+`calc(4rem + 1.5rem - var(--section-pad))`: Header plus Luft, minus den Innenabstand der
+Sektion, der über dem Kicker liegt. Vorher standen pauschal 9rem da; zusammen mit dem
+Innenabstand lag der Kicker damit rund 240px unter dem Fensterrand, mitten im Bild statt oben.
+Gemessen nach der Änderung (Direktaufruf, je drei Läufe): Kicker-Oberkante bei 97–99px,
+Desktop 1440px und Handy 390px, für `#maschinen` wie für `#handwerk`. Der Header endet bei
+64px.
+
+`#szenario` sitzt an der Vitrine (kein Innenabstand darüber) und behält seine eigenen 9rem.
 
 **Warum das Composable nötig ist.** Beim Direktaufruf eines Ankers springt der Browser,
 bevor die selbst gehosteten Schriften geladen sind. Sobald Fraunces und Manrope die
