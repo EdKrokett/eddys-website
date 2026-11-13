@@ -39,8 +39,8 @@ useAnchorScroll()
 
 const title = 'trusted blogs — Eduard Andrae'
 const description
-  = 'Wie ich trusted blogs mit KI neu gebaut habe: Zahlen aus dem Repository, 25 Make-Szenarien, '
-    + 'die Stellen, an denen es geklemmt hat, und warum KI eher eine Geige ist als ein Hammer.'
+  = 'Wie ich trusted blogs mit KI neu gebaut habe: 25 Make-Szenarien, die Stellen, an denen es '
+    + 'geklemmt hat, und warum KI eher eine Geige ist als ein Hammer.'
 
 const { url: siteUrl } = useSiteConfig()
 
