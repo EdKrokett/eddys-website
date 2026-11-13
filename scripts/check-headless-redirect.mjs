@@ -225,7 +225,8 @@ async function buildCases() {
     { label: 'REST-API', url: `${WP}/wp-json/`, none: { status: 200 } },
     { label: 'Login', url: `${WP}/wp-login.php`, none: { status: 200 } },
     { label: 'robots.txt', url: `${WP}/robots.txt`, none: { status: 200 } },
-    { label: 'Sitemap (The SEO Framework)', url: `${WP}/sitemap.xml`, none: {} },
+    { label: 'Sitemap (früher The SEO Framework)', url: `${WP}/sitemap.xml`, target: `${SITE}/sitemap.xml` },
+    { label: 'Sitemap (WordPress)', url: `${WP}/wp-sitemap.xml`, target: `${SITE}/sitemap.xml` },
   )
 
   if (authHeader()) {
@@ -270,6 +271,11 @@ async function checkTarget(target) {
       const location = res.headers.get('location')
       await res.body?.cancel()
       return `Status ${res.status}${location ? ` → ${location}` : ''}`
+    }
+    // Ein Canonical gibt es nur bei HTML-Seiten, nicht bei der Sitemap.
+    if (!res.headers.get('content-type')?.includes('text/html')) {
+      await res.body?.cancel()
+      return null
     }
     const canonical = canonicalOf(await res.text())
     const expected = target.split('?')[0]

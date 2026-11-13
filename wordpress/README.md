@@ -130,8 +130,7 @@ curl -sI https://blog.eduard-andrae.de/impressum/ | grep -i x-eddy
 # X-Eddy-Redirect: https://eduard-andrae.de/impressum
 ```
 
-Fehlt der Header ganz: Plugin nicht aktiv oder auf „Aus“. Angemeldet im Browser sieht man
-`X-Eddy-Redirect-Skip: angemeldet`; das ist richtig.
+Fehlt der Header ganz: Plugin nicht aktiv oder auf „Aus“.
 
 ### Stellungen
 
@@ -140,3 +139,22 @@ Fehlt der Header ganz: Plugin nicht aktiv oder auf „Aus“. Angemeldet im Brow
 | Aus | Nichts. Notschalter, ohne das Plugin zu deaktivieren. |
 | Testmodus | Nur Header, keine Umleitung. |
 | Aktiv | 301 auf `eduard-andrae.de`. Browser merken sich eine 301 dauerhaft; ein Zurückschalten wirkt bei Besuchern, die schon umgeleitet wurden, erst nach dem Leeren des Browser-Caches. |
+
+### Update auf Version 1.1
+
+Sitemap-Adressen des Blogs (`/sitemap.xml`, `/wp-sitemap*.xml`) leiten auf
+`https://eduard-andrae.de/sitemap.xml` um, statt als Startseite auf `/blog` zu landen.
+Hintergrund: `docs/headless-wordpress.md`, Schritt 4. ZIP hochladen und ersetzen genügt, die
+Stellung (Aktiv) bleibt erhalten. Prüfen:
+
+```bash
+curl -sI https://blog.eduard-andrae.de/sitemap.xml | grep -i location
+# location: https://eduard-andrae.de/sitemap.xml
+```
+
+### Update auf Version 1.2
+
+Keine Ausnahme mehr für angemeldete Nutzer: Auch wer in WP-Admin angemeldet ist, wird
+umgeleitet. Die Vorschau bleibt auf WordPress, sie hängt an `is_preview()`, ebenso private
+Beiträge und Entwürfe. ZIP hochladen und ersetzen genügt; danach einmal bei einem Entwurf auf
+„Vorschau“ klicken.

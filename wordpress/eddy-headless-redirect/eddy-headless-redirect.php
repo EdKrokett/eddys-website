@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Headless-Weiterleitung für eduard-andrae.de
  * Description: Leitet Leser des WordPress-Frontends per 301 auf die gleiche Seite unter eduard-andrae.de um. WordPress bleibt Redaktionssystem, REST-API und Bildquelle. Mit Testmodus, der nur einen Header setzt.
- * Version:     1.0.0
+ * Version:     1.2.0
  * Author:      Eduard Andrae
  * License:     GPL-2.0-or-later
  *
@@ -102,13 +102,22 @@ function eddy_hr_decide() {
 		return eddy_hr_skip( 'methode' );
 	}
 
-	// Eddy im Backend angemeldet: Vorschau-Knopf und Ansicht-Links müssen funktionieren.
-	if ( is_user_logged_in() ) {
-		return eddy_hr_skip( 'angemeldet' );
-	}
-
+	// Vorschau-Knopf im Editor: Entwürfe (`?p=…&preview=true`) und Änderungen an
+	// veröffentlichten Beiträgen (`?preview_id=…&preview=true`) setzen beide is_preview().
+	// Eine eigene Ausnahme für Angemeldete gibt es seit 1.2.0 nicht mehr (13.11.2026): Sie
+	// war für die Vorschau überflüssig und ließ Eddy im angemeldeten Browser glauben, die
+	// Weiterleitung funktioniere nicht.
 	if ( is_preview() || is_customize_preview() ) {
 		return eddy_hr_skip( 'vorschau' );
+	}
+
+	// Sitemaps des Blogs gehen auf die Sitemap der Nuxt-Seite. Feste Zuordnung über den
+	// Pfad und bewusst VOR der 404-Prüfung: Seit The SEO Framework gelöscht ist (13.11.2026),
+	// hält WordPress /sitemap.xml je nach Stand der Rewrite-Regeln für die Startseite oder
+	// für eine 404. Eine Schleife ist ausgeschlossen, weil eduard-andrae.de/sitemap.xml eine
+	// echte Datei ist und nie bei der Catch-all-Route landet.
+	if ( eddy_hr_is_sitemap_path( eddy_hr_request_path() ) ) {
+		return eddy_hr_target( '/sitemap.xml' );
 	}
 
 	if ( is_404() ) {
@@ -174,8 +183,8 @@ function eddy_hr_decide_singular( $object ) {
 		return eddy_hr_target( '/blog' );
 	}
 
-	// Angemeldete sind oben schon ausgenommen. Was hier ankommt und nicht öffentlich ist,
-	// sollte es nicht geben; im Zweifel nichts tun.
+	// Nicht öffentlich (privat, Entwurf) sehen nur Angemeldete. Die Nuxt-Seite zeigt nur
+	// Veröffentlichtes, eine Umleitung führte dort auf eine 404. Also auf WordPress bleiben.
 	if ( 'publish' !== $object->post_status ) {
 		return eddy_hr_skip( 'nicht-oeffentlich' );
 	}
@@ -191,6 +200,27 @@ function eddy_hr_decide_singular( $object ) {
 	}
 
 	return eddy_hr_target( '/blog' );
+}
+
+/**
+ * @return string Pfad der Anfrage ohne Query, z. B. `/sitemap.xml`.
+ */
+function eddy_hr_request_path() {
+	$uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '/';
+	$path = wp_parse_url( $uri, PHP_URL_PATH );
+
+	return is_string( $path ) ? $path : '/';
+}
+
+/**
+ * Sitemap-Adressen, die The SEO Framework (`/sitemap.xml`) und WordPress selbst
+ * (`/wp-sitemap.xml`, `/wp-sitemap-posts-post-1.xml`, …) bedient haben.
+ *
+ * @param string $path Pfad der Anfrage.
+ * @return bool
+ */
+function eddy_hr_is_sitemap_path( $path ) {
+	return 1 === preg_match( '#^/(wp-)?sitemap[a-z0-9_-]*\.xml$#i', $path );
 }
 
 /**
@@ -285,7 +315,7 @@ function eddy_hr_render_settings_page() {
 	$labels = array(
 		'off'  => array( 'Aus', 'Das Plugin tut nichts. Notschalter, ohne es deaktivieren zu müssen.' ),
 		'test' => array( 'Testmodus', 'Keine Umleitung. Jede Seite bekommt nur den Header X-Eddy-Redirect mit dem Ziel, oder X-Eddy-Redirect-Skip mit dem Grund, warum sie nicht umgeleitet würde.' ),
-		'live' => array( 'Aktiv', 'Leser werden per 301 auf eduard-andrae.de umgeleitet. Angemeldete Nutzer, Vorschau, Feed, REST-API, Bilder und 404-Seiten bleiben unberührt.' ),
+		'live' => array( 'Aktiv', 'Leser werden per 301 auf eduard-andrae.de umgeleitet. Vorschau, private Beiträge, Feed, REST-API, Bilder und 404-Seiten bleiben unberührt.' ),
 	);
 	?>
 	<div class="wrap">

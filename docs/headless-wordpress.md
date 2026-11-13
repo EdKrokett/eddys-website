@@ -1,7 +1,8 @@
 # WordPress ohne eigenes Frontend („headless“)
 
-Stand: 12.11.2026. Konzept, abgestimmt mit Eddy. **Schritte 1 bis 3 sind umgesetzt** (seit 13.11.2026
-leitet WordPress per 301 um). Wer hier weitermacht, beginnt bei Schritt 4.
+Stand: 12.11.2026. Konzept, abgestimmt mit Eddy. **Alle vier Schritte sind umgesetzt** (seit 13.11.2026
+leitet WordPress per 301 um). Offen ist nur, Plugin 1.2.0 einzuspielen und danach die
+Vorschau eines Entwurfs einmal von Hand zu prüfen.
 
 ## Ausgangslage
 
@@ -51,13 +52,18 @@ im Repo, per ZIP hochgeladen.
 | Seite `gewichtiges` (2016, Gewicht und Lauf-km) | `/statistik` (Eddy, 12.11.2026) |
 | jede andere Seite, darunter `bildliches` (2015) | `/blog`. Eddy braucht „Bildliches“ nicht mehr (12.11.2026); die Seite darf in WordPress gelöscht werden, danach ist ihre Adresse eine 404. |
 | Feed (`is_feed()`) | keine Umleitung |
-| Vorschau (`is_preview()`) und angemeldete Nutzer | keine Umleitung, sonst funktioniert der Vorschau-Knopf für Entwürfe nicht |
-| Embed (`/<slug>/embed/`), Trackback, `robots.txt`, `favicon.ico`, Sitemaps | keine Umleitung: Maschinen-Abrufe, keine Leser |
+| Vorschau (`is_preview()`), private Beiträge und Entwürfe | keine Umleitung, sonst funktioniert der Vorschau-Knopf nicht. Angemeldete Nutzer werden seit Plugin 1.2.0 (13.11.2026) sonst genauso umgeleitet wie alle; die frühere Ausnahme war für die Vorschau überflüssig und ließ die Weiterleitung im angemeldeten Browser kaputt wirken. |
+| Sitemap: `/sitemap.xml`, `/wp-sitemap*.xml` (Pfad-Muster) | `https://eduard-andrae.de/sitemap.xml`, seit Plugin 1.1.0 (13.11.2026). Einzige Zuordnung über den Pfad und die einzige, die auch bei einer WordPress-404 greift, siehe Schritt 4. |
+| Embed (`/<slug>/embed/`), Trackback, `robots.txt`, `favicon.ico` | keine Umleitung: Maschinen-Abrufe, keine Leser |
 | Anfrage mit anderer Methode als GET/HEAD (Kommentarformular, XML-RPC) | keine Umleitung |
 | 404 | **keine Umleitung**, siehe Endlosschleife |
 | REST, Admin, Login, Cron, Uploads | erreichen `template_redirect` gar nicht oder sind ausgenommen |
 
 ### Endlosschleife (hart verboten)
+
+Einzige Ausnahme von „nur positiv erkannter Inhalt“: die Sitemap-Pfade oben. Ihr Ziel
+`eduard-andrae.de/sitemap.xml` ist eine echte Datei der Nuxt-Seite und erreicht die
+Catch-all-Route nie; ein Kreis ist damit ausgeschlossen.
 
 `app/pages/[...slug].vue` schickt jeden unbekannten Pfad auf `eduard-andrae.de` per 301 an
 `blog.eduard-andrae.de` (alte Links aus der Zeit vor dem Umzug). Würde WordPress einen ihm
@@ -108,7 +114,7 @@ Plugin `wordpress/eddy-headless-redirect/`, Installation in `wordpress/README.md
 - Testmodus: Das Plugin leitet nicht um, sondern setzt nur einen Header
   `X-Eddy-Redirect: <ziel>`. So lässt sich die Zuordnung prüfen, ohne Besucher umzuleiten.
   Leitet es bewusst nicht um, nennt `X-Eddy-Redirect-Skip: <grund>` den Grund (`404`,
-  `feed`, `angemeldet`, `vorschau`, …). Den Grund-Header gibt es nur im Testmodus.
+  `feed`, `vorschau`, …). Den Grund-Header gibt es nur im Testmodus.
 - Haken `template_redirect` mit Priorität 1, also vor `redirect_canonical` und
   `wp_old_slug_redirect` (beide Priorität 10). Dadurch springt `?p=123` direkt zur Nuxt-Seite.
   Ein umbenannter Beitrag ist für WordPress zunächst eine 404; ihn löst erst
@@ -183,6 +189,16 @@ Nebenbei: Das Stylesheet der Sitemap ist abgeschaltet (`sitemap.xsl: false` in
   Blogs streichen, falls vorhanden.
 - Bleibt: Akismet (prüft auch Kommentare, die über die Nuxt-Seite eingehen), FluentSMTP,
   Redirection, die eigenen Plugins, die AI-Plugins (Eddys Entscheidung).
+
+**Erledigt am 13.11.2026:** Eddy hat Complianz, Autoptimize und The SEO Framework gelöscht
+und die Datenschutzerklärung gegengelesen. Aktiv sind danach: Akismet, FluentSMTP,
+Redirection und die drei eigenen Plugins (die AI-Plugins sind nicht mehr installiert).
+
+**Folge, beim Nachprüfen gefunden:** The SEO Framework hatte `/sitemap.xml` bedient und die
+WordPress-eigene Sitemap abgeschaltet. Ohne es hielt WordPress `/sitemap.xml` und
+`/wp-sitemap.xml` für die Startseite, und das Plugin leitete beide auf `/blog` um, also eine
+Sitemap-Adresse auf eine HTML-Seite. Seit Plugin 1.1.0 gehen alle Sitemap-Pfade auf
+`eduard-andrae.de/sitemap.xml`.
 
 ## Entscheidungen
 
