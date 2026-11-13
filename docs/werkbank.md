@@ -212,16 +212,13 @@ Make-API.
 | Publer-API (Pinterest ×2, Twitter, Facebook, LinkedIn) | je 40 | 589 | 5.303 |
 | **Summe über alle 19 Szenarien** | | **1.665** | **29.110** |
 
-**Auf der Seite stehen drei davon** (Eddys Auswahl, 12.09.2026): Promotion erstellen,
+**Bis 13.11.2026 standen drei davon als Tabelle auf der Seite** (Eddys Auswahl, 12.09.2026; seit
+13.11.2026 entfallen, siehe „Umbau“ unten): Promotion erstellen,
 KI-Blogpost erstellen, Content-Versand. Die Beschriftung sagt „Drei der neunzehn Szenarien",
 nicht „die drei größten" — nach Modulzahl stünde auf Platz drei „Pinterest:
 Multi-PIN-Erstellung" mit 56 Modulen und **0 Läufen**, und ein gebautes, aber nie
 gestartetes Szenario wirft in einer Tabelle, die zeigen soll was läuft, mehr Fragen auf als
 es beantwortet.
-
-Der Balken hinter jedem Namen rechnet gegen die größte Modulzahl **dieser Liste**, nicht
-gegen alle neunzehn. Kommt eine Zeile dazu oder fällt eine weg, skalieren die Balken
-entsprechend mit.
 
 Angebundene Dienste (20): Google Sheets, HTTP, JSON, ai-tools, Placid, Cloudinary, OpenAI,
 Anthropic Claude, Brevo/Sendinblue, Notion, Apify, Scraptio, WordPress, Data Store u. a.
@@ -253,15 +250,13 @@ noch 115), ausgelöst durch eine neue Tabellenzeile. Seit 13.11.2026:
 | --- | --- | --- |
 | Szenarienzahl (Intro, Titel, Beschreibung, Startseiten-Band) | 19 | 25 |
 | Kennzahl 2 in Kapitel 03 | 115 · Module im größten davon | 129 · Module in „Promotion erstellen“, verteilt auf sechs Szenarien |
-| Tabellenzeile „Promotion erstellen“ | 115 Module | 129 in 6 Szenarien, Läufe/Operationen vom 12.09. bleiben, Vermerk „umgebaut 11/2026“ |
+| Szenarientabelle (3 Abläufe mit Modulen, Läufen, Operationen) | 115 Module bei „Promotion erstellen“ | entfällt ganz (Eddys Entscheidung, 13.11.2026). Die Stückliste trägt die Modulzahlen, die Läufe des neuen Aufbaus sind noch nicht aussagekräftig |
 | Bild | Make-Screenshot (PNG, 1606×1242) | Explosionszeichnung (WebP, 3200×1800) |
 | Erklärgrafik | `WerkbankChain.vue` (SVG-Kette, Auslöser „neue Zeile“) | entfällt, dafür Stückliste |
 
 Weil nur ein Teil der Make-Zahlen neu ist, nennt die Seite **zwei Stichtage**
-(`WERKBANK_STICHTAG`, `WERKBANK_UMBAU_STICHTAG`): im Intro-Vermerk und in der
-Tabellenbeschriftung. Läufe und Operationen des neuen Aufbaus sind noch nicht aussagekräftig;
-keine Zahl dafür erfinden, sondern beim nächsten Abruf aus Make übernehmen und dann den
-Vermerk prüfen.
+(`WERKBANK_STICHTAG`, `WERKBANK_UMBAU_STICHTAG`) im Intro-Vermerk. Läufe und Operationen des
+neuen Aufbaus sind noch nicht aussagekräftig; keine Zahl dafür erfinden.
 
 **Die Explosionszeichnung** (`public/images/werkbank/promotion-erstellen-explosionszeichnung.webp`)
 ist eine helle Lichtpause auf Papier. Sie nennt nur Baugruppen und Netzwerke: keine
@@ -287,8 +282,9 @@ hätte zwei Diagramme desselben Ablaufs hintereinander ergeben.
 **Die Stückliste.** Unter der Zeichnung stehen die Baugruppen als Stückliste
 (`WERKBANK_PROMOTION_TEILE`), mit denselben Positionsnummern 01–07 wie die Kreise in der
 Zeichnung. Die Freigabe (03) trägt statt einer Modulzahl „von Hand“ und ist in Stahl statt
-Teal gesetzt: Teal ist auf dieser Seite die Maschine. Die Summe 129 und die Zahl 6 werden aus
-der Liste gerechnet (`sumParts`) und speisen Tabelle und Kennzahl; die Tests in
+Teal gesetzt: Teal ist auf dieser Seite die Maschine. Die Texte der Positionen 01, 05 und 06
+hat Eddy am 13.11.2026 selbst formuliert. Die Summe 129 und die Zahl 6 werden aus der Liste
+gerechnet (`sumParts`) und speisen Summenzeile und Kennzahl; die Tests in
 `werkbank.spec.ts` halten sie auf 129 und 6 fest.
 
 ### 4. Diese Website
@@ -315,7 +311,7 @@ Aktualisieren gilt: **Stichtag mitziehen**, sonst behauptet die Seite Aktualitä
 | Auftakt | Das Zitat aus Anhang F | Faksimile: heller Papierblock, Fraunces, Seitenzahl; dahinter rechts das Räderwerk als Konstruktionszeichnung |
 | 01 Der Neubau | Wolffs Beschreibung, Startseiten-Screenshot, Kennzahlen | Vitrine mit Link nach außen + Balkenvergleich Altsystem / neues System |
 | 02 Das Handwerk | Die Geigen-These, Hardys Rolle, Wolffs zweiter Einwand | Statement-Satzbild mit Teal-Pointe |
-| 03 Die Maschinen | 25 Szenarien, „Promotion erstellen“ als Beispiel (129 Module in 6 Szenarien), 20 Dienste | Explosionszeichnung in der Vitrine + Stückliste |
+| 03 Die Maschinen | 25 Szenarien, „Promotion erstellen“ als Beispiel (129 Module in 6 Szenarien), 20 Dienste | Explosionszeichnung in der Vitrine + Stückliste, Werkzeugregal |
 | 04 Wo es klemmte | Lessons aus `tb26-code/docs/ai-lessons.md` | Werkzeugregal, typografisch |
 | 05 Diese Seite | Colophon zu eduard-andrae.de | Kennzahlenleiste |
 | Leise Tür | Werkzeugkasten-Link + Kontakt | — |
@@ -468,7 +464,7 @@ daneben, nicht das Schloss davor.
 4. **Reaktive Kette?** Keine Reaktivität außer dem Lightbox-`ref` für den Screenshot. Kein
    `shallowRef`-Fallstrick.
 5. **Test, der einen Bug fände?** Logik in `app/utils/werkbank.ts`: `barWidth()`
-   (Balkenbreite aus Modulzahl) und `sumParts()` (Modulsumme der Stückliste). Getestet in
+   (Balkenbreite im Vergleich Altsystem / neues System) und `sumParts()` (Modulsumme der Stückliste). Getestet in
    `werkbank.spec.ts`: Happy Path mit konkretem Wert, `0`, negative Zahl, Wert über Maximum;
    bei `sumParts` der Teil ohne Module (Freigabe) und die leere Liste. Dazu Festschreibungen
    auf 129 Module, 6 Szenarien und 25 aktive Szenarien.

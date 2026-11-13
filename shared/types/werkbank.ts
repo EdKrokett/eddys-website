@@ -5,28 +5,6 @@
  */
 
 /**
- * Ein Make-Szenario (oder ein Ablauf aus mehreren) mit seinen Kennzahlen.
- *
- * `modules` ist die tragende Zahl, nicht `runs`: Eine Promotion ist kein Massenprozess,
- * die Laufzahlen sind dreistellig. Bemerkenswert ist die Komplexität eines einzelnen
- * Ablaufs, verdrahtet ohne eine Zeile Code.
- */
-export interface WerkbankScenario {
-  name: string
-  /** Anzahl der Module, über alle Teile — steuert auch die Balkenlänge in der Tabelle. */
-  modules: number
-  /** Auf wie viele Szenarien sich die Module verteilen. Fehlt es, ist es eines. */
-  scenarios?: number
-  runs: number
-  operations: number
-  /**
-   * Vermerk unter dem Namen, z. B. „umgebaut 11/2026“. Nötig, sobald die Zahlen einer
-   * Zeile nicht mehr alle denselben Stand haben.
-   */
-  note?: string
-}
-
-/**
  * Eine Position der Stückliste zu „Promotion erstellen“.
  *
  * `pos` ist die Positionsnummer in der Explosionszeichnung (Kreis an der Baugruppe).

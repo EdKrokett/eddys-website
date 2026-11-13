@@ -12,7 +12,6 @@ import {
   WERKBANK_PROMOTION_TEILE,
   WERKBANK_SCREENSHOT,
   WERKBANK_STARTSEITE_SHOT,
-  WERKBANK_SZENARIEN,
 } from './werkbank'
 
 /**
@@ -142,8 +141,8 @@ describe('sumParts', () => {
 })
 
 /**
- * Die Zahlen zum Umbau vom 13.11.2026 stehen an drei Stellen der Seite: Stückliste,
- * Tabelle, Kennzahlenleiste. Diese Tests halten sie an den Fakten aus Make fest.
+ * Die Zahlen zum Umbau vom 13.11.2026 stehen an zwei Stellen der Seite: Stückliste
+ * (Summenzeile) und Kennzahlenleiste. Diese Tests halten sie an den Fakten aus Make fest.
  */
 describe('Promotion erstellen nach dem Umbau', () => {
   it('kommt auf 129 Module in 6 Szenarien', () => {
@@ -159,14 +158,6 @@ describe('Promotion erstellen nach dem Umbau', () => {
     const manual = WERKBANK_PROMOTION_TEILE.filter(part => part.modules === undefined)
 
     expect(manual.map(part => part.name)).toEqual(['Freigabe'])
-  })
-
-  it('zeigt in der Tabelle dieselbe Summe wie die Stückliste', () => {
-    const row = WERKBANK_SZENARIEN.find(scenario => scenario.name === 'Promotion erstellen')
-
-    expect(row?.modules).toBe(129)
-    expect(row?.scenarios).toBe(6)
-    expect(row?.note).toBe('umgebaut 11/2026')
   })
 
   it('zeigt in der Kennzahlenleiste dieselbe Summe wie die Stückliste', () => {

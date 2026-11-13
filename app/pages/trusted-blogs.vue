@@ -23,7 +23,6 @@
  *   Kreisen wie in der Zeichnung, damit man jede Zeile dort wiederfindet.
  */
 const maxCommits = Math.max(...WERKBANK_BUILDS.map(build => build.commits))
-const maxModules = Math.max(...WERKBANK_SZENARIEN.map(scenario => scenario.modules))
 
 /**
  * Lightbox für den Screenshot. Natives `<dialog>` statt eigener Overlay-Logik: bringt
@@ -446,7 +445,7 @@ useSeoMeta({
           <!--
             Stückliste zur Zeichnung. Die Positionsnummern sind die Kreise an den
             Baugruppen der Zeichnung; die Modulsumme wird aus den Zeilen gerechnet
-            (`WERKBANK_PROMOTION_SUMME`), damit Liste, Tabelle und Kennzahl dieselbe Zahl
+            (`WERKBANK_PROMOTION_SUMME`), damit Summenzeile und Kennzahl dieselbe Zahl
             zeigen. Die Freigabe trägt statt einer Modulzahl „von Hand“.
           -->
           <div class="parts">
@@ -492,57 +491,6 @@ useSeoMeta({
             einzeln verstehen, testen und ändern kann. Zusammen sind es 129 Module,
             dreizehn mehr als vorher, weil Prüfungen dazugekommen sind.
           </p>
-
-          <!-- Szenarientabelle: drei ausgewählte Abläufe, nicht alle Szenarien. -->
-          <div class="table-scroll">
-            <table class="scenarios">
-              <caption class="scenarios__caption">
-                Drei Abläufe aus Make, Stand {{ WERKBANK_STICHTAG }}. Module von
-                „Promotion erstellen“ nach dem Umbau, Stand {{ WERKBANK_UMBAU_STICHTAG }}.
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">
-                    Szenario
-                  </th>
-                  <th scope="col" class="scenarios__num">
-                    Module
-                  </th>
-                  <th scope="col" class="scenarios__num">
-                    Läufe
-                  </th>
-                  <th scope="col" class="scenarios__num">
-                    Operationen
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="scenario in WERKBANK_SZENARIEN" :key="scenario.name">
-                  <th scope="row" class="scenarios__name">
-                    {{ scenario.name }}
-                    <span v-if="scenario.note" class="scenarios__note">{{ scenario.note }}</span>
-                    <span
-                      class="scenarios__bar"
-                      :style="{ width: `${barWidth(scenario.modules, maxModules)}%` }"
-                      aria-hidden="true"
-                    />
-                  </th>
-                  <td class="scenarios__num scenarios__num--strong">
-                    {{ scenario.modules }}
-                    <span v-if="scenario.scenarios" class="scenarios__split">
-                      in {{ scenario.scenarios }} Szenarien
-                    </span>
-                  </td>
-                  <td class="scenarios__num">
-                    {{ scenario.runs.toLocaleString('de-DE') }}
-                  </td>
-                  <td class="scenarios__num">
-                    {{ scenario.operations.toLocaleString('de-DE') }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
 
           <h3 class="sub">
             Das Werkzeugregal
@@ -932,10 +880,11 @@ useSeoMeta({
 
 /*
   Grid-Items haben `min-width: auto` und schrumpfen deshalb NICHT unter die Breite
-  ihres Inhalts. Ohne diese Zeile sprengen die beiden bewusst breiten Blöcke (die
-  Tabelle mit `min-width: 34rem`, die Kette mit 38rem) ihre Spalte und schieben die
-  ganze Seite seitlich auf — ihr eigenes `overflow-x: auto` greift dann nie, weil das
-  Grid-Item selbst mitwächst. Genau dieser Überlauf war auf dem Handy sichtbar.
+  ihres Inhalts. Ohne diese Zeile sprengt ein bewusst breiter Block seine Spalte und
+  schiebt die ganze Seite seitlich auf — sein eigenes `overflow-x: auto` greift dann nie,
+  weil das Grid-Item selbst mitwächst. Genau dieser Überlauf war auf dem Handy sichtbar,
+  damals mit der Szenarientabelle und der SVG-Kette (beide inzwischen entfallen). Die
+  Zeile bleibt als Schutz für jeden künftigen breiten Block.
 */
 .section__body > * {
   min-width: 0;
@@ -1468,88 +1417,6 @@ useSeoMeta({
   letter-spacing: 0.12em;
   text-align: center;
   color: var(--color-steel-600);
-}
-
-/* ── Szenarientabelle ───────────────────────────────────────────────────────── */
-/* Tabellen dürfen waagerecht scrollen, der Seitenkörper nicht (Regel aus main.css). */
-.table-scroll {
-  overflow-x: auto;
-}
-
-.scenarios {
-  width: 100%;
-  min-width: 34rem;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-
-.scenarios__caption {
-  margin-bottom: 1rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.08em;
-  text-align: left;
-  color: var(--color-steel-600);
-}
-
-.scenarios th,
-.scenarios td {
-  padding: 0.9rem 1rem 0.9rem 0;
-  text-align: left;
-  border-bottom: 1px solid var(--color-graphite-800);
-}
-
-.scenarios thead th {
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-steel-600);
-  border-bottom-color: var(--color-graphite-700);
-}
-
-.scenarios__name {
-  position: relative;
-  font-size: var(--text-base);
-  font-weight: 500;
-  color: var(--color-steel-200);
-}
-
-/*
-  Der Balken liegt als dünne Linie am unteren Rand der Zeile, nicht als eigene Spalte:
-  So bleibt die Tabelle schmal genug fürs Handy und der Größenvergleich trotzdem sichtbar.
-*/
-.scenarios__bar {
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  height: 2px;
-  background: var(--color-accent-700);
-}
-
-.scenarios__num {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  text-align: right;
-  color: var(--color-steel-400);
-}
-
-.scenarios__num--strong {
-  color: var(--color-accent-300);
-}
-
-/* Vermerk unter dem Namen („umgebaut 11/2026“) und Aufteilung unter der Modulzahl. */
-.scenarios__note,
-.scenarios__split {
-  display: block;
-  margin-top: 0.3rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-  color: var(--color-steel-500);
 }
 
 /* ── Werkzeugregal ──────────────────────────────────────────────────────────── */

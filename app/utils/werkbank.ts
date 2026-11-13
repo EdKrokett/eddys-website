@@ -3,7 +3,6 @@ import type {
   WerkbankLesson,
   WerkbankMetric,
   WerkbankPart,
-  WerkbankScenario,
   WerkbankShot,
   WerkbankTool,
 } from '#shared/types/werkbank'
@@ -112,7 +111,7 @@ export const WERKBANK_NEUBAU_METRIKEN: WerkbankMetric[] = [
  * fünf Unterszenarien und an Position 03 ein Mensch. Die Positionsnummern sind die der
  * Explosionszeichnung (`WERKBANK_SCREENSHOT`).
  *
- * Die Modulzahlen sind die EINZIGE Quelle für die Gesamtzahl: Tabelle und Kennzahl
+ * Die Modulzahlen sind die EINZIGE Quelle für die Gesamtzahl: Summenzeile und Kennzahl
  * rechnen daraus (`WERKBANK_PROMOTION_MODULE`), statt eine 129 ein zweites Mal zu
  * pflegen. Vor dem Umbau war es ein einziges Szenario mit 116 Modulen; die Summe ist
  * gestiegen, weil Prüfungen dazukamen.
@@ -121,7 +120,7 @@ export const WERKBANK_PROMOTION_TEILE: WerkbankPart[] = [
   {
     pos: '01',
     name: 'Orchestrator',
-    text: 'Nimmt den Auftrag von trusted blogs an und entscheidet, was als Nächstes läuft.',
+    text: 'Nimmt meinen Auftrag an und entscheidet, was als Nächstes läuft.',
     modules: 22,
   },
   {
@@ -144,13 +143,13 @@ export const WERKBANK_PROMOTION_TEILE: WerkbankPart[] = [
   {
     pos: '05',
     name: 'Kanäle veröffentlichen',
-    text: 'Je ein Post für Pinterest (zweimal), X, Facebook und LinkedIn.',
+    text: 'Je ein Post für Pinterest, X, Facebook und LinkedIn.',
     modules: 27,
   },
   {
     pos: '06',
     name: 'Abschluss',
-    text: 'Eine Übersicht aller Posts geht als Mail an den Blogger.',
+    text: 'Eine Vorschau der Posts geht als Mail an den Blogger.',
     modules: 18,
   },
   {
@@ -178,36 +177,6 @@ export function sumParts(parts: readonly WerkbankPart[]): { modules: number, sce
 }
 
 export const WERKBANK_PROMOTION_SUMME = sumParts(WERKBANK_PROMOTION_TEILE)
-
-/**
- * Drei Abläufe aus Make (Eddys Auswahl, 12.09.2026). Eine vollständige Tabelle
- * wäre eine Inventarliste, keine Aussage.
- *
- * Bewusst NICHT „die drei größten“: Auf Platz drei nach Modulzahl stünde
- * „Pinterest: Multi-PIN-Erstellung“ (56 Module, 0 Läufe). Ein gebautes, aber nie
- * gestartetes Szenario in einer Tabelle, die zeigen soll, was läuft, wirft beim Lesen
- * mehr Fragen auf, als es beantwortet.
- *
- * Die Reihenfolge ist die der Aufzählung, nicht sortiert. Dass sie trotzdem von lang
- * nach kurz läuft, ist Zufall der Auswahl: Der Balken hinter dem Namen rechnet gegen
- * die größte Modulzahl DIESER Liste, nicht gegen alle Szenarien.
- *
- * „Promotion erstellen“ mischt seit dem Umbau zwei Stände (Eddys Entscheidung,
- * 13.11.2026): Module nach dem Umbau, Läufe und Operationen vom 12.09.2026, weil der neue
- * Aufbau noch keine aussagekräftigen Zahlen hat. Der Vermerk in `note` macht das sichtbar.
- */
-export const WERKBANK_SZENARIEN: WerkbankScenario[] = [
-  {
-    name: 'Promotion erstellen',
-    modules: WERKBANK_PROMOTION_SUMME.modules,
-    scenarios: WERKBANK_PROMOTION_SUMME.scenarios,
-    runs: 482,
-    operations: 13321,
-    note: 'umgebaut 11/2026',
-  },
-  { name: 'KI-Blogpost erstellen', modules: 87, runs: 49, operations: 1437 },
-  { name: 'Content-Versand', modules: 26, runs: 160, operations: 3327 },
-]
 
 export const WERKBANK_MAKE_METRIKEN: WerkbankMetric[] = [
   { value: SZENARIEN_AKTIV, label: 'Szenarien, alle aktiv' },
