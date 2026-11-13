@@ -1,8 +1,8 @@
 # WordPress ohne eigenes Frontend („headless“)
 
 Stand: 12.11.2026. Konzept, abgestimmt mit Eddy. **Alle vier Schritte sind umgesetzt** (seit 13.11.2026
-leitet WordPress per 301 um). Offen ist nur, Plugin 1.2.0 einzuspielen und danach die
-Vorschau eines Entwurfs einmal von Hand zu prüfen.
+leitet WordPress per 301 um). Abgeschlossen am 13.11.2026: Plugin 1.2.0 ist eingespielt,
+Eddy hat die Vorschau und die Umleitung im angemeldeten Browser geprüft.
 
 ## Ausgangslage
 
