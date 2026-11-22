@@ -106,6 +106,9 @@ export function normalizeCommentUrl(input: string | undefined | null): string | 
 /**
  * Prüft den Entwurf. Ein leeres Objekt heißt: darf gesendet werden.
  *
+ * Pflicht sind Kommentar und Name. E-Mail und Website sind freiwillig, werden aber
+ * geprüft, sobald etwas drinsteht.
+ *
  * Geprüft wird die Länge NACH dem Kodieren der Emojis, weil WordPress genau das speichert.
  */
 export function validateCommentDraft(draft: CommentDraft): CommentFieldErrors {
@@ -128,9 +131,8 @@ export function validateCommentDraft(draft: CommentDraft): CommentFieldErrors {
     errors.name = 'Der Name ist zu lang.'
   }
 
-  if (email === '') {
-    errors.email = 'Bitte eine E-Mail-Adresse angeben.'
-  } else if (!EMAIL_PATTERN.test(email) || email.length > COMMENT_LIMITS.email) {
+  // Freiwillig (Eddy, 22.11.2026). Wer eine angibt, soll aber keinen Tippfehler speichern.
+  if (email !== '' && (!EMAIL_PATTERN.test(email) || email.length > COMMENT_LIMITS.email)) {
     errors.email = 'Diese E-Mail-Adresse sieht nicht gültig aus.'
   }
 
@@ -218,7 +220,9 @@ const MESSAGES_BY_CODE: Record<string, string> = {
   comment_on_draft: MESSAGE_CLOSED,
   comment_on_trash: MESSAGE_CLOSED,
   comment_on_password_protected: MESSAGE_CLOSED,
-  require_name_email: 'Bitte Name und E-Mail-Adresse angeben.',
+  // Kommt nur, falls in WordPress die Pflicht für Name UND E-Mail eingeschaltet wird; das
+  // Formular lässt die E-Mail sonst leer durch (docs/blog-kommentare.md).
+  require_name_email: 'Der Blog verlangt Name und E-Mail-Adresse. Bitte beides angeben.',
   require_valid_email: 'Diese E-Mail-Adresse nimmt der Blog nicht an. Bitte prüfen.',
   require_valid_comment: 'Der Kommentar ist leer.',
   comment_author_column_length: 'Der Name ist zu lang.',

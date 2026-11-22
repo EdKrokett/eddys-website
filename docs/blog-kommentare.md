@@ -115,8 +115,9 @@ Drei Entscheidungen dahinter:
 
 ### Was das Formular vor dem Senden tut (`shared/utils/comment-submit.ts`)
 
-- Pflichtfelder Name, E-Mail, Kommentar prüfen; Website ist freiwillig und bekommt
-  `https://` vorangestellt, wenn das Schema fehlt. Nur http(s).
+- Pflichtfelder Kommentar und Name prüfen. E-Mail und „Blog oder Website“ sind freiwillig
+  (siehe unten); die Website bekommt `https://` vorangestellt, wenn das Schema fehlt. Nur
+  http(s). Eine angegebene E-Mail-Adresse wird auf ihre Form geprüft.
 - **Zeichen außerhalb der BMP (Emojis) als HTML-Entity kodieren** (`😄` → `&#x1f604;`).
   WordPress speichert 4-Byte-Zeichen hier nicht: `POST /wp/v2/comments` mit echtem Emoji
   endete am 12.11.2026 mit `500 rest_comment_failed_create`. Die Anzeige dekodiert Entities
@@ -124,7 +125,26 @@ Drei Entscheidungen dahinter:
 - Längen gegen die Spaltengrenzen von WordPress prüfen (Name 245, E-Mail 100, Website 200,
   Text 65.525), und zwar NACH dem Kodieren.
 
-### Das Formular ist strenger als WordPress (gemessen 22.11.2026)
+### Pflicht sind nur Kommentar und Name (Eddy, 22.11.2026)
+
+Die E-Mail-Adresse ist freiwillig. Drei Gründe:
+
+- WordPress verlangt sie hier ohnehin nicht (nächster Absatz), die Pflicht galt nur im
+  Formular.
+- Sie wird nie angezeigt und nicht für Benachrichtigungen an den Kommentator benutzt. Eine
+  Angabe zu erzwingen, die die Seite nicht braucht, widerspricht der Datensparsamkeit
+  (Art. 5 Abs. 1 lit. c DSGVO).
+- Wer nur wegen der Adresse nicht kommentiert, fehlt im Gespräch.
+
+Was ohne Adresse wegfällt: Eddy kann dem Kommentator nicht privat antworten, und Akismet
+hat ein Merkmal weniger. Wird in WordPress später „Der Autor muss bereits einen
+freigegebenen Kommentar geschrieben haben“ eingeschaltet, erkennt WordPress Stammleser am
+Paar aus Name und E-Mail; Kommentare ohne Adresse landen dann immer in der Moderation.
+
+Das Feld „Blog oder Website“ war von Anfang an freiwillig. Ist es ausgefüllt, wird der Name
+über dem Kommentar zum Link (`BlogCommentItem.vue`, nur http(s), `rel="nofollow ugc"`).
+
+### WordPress-Einstellungen dahinter (gemessen 22.11.2026)
 
 Auf blog.eduard-andrae.de ist die Einstellung „Benutzer müssen zum Kommentieren Name und
 E-Mail-Adresse angeben“ **aus**, und Gast-Kommentare erscheinen ohne Moderation: Ein
@@ -132,10 +152,11 @@ E-Mail-Adresse angeben“ **aus**, und Gast-Kommentare erscheinen ohne Moderatio
 `201 {"status":"approved"}` zurück und stand sofort öffentlich am Beitrag (Kommentar 140800,
 unbeabsichtigt angelegt und gleich wieder gelöscht).
 
-Das Formular verlangt Name und E-Mail trotzdem. Die Pflicht gilt damit nur im Formular, nicht
-an der Route: Wer direkt an WordPress sendet, kann ohne beides kommentieren, so wie schon
-immer über `wp-comments-post.php`. Serverseitig erzwingen lässt es sich in WP-Admin unter
-Einstellungen → Diskussion.
+Den Namen verlangt also nur das Formular, nicht die Route: Wer direkt an WordPress sendet,
+kann ohne Namen kommentieren, so wie schon immer über `wp-comments-post.php`. Die
+WordPress-Einstellung kennt nur „Name UND E-Mail“ als Paar. Wird sie eingeschaltet, lehnt
+WordPress Kommentare ohne E-Mail ab (`require_name_email`), und das Formular müsste die
+Adresse wieder zur Pflicht machen.
 
 **Folge für Prüfungen:** Die Route nie mit einer Eingabe testen, deren Ablehnung von einer
 WordPress-Einstellung abhängt. Gefahrlos sind nur Eingaben, die schon am Schema scheitern

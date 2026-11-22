@@ -76,12 +76,16 @@ describe('validateCommentDraft', () => {
     expect(validateCommentDraft(VALID)).toEqual({})
   })
 
-  it('meldet jedes leere Pflichtfeld, die Website nicht', () => {
+  it('meldet die leeren Pflichtfelder Kommentar und Name, nicht E-Mail und Website', () => {
     expect(validateCommentDraft({ name: '', email: '', url: '', content: '' })).toEqual({
       content: 'Der Kommentar ist noch leer.',
       name: 'Bitte einen Namen angeben.',
-      email: 'Bitte eine E-Mail-Adresse angeben.',
     })
+  })
+
+  it('lässt einen Kommentar ohne E-Mail-Adresse durch', () => {
+    expect(validateCommentDraft({ ...VALID, email: '' })).toEqual({})
+    expect(validateCommentDraft({ ...VALID, email: '   ' })).toEqual({})
   })
 
   it('wertet reinen Leerraum als leer', () => {
@@ -143,6 +147,10 @@ describe('buildCommentPayload', () => {
 
   it('sendet eine leere Website als leeren String', () => {
     expect(buildCommentPayload(VALID, 18055).author_url).toBe('')
+  })
+
+  it('sendet eine fehlende E-Mail-Adresse als leeren String', () => {
+    expect(buildCommentPayload({ ...VALID, email: '  ' }, 18055).author_email).toBe('')
   })
 
   it('lässt HTML im Text unangetastet, WordPress filtert es beim Speichern', () => {
@@ -216,6 +224,11 @@ describe('commentErrorMessage', () => {
   it('behandelt ein fehlendes Plugin (rest_no_route) als „nicht möglich“', () => {
     expect(commentErrorMessage({ code: 'rest_no_route', status: 404 }))
       .toBe('Kommentieren ist gerade nicht möglich. Bitte später noch einmal versuchen.')
+  })
+
+  it('sagt, was fehlt, wenn WordPress Name und E-Mail zur Pflicht macht', () => {
+    expect(commentErrorMessage({ code: 'require_name_email', status: 400 }))
+      .toBe('Der Blog verlangt Name und E-Mail-Adresse. Bitte beides angeben.')
   })
 
   it('fällt bei unbekanntem Code auf den Status zurück', () => {

@@ -27,6 +27,7 @@ const { draft, status, fieldErrors, errorMessage, clearFieldError, submit } = us
 const uid = useId()
 const fieldId = (field: CommentField) => `${uid}-${field}`
 const errorId = (field: CommentField) => `${uid}-${field}-error`
+const hintId = (field: CommentField) => `${uid}-${field}-hint`
 
 const contentField = useTemplateRef<HTMLTextAreaElement>('contentField')
 const formElement = useTemplateRef<HTMLFormElement>('formElement')
@@ -132,7 +133,7 @@ defineExpose({ focus })
         <label :for="fieldId('email')" class="cform__label">
           <span class="cform__index" aria-hidden="true">03</span>
           E-Mail
-          <span class="cform__aside">nicht öffentlich</span>
+          <span class="cform__aside">freiwillig</span>
         </label>
         <input
           :id="fieldId('email')"
@@ -141,20 +142,22 @@ defineExpose({ focus })
           class="cform__control"
           autocomplete="email"
           inputmode="email"
-          required
           :aria-invalid="fieldErrors.email ? 'true' : undefined"
-          :aria-describedby="fieldErrors.email ? errorId('email') : undefined"
+          :aria-describedby="fieldErrors.email ? errorId('email') : hintId('email')"
           @input="clearFieldError('email')"
         >
         <p v-if="fieldErrors.email" :id="errorId('email')" class="cform__error" v-text="fieldErrors.email" />
+        <p v-else :id="hintId('email')" class="cform__hint">
+          Wird nicht veröffentlicht.
+        </p>
       </div>
     </div>
 
-    <!-- 04 · Website -->
+    <!-- 04 · Blog oder Website -->
     <div class="cform__field" :class="{ 'cform__field--invalid': fieldErrors.url }">
       <label :for="fieldId('url')" class="cform__label">
         <span class="cform__index" aria-hidden="true">04</span>
-        Website
+        Blog oder Website
         <span class="cform__aside">freiwillig</span>
       </label>
       <input
@@ -166,11 +169,15 @@ defineExpose({ focus })
         inputmode="url"
         autocapitalize="off"
         spellcheck="false"
+        placeholder="beispiel.de"
         :aria-invalid="fieldErrors.url ? 'true' : undefined"
-        :aria-describedby="fieldErrors.url ? errorId('url') : undefined"
+        :aria-describedby="fieldErrors.url ? errorId('url') : hintId('url')"
         @input="clearFieldError('url')"
       >
       <p v-if="fieldErrors.url" :id="errorId('url')" class="cform__error" v-text="fieldErrors.url" />
+      <p v-else :id="hintId('url')" class="cform__hint">
+        Der Name über dem Kommentar wird damit zum Link.
+      </p>
     </div>
 
     <!-- Meldung zum Versand. role="alert", damit ein Screenreader sie ohne Fokuswechsel liest. -->
@@ -178,7 +185,7 @@ defineExpose({ focus })
 
     <footer class="cform__foot">
       <p class="cform__privacy">
-        Name, Website und Kommentar erscheinen öffentlich, die E-Mail-Adresse nicht.
+        Name, Website und Kommentar erscheinen öffentlich.
         Gespeichert wird im Blog, geprüft von Akismet.
         <NuxtLink to="/datenschutz#kommentare" class="cform__privacy-link">Datenschutz</NuxtLink>
       </p>
@@ -367,6 +374,20 @@ defineExpose({ focus })
 }
 .cform__field--invalid .cform__index {
   color: var(--color-brass-400);
+}
+
+/* Hinweis unter einem freiwilligen Feld. Weicht der Fehlermeldung, wenn es eine gibt. */
+.cform__hint {
+  margin-top: 0.5rem;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-steel-500);
+}
+
+/* Beispiel im leeren Feld: deutlich leiser als eine Eingabe, damit es nicht ausgefüllt wirkt. */
+.cform__control::placeholder {
+  color: var(--color-steel-600);
+  opacity: 1;
 }
 
 .cform__error {

@@ -21,7 +21,8 @@
  * - Kommentarformular unter den Beiträgen (seit 22.11.2026): Der Browser sendet direkt an
  *   WordPress, dort prüft Akismet. WordPress speichert IP-Adresse und Browserkennung
  *   (nachgezählt am 22.11.2026 an 23 Gast-Kommentaren). Abschnitt „Kommentare“ von Eddy
- *   gegengelesen und freigegeben am 22.11.2026. docs/blog-kommentare.md
+ *   gegengelesen und freigegeben am 22.11.2026; am selben Tag angepasst, weil die
+ *   E-Mail-Adresse freiwillig wurde (ein Satz, von Eddy erneut freigegeben). docs/blog-kommentare.md
  */
 useSeoMeta({
   title: 'Datenschutz — Eduard Andrae',
@@ -115,11 +116,11 @@ useSeoMeta({
         <p>
           Unter den Blogbeiträgen können Sie Kommentare schreiben. Ihr Browser sendet die
           Angaben dabei direkt an blog.eduard-andrae.de, die WordPress-Installation bei der
-          IONOS SE in Deutschland. Gespeichert werden Ihr Name, Ihre E-Mail-Adresse, die
-          Website, falls Sie eine angeben, der Kommentar, der Zeitpunkt, Ihre IP-Adresse
-          und die Kennung Ihres Browsers. Name, Website, Kommentar und Zeitpunkt
-          erscheinen öffentlich, alles andere nicht. Auf Ihrem Gerät wird dafür nichts
-          gespeichert.
+          IONOS SE in Deutschland. Gespeichert werden Ihr Name, der Kommentar, der
+          Zeitpunkt, Ihre IP-Adresse und die Kennung Ihres Browsers, außerdem Ihre
+          E-Mail-Adresse und Ihre Website, falls Sie diese angeben. Beide Angaben sind
+          freiwillig. Name, Website, Kommentar und Zeitpunkt erscheinen öffentlich,
+          alles andere nicht. Auf Ihrem Gerät wird dafür nichts gespeichert.
         </p>
         <p>
           Zum Schutz vor Spam prüft der Dienst Akismet der Automattic Inc. (USA) jeden
