@@ -14,7 +14,7 @@ const EMPTY: WordPressCommentsResponse = { total: 0, truncated: false, threads: 
  * Tiefenmutation an einem shallowRef.
  */
 export function useBlogComments(slug: string) {
-  const { data, status, error } = useFetch<WordPressCommentsResponse>(
+  const { data, status, error, refresh } = useFetch<WordPressCommentsResponse>(
     () => `/api/blog/${slug}/comments`,
     {
       key: `blog-comments-${slug}`,
@@ -28,5 +28,6 @@ export function useBlogComments(slug: string) {
     truncated: computed(() => data.value?.truncated ?? false),
     status,
     error,
+    refresh,
   }
 }

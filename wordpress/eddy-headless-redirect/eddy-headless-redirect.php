@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Headless-Weiterleitung für eduard-andrae.de
- * Description: Leitet Leser des WordPress-Frontends per 301 auf die gleiche Seite unter eduard-andrae.de um. WordPress bleibt Redaktionssystem, REST-API und Bildquelle. Mit Testmodus, der nur einen Header setzt.
- * Version:     1.2.0
+ * Description: Leitet Leser des WordPress-Frontends per 301 auf die gleiche Seite unter eduard-andrae.de um und nimmt deren Kommentare über die REST-API an. WordPress bleibt Redaktionssystem, REST-API und Bildquelle. Mit Testmodus, der nur einen Header setzt.
+ * Version:     1.3.0
  * Author:      Eduard Andrae
  * License:     GPL-2.0-or-later
  *
@@ -267,6 +267,133 @@ function eddy_hr_skip( $reason ) {
 }
 
 /* -------------------------------------------------------------------------
+ * Kommentare von eduard-andrae.de annehmen (seit 1.3.0)
+ *
+ * Mit der Weiterleitung ist das Kommentarformular des Themes nicht mehr erreichbar:
+ * /<slug>/#respond landet auf der Nuxt-Seite. Deren eigenes Formular sendet hierher,
+ * direkt aus dem Browser des Lesers, damit Akismet und die Flood-Prüfung seine
+ * IP-Adresse sehen und nicht die eines Servers.
+ *
+ * Bewusst nicht POST /wp/v2/comments mit dem Filter rest_allow_anonymous_comments: Die
+ * Kern-Route speichert über wp_insert_comment() und löst den Haken comment_post nicht
+ * aus. An dem hängen die Benachrichtigungsmails von WordPress und der Inhalts-Webhook
+ * (Plugin eddy-comment-revalidate). wp_handle_comment_submission() ist die Funktion, die
+ * auch wp-comments-post.php aufruft, also exakt der Weg des alten Formulars.
+ *
+ * Kein neues Einfallstor: wp-comments-post.php nimmt Gast-Kommentare ohnehin von jedem
+ * an, mit denselben Prüfungen davor. Die Route läuft unabhängig von der Stellung des
+ * Plugins, weil die Nuxt-Seite ihr Formular immer zeigt.
+ *
+ * Gegenstück: app/composables/useCommentForm.ts, docs/blog-kommentare.md.
+ * ---------------------------------------------------------------------- */
+
+add_action( 'rest_api_init', 'eddy_hr_register_comment_route' );
+
+function eddy_hr_register_comment_route() {
+	register_rest_route(
+		'eddy-headless/v1',
+		'/kommentare',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'eddy_hr_create_comment',
+			// Öffentlich wie wp-comments-post.php. Ob kommentiert werden darf, entscheidet
+			// wp_handle_comment_submission() (Beitrag offen, Pflichtfelder, Registrierungszwang).
+			'permission_callback' => '__return_true',
+			'args'                => array(
+				'post'         => array(
+					'type'     => 'integer',
+					'required' => true,
+					'minimum'  => 1,
+				),
+				'parent'       => array(
+					'type'    => 'integer',
+					'default' => 0,
+					'minimum' => 0,
+				),
+				'author_name'  => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'author_email' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'author_url'   => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'content'      => array(
+					'type'     => 'string',
+					'required' => true,
+				),
+			),
+		)
+	);
+}
+
+/**
+ * @param WP_REST_Request $request Anfrage des Formulars auf eduard-andrae.de.
+ * @return WP_REST_Response|WP_Error 201 mit id und status, sonst der Fehler aus WordPress.
+ */
+function eddy_hr_create_comment( WP_REST_Request $request ) {
+	// REST-Parameter sind bereits ohne Maskierung, genau wie wp_handle_comment_submission()
+	// sie erwartet (wp-comments-post.php ruft vorher wp_unslash() auf).
+	$comment = wp_handle_comment_submission(
+		array(
+			'comment_post_ID' => (int) $request['post'],
+			'comment_parent'  => (int) $request['parent'],
+			'author'          => (string) $request['author_name'],
+			'email'           => (string) $request['author_email'],
+			'url'             => (string) $request['author_url'],
+			'comment'         => (string) $request['content'],
+		)
+	);
+
+	if ( is_wp_error( $comment ) ) {
+		return new WP_Error(
+			$comment->get_error_code(),
+			wp_strip_all_tags( $comment->get_error_message() ),
+			array( 'status' => eddy_hr_comment_error_status( $comment ) )
+		);
+	}
+
+	// Sollte nicht vorkommen: wp_handle_comment_submission() liefert WP_Comment oder WP_Error.
+	if ( ! $comment instanceof WP_Comment ) {
+		return new WP_Error( 'comment_save_error', 'Der Kommentar konnte nicht gespeichert werden.', array( 'status' => 500 ) );
+	}
+
+	return new WP_REST_Response(
+		array(
+			'id'     => (int) $comment->comment_ID,
+			// comment_approved ist '1', '0', 'spam' oder 'trash'. Alles außer '1' ist für den
+			// Absender dasselbe: noch nicht sichtbar. Ein Spamverdacht wird nicht verraten.
+			'status' => '1' === (string) $comment->comment_approved ? 'approved' : 'hold',
+		),
+		201
+	);
+}
+
+/**
+ * HTTP-Status zu einem Fehler aus wp_handle_comment_submission().
+ *
+ * WordPress hängt den Status als Fehlerdaten an, aber für die Fehlerseite von
+ * wp-comments-post.php gedacht: Pflichtfeld-Fehler tragen 200, manche gar keinen. Eine
+ * REST-Antwort mit 200 würde das Formular als Erfolg lesen.
+ *
+ * @param WP_Error $error Fehler aus wp_handle_comment_submission().
+ * @return int Status ab 400.
+ */
+function eddy_hr_comment_error_status( WP_Error $error ) {
+	$status = (int) $error->get_error_data();
+
+	if ( $status >= 400 && $status <= 599 ) {
+		return $status;
+	}
+
+	return 'comment_id_not_found' === $error->get_error_code() ? 404 : 400;
+}
+
+/* -------------------------------------------------------------------------
  * Einstellungen
  * ---------------------------------------------------------------------- */
 
@@ -324,6 +451,11 @@ function eddy_hr_render_settings_page() {
 		<p>
 			Schickt Leser dieses Blogs auf dieselbe Seite unter <code><?php echo esc_html( EDDY_HR_SITE ); ?></code>.
 			WordPress bleibt Redaktionssystem; die Beiträge erscheinen nur noch dort.
+		</p>
+
+		<p>
+			Kommentare schreiben Leser im Formular auf <code><?php echo esc_html( EDDY_HR_SITE ); ?></code>.
+			Dieses Plugin nimmt sie über die REST-API an, in jeder Stellung.
 		</p>
 
 		<form method="post" action="options.php">

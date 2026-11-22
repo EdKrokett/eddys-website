@@ -56,6 +56,7 @@ im Repo, per ZIP hochgeladen.
 | Sitemap: `/sitemap.xml`, `/wp-sitemap*.xml` (Pfad-Muster) | `https://eduard-andrae.de/sitemap.xml`, seit Plugin 1.1.0 (13.11.2026). Einzige Zuordnung über den Pfad und die einzige, die auch bei einer WordPress-404 greift, siehe Schritt 4. |
 | Embed (`/<slug>/embed/`), Trackback, `robots.txt`, `favicon.ico` | keine Umleitung: Maschinen-Abrufe, keine Leser |
 | Anfrage mit anderer Methode als GET/HEAD (Kommentarformular, XML-RPC) | keine Umleitung |
+| `POST /wp-json/eddy-headless/v1/kommentare` | keine Umleitung (REST). Nimmt seit Plugin 1.3.0 (22.11.2026) die Kommentare des Formulars auf `eduard-andrae.de` an, siehe „Nachtrag: Kommentare“. |
 | 404 | **keine Umleitung**, siehe Endlosschleife |
 | REST, Admin, Login, Cron, Uploads | erreichen `template_redirect` gar nicht oder sind ausgenommen |
 
@@ -199,6 +200,29 @@ WordPress-eigene Sitemap abgeschaltet. Ohne es hielt WordPress `/sitemap.xml` un
 `/wp-sitemap.xml` für die Startseite, und das Plugin leitete beide auf `/blog` um, also eine
 Sitemap-Adresse auf eine HTML-Seite. Seit Plugin 1.1.0 gehen alle Sitemap-Pfade auf
 `eduard-andrae.de/sitemap.xml`.
+
+## Nachtrag: Kommentare (22.11.2026)
+
+Bei der Umstellung übersehen: Das Kommentarformular gehörte zum WordPress-Frontend. Die
+Nuxt-Seite zeigte Kommentare nur an und verlinkte zum Schreiben auf
+`blog.eduard-andrae.de/<slug>/#respond`. Mit der Weiterleitung führte dieser Link auf die
+Nuxt-Seite zurück, vom 13.11. bis 22.11.2026 konnte niemand kommentieren (letzter
+Gast-Kommentar: 11.11.2026). Gemeldet von Eddy am 22.11.2026 (`docs/error-catalog.md`).
+
+Die Zuordnungstabelle oben beantwortet „Wohin geht jede Adresse?“. Die Frage, die gefehlt
+hat: **„Was konnte ein Leser auf dem WordPress-Frontend TUN, und wo tut er es jetzt?“**
+
+| Funktion des alten Frontends | Jetzt |
+|---|---|
+| Beitrag lesen, suchen, Archiv | Nuxt-Seite (Tabelle oben) |
+| Kommentare lesen | Nuxt-Seite, `server/api/blog/[slug]/comments.get.ts` |
+| Kommentar schreiben, antworten | Formular auf der Nuxt-Seite → Route des Plugins (ab 1.3.0). `docs/blog-kommentare.md` |
+| Kommentare abonnieren, RSS der Kommentare | Feed bleibt erreichbar (`is_feed()`), ein Abo per Mail gab es zuletzt nicht |
+| Cookie-Einwilligung | entfällt, die Nuxt-Seite setzt keine Cookies |
+
+Plugin 1.3.0 registriert `POST /wp-json/eddy-headless/v1/kommentare` und reicht die Angaben
+an `wp_handle_comment_submission()` weiter. Die Route arbeitet in jeder Stellung des
+Plugins (auch „Aus“), weil die Nuxt-Seite ihr Formular immer zeigt.
 
 ## Entscheidungen
 

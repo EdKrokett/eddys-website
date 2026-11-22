@@ -62,9 +62,9 @@ export interface WordPressCommentNode extends WordPressComment {
 
 /** Antwort der Kommentar-Route: Baum plus Zähler für die Überschrift. */
 export interface WordPressCommentsResponse {
-  /** Gesamtzahl laut WP (`X-WP-Total`) — kann grösser sein als die gelieferten Knoten. */
+  /** Zahl der gelieferten Kommentare mit Textinhalt. */
   total: number
-  /** true, wenn WordPress mehr Kommentare hat, als eine Anfrage liefern kann (100). */
+  /** true, wenn WordPress mehr Kommentare hat, als die Route nachlädt (500). */
   truncated: boolean
   threads: WordPressCommentNode[]
 }

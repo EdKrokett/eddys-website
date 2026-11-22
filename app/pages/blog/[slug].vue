@@ -142,7 +142,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <BlogComments :slug="post.slug" />
+      <BlogComments :slug="post.slug" :post-id="post.id" />
     </UContainer>
 
     <!-- ═══════════════ ABSCHLUSS ═══════════════ -->

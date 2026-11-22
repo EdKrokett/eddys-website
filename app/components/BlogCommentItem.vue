@@ -19,6 +19,14 @@ const props = withDefaults(
 const MAX_INDENT_DEPTH = 3
 const isIndented = computed(() => props.depth > 0 && props.depth <= MAX_INDENT_DEPTH)
 
+/**
+ * „Antworten“ öffnet das Formular in BlogComments mit diesem Kommentar als Elternteil.
+ * Nur bis Ebene 4: WordPress schachtelt in der Voreinstellung fünf Ebenen tief.
+ */
+const MAX_REPLY_DEPTH = 3
+const startReply = inject(COMMENT_REPLY_KEY, undefined)
+const canReply = computed(() => startReply !== undefined && props.depth <= MAX_REPLY_DEPTH)
+
 /** Monogramm statt Gravatar: kein externer Request, kein Datenschutz-Punkt. */
 const monogram = computed(() => props.comment.authorName.trim().charAt(0).toUpperCase() || '?')
 </script>
@@ -69,6 +77,17 @@ const monogram = computed(() => props.comment.authorName.trim().charAt(0).toUppe
           class="comment__text"
           v-text="paragraph"
         />
+
+        <button
+          v-if="canReply"
+          type="button"
+          class="comment__reply-btn"
+          @click="startReply?.({ id: comment.id, authorName: comment.authorName })"
+        >
+          <Icon name="lucide:corner-down-right" class="size-3.5" />
+          Antworten
+          <span class="sr-only">auf den Kommentar von {{ comment.authorName }}</span>
+        </button>
       </div>
     </article>
 
@@ -208,6 +227,25 @@ const monogram = computed(() => props.comment.authorName.trim().charAt(0).toUppe
 }
 .comment__text + .comment__text {
   margin-top: 0.85em;
+}
+
+/* Zurückhaltend, bis man hinsieht: Der Text des Kommentars bleibt die Hauptsache. */
+.comment__reply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  padding: 0.3rem 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-steel-500);
+  transition: color 200ms ease, gap 200ms ease;
+}
+.comment__reply-btn:hover {
+  color: var(--color-accent-300);
+  gap: 0.65rem;
 }
 
 .comment__replies {

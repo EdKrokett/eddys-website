@@ -480,3 +480,23 @@ Aus dem Lightbox-Hinweis, der nie angezeigt wurde (13.11.2026, `docs/error-catal
   `/>` endet.
 - Für jeden sichtbaren Text in einem Dialog oder Overlay: im Browser öffnen und nachsehen,
   ob er erscheint. Ein geschlossener `<dialog>` taucht in keinem Seiten-Screenshot auf.
+
+## Führt jeder Link auf die eigene WordPress-Domain noch irgendwohin?
+
+Aus dem Kommentar-Link, der neun Tage auf die eigene Seite zurückführte (22.11.2026,
+`docs/error-catalog.md`).
+
+- Welche Stellen verlinken auf das WordPress-Frontend? Suche:
+  `grep -rn "blog\.eduard-andrae\.de\|wordpressUrl" app | grep -v "wp-json\|wp-content"`.
+  Für jeden Treffer mit `curl -sI <adresse> | grep -i location` nachsehen, wo er landet.
+  Landet er auf der Seite, auf der er steht, ist er tot.
+- Vor jeder Änderung an Weiterleitungen (Plugin `eddy-headless-redirect`, `routeRules`,
+  Catch-all-Route): Nicht nur „Wohin geht jede Adresse?“ fragen, auch „Was konnte man dort
+  TUN?“ (kommentieren, suchen, abonnieren, einwilligen). Jede Funktion braucht einen neuen
+  Ort oder die bewusste Entscheidung, dass sie entfällt. Tabelle in
+  `docs/headless-wordpress.md`, Abschnitt „Nachtrag: Kommentare“.
+- Kann man auf der Live-Seite kommentieren? Nach jedem Update des Headless-Plugins und nach
+  WordPress-Updates einmal von Hand prüfen, oder ohne Kommentar:
+  `curl -s -X POST https://blog.eduard-andrae.de/wp-json/eddy-headless/v1/kommentare -H 'Content-Type: application/json' -d '{}'`
+  muss `rest_missing_callback_param` (400) liefern, nicht `rest_no_route`.
+

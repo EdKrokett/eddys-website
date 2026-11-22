@@ -104,6 +104,10 @@ Leitet Leser des WordPress-Frontends per 301 auf dieselbe Seite unter `eduard-an
 REST-API, Admin, Login, Bilder, Feed, Vorschau und 404-Seiten bleiben unberührt. Konzept,
 Zuordnungstabelle und die Regel gegen die Endlosschleife: `docs/headless-wordpress.md`.
 
+Seit Version 1.3 nimmt das Plugin außerdem die Kommentare an, die Leser im Formular auf
+`eduard-andrae.de` schreiben (`POST /wp-json/eddy-headless/v1/kommentare`). Weg und
+Begründung: `docs/blog-kommentare.md`.
+
 ### Paket bauen
 
 ```bash
@@ -158,3 +162,31 @@ Keine Ausnahme mehr für angemeldete Nutzer: Auch wer in WP-Admin angemeldet ist
 umgeleitet. Die Vorschau bleibt auf WordPress, sie hängt an `is_preview()`, ebenso private
 Beiträge und Entwürfe. ZIP hochladen und ersetzen genügt; danach einmal bei einem Entwurf auf
 „Vorschau“ klicken.
+
+### Update auf Version 1.3
+
+Neu: die Route `POST /wp-json/eddy-headless/v1/kommentare` für das Kommentarformular der
+Nuxt-Seite. ZIP hochladen und ersetzen genügt, nichts einzutragen, die Stellung (Aktiv)
+bleibt erhalten. **Reihenfolge: erst dieses Update, dann die Nuxt-Seite deployen.** Ohne das
+Update meldet das Formular „Kommentieren ist gerade nicht möglich“.
+
+Prüfen, ohne einen Kommentar anzulegen (leerer Body, WordPress lehnt ihn ab):
+
+```bash
+curl -s -X POST https://blog.eduard-andrae.de/wp-json/eddy-headless/v1/kommentare \
+  -H 'Content-Type: application/json' -d '{}'
+# erwartet: {"code":"rest_missing_callback_param", … "status":400}
+# rest_no_route (404) heißt: Plugin nicht aktiv oder älter als 1.3.0
+```
+
+Nichts anderes als `{}` schicken: Name und E-Mail sind auf diesem Blog keine Pflichtfelder,
+ein Body mit Beitrags-ID und Text legt einen echten, sofort öffentlichen Kommentar an
+(am 22.11.2026 versehentlich passiert, `docs/blog-kommentare.md`).
+
+Danach einmal von Hand auf `eduard-andrae.de` kommentieren. Der Kommentar muss in
+WP-Admin → Kommentare stehen, die Benachrichtigungsmail muss ankommen, und nach der
+Freigabe muss er auf der Beitragsseite erscheinen (Inhalts-Webhook).
+
+Bekannte Eigenheit: Steht Akismet auf „Den schlimmsten Spam automatisch löschen“, antwortet
+WordPress bei solchem Spam mit einer Weiterleitung statt mit JSON. Das Formular zeigt dann
+„Keine Verbindung zum Blog“. Für echte Leser tritt das nicht auf.

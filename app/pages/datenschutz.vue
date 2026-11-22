@@ -18,6 +18,10 @@
  * - Schriften selbst gehostet über @nuxt/fonts (kein Google-Fonts-Request)
  * - Hosting bei Vercel, Serverless-Region iad1 (USA) — deshalb der Drittland-Absatz
  * - Bilder und Blogtexte werden von blog.eduard-andrae.de nachgeladen (IONOS)
+ * - Kommentarformular unter den Beiträgen (seit 22.11.2026): Der Browser sendet direkt an
+ *   WordPress, dort prüft Akismet. WordPress speichert IP-Adresse und Browserkennung
+ *   (nachgezählt am 22.11.2026 an 23 Gast-Kommentaren). Abschnitt „Kommentare“ von Eddy
+ *   gegengelesen und freigegeben am 22.11.2026. docs/blog-kommentare.md
  */
 useSeoMeta({
   title: 'Datenschutz — Eduard Andrae',
@@ -104,6 +108,32 @@ useSeoMeta({
           das technisch für jede Verbindung nötig ist.
         </p>
 
+        <!-- Die id ist Sprungziel aus dem Kommentarformular (BlogCommentForm.vue). -->
+        <h2 id="kommentare">
+          Kommentare
+        </h2>
+        <p>
+          Unter den Blogbeiträgen können Sie Kommentare schreiben. Ihr Browser sendet die
+          Angaben dabei direkt an blog.eduard-andrae.de, die WordPress-Installation bei der
+          IONOS SE in Deutschland. Gespeichert werden Ihr Name, Ihre E-Mail-Adresse, die
+          Website, falls Sie eine angeben, der Kommentar, der Zeitpunkt, Ihre IP-Adresse
+          und die Kennung Ihres Browsers. Name, Website, Kommentar und Zeitpunkt
+          erscheinen öffentlich, alles andere nicht. Auf Ihrem Gerät wird dafür nichts
+          gespeichert.
+        </p>
+        <p>
+          Zum Schutz vor Spam prüft der Dienst Akismet der Automattic Inc. (USA) jeden
+          Kommentar, bevor er erscheint. Dafür erhält Akismet die genannten Angaben.
+          Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Mein berechtigtes Interesse liegt
+          im Austausch mit Leserinnen und Lesern und im Schutz des Blogs vor Spam und
+          Missbrauch.
+        </p>
+        <p>
+          Kommentare bleiben gespeichert, solange der Beitrag online ist. Wenn Sie einen
+          eigenen Kommentar gelöscht haben möchten, genügt eine E-Mail an die oben
+          genannte Adresse.
+        </p>
+
         <h2>Externe Links</h2>
         <p>
           Diese Seite verlinkt auf externe Angebote, etwa LinkedIn oder
@@ -167,6 +197,11 @@ useSeoMeta({
   font-size: 1.15rem;
   color: var(--color-steel-100);
 }
+/* Sprungziel (#kommentare): nicht unter der mitlaufenden Kopfleiste landen. */
+.legal__body :deep(h2[id]) {
+  scroll-margin-top: 6rem;
+}
+
 .legal__body :deep(h2:first-child) {
   margin-top: 0;
   padding-top: 0;

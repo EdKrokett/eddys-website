@@ -12,6 +12,7 @@ const {
   loadMore,
   hasMore,
   isLoadingMore,
+  refresh,
 } = useBlog({ paginated: true })
 
 const route = useRoute()
@@ -136,9 +137,12 @@ useSeoMeta({
 
         <div v-else-if="status === 'error'" class="state state--error">
           <p>Die Beiträge konnten gerade nicht geladen werden.</p>
+          <!-- Kein Link auf blog.eduard-andrae.de: Der leitet seit der Headless-Umstellung
+               (13.11.2026) auf genau diese Seite zurück. -->
           <p class="state__hint">
-            Der Blog ist auch direkt erreichbar:
-            <a href="https://blog.eduard-andrae.de" class="state__link">blog.eduard-andrae.de</a>
+            <button type="button" class="state__link" @click="refresh()">
+              Erneut versuchen
+            </button>
           </p>
         </div>
 

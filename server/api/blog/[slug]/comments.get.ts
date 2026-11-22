@@ -10,8 +10,15 @@ interface WpComment {
   content: { rendered: string }
 }
 
-/** WordPress' Maximum pro Anfrage. Siehe docs/blog-kommentare.md zur bewussten Grenze. */
-const MAX_COMMENTS = 100
+/** WordPress' Maximum pro Anfrage. */
+const PAGE_SIZE = 100
+
+/**
+ * Höchstens so viele Seiten werden nachgeladen, also 500 Kommentare. Die Grenze schützt
+ * die Function vor einer endlosen Schleife, falls WordPress immer volle Seiten liefert.
+ * Siehe docs/blog-kommentare.md.
+ */
+const MAX_PAGES = 5
 
 const WP_FIELDS = ['id', 'parent', 'author', 'author_name', 'author_url', 'date', 'content'].join(',')
 
@@ -40,12 +47,28 @@ export default defineEventHandler(async (event): Promise<WordPressCommentsRespon
   const config = useRuntimeConfig()
   const wpUrl = config.public.wordpressUrl
 
-  const response = await backendFetch<WpComment[]>(
-    `${wpUrl}/wp-json/wp/v2/comments`
-    + `?post=${post.id}&per_page=${MAX_COMMENTS}&order=asc&orderby=date&_fields=${WP_FIELDS}`,
-  )
+  // Seite für Seite, bis eine nicht mehr voll ist. Bis 22.11.2026 endete die Anzeige bei
+  // 100 mit einem Link auf den WordPress-Beitrag; den gibt es seit der Headless-Umstellung
+  // nicht mehr, also muss die Seite selbst alles zeigen können.
+  const rawComments: WpComment[] = []
+  let truncated = false
 
-  const comments: WordPressComment[] = (response ?? []).map(raw => ({
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const response = await backendFetch<WpComment[]>(
+      `${wpUrl}/wp-json/wp/v2/comments`
+      + `?post=${post.id}&per_page=${PAGE_SIZE}&page=${page}&order=asc&orderby=date&_fields=${WP_FIELDS}`,
+    )
+
+    // EXTERN: Ein Proxy oder eine Wartungsseite kann etwas anderes als ein Array liefern.
+    const batch = Array.isArray(response) ? response : []
+    rawComments.push(...batch)
+
+    if (batch.length < PAGE_SIZE) break
+    // Volle letzte Seite: Ob danach noch etwas käme, ist unbekannt.
+    if (page === MAX_PAGES) truncated = true
+  }
+
+  const comments: WordPressComment[] = rawComments.map(raw => ({
     id: raw.id,
     parent: raw.parent ?? 0,
     // Anonyme Kommentare kommen mit leerem Namen vor (geprüft: Kommentar 125111).
@@ -61,7 +84,7 @@ export default defineEventHandler(async (event): Promise<WordPressCommentsRespon
 
   return {
     total: comments.length,
-    truncated: (response?.length ?? 0) >= MAX_COMMENTS,
+    truncated,
     threads: buildCommentThreads(comments),
   }
 })

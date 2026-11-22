@@ -1340,3 +1340,54 @@ stand zwei Monate im Code und nie auf der Seite.
 
 **→ AUDIT-PERSPEKTIVE:** „Steht, was im Template steht, auch auf der Seite?" in
 `docs/audit-perspectives.md`.
+
+---
+
+## Link auf eine Adresse, die inzwischen auf die eigene Seite zurückleitet
+
+**Gefunden:** 22.11.2026, von Eddy gemeldet: „Kommentar schreiben“ unter einem Beitrag
+öffnete dieselbe Seite in einem neuen Fenster. Der Fehler bestand seit der
+Headless-Umstellung am 13.11.2026; der letzte Gast-Kommentar stammt vom 11.11.2026.
+
+**FALSCH** (`app/components/BlogComments.vue`):
+```vue
+<script setup lang="ts">
+/** Zielt auf das native WP-Kommentarformular (`#respond` ist WordPress-Standard). */
+const writeUrl = computed(() => `${config.public.wordpressUrl}/${props.slug}/#respond`)
+</script>
+
+<NuxtLink :to="writeUrl" external target="_blank">Kommentar schreiben</NuxtLink>
+```
+
+**RICHTIG:**
+```vue
+<button type="button" :aria-expanded="formOpen" @click="toggleForm">Kommentar schreiben</button>
+<BlogCommentForm v-if="formMounted" v-show="formOpen" :post-id="postId" :reply-to="replyTo" />
+```
+
+**WARUM:** Der Link war beim Schreiben richtig. Falsch wurde er durch eine Änderung an
+ganz anderer Stelle: Das Plugin `eddy-headless-redirect` leitet seit dem 13.11.2026 jede
+Beitragsadresse des Blogs per 301 auf `eduard-andrae.de/blog/<slug>` um, also genau
+dorthin, wo der Link stand. Das Kommentarformular gehörte zum WordPress-Frontend und ist
+mit ihm verschwunden.
+
+Warum es neun Tage niemand merkte: Die Umstellung wurde über die Frage „Wohin geht jede
+Adresse?“ geprüft (`scripts/check-headless-redirect.mjs`, 272 Adressen, alle grün). Jede
+Weiterleitung war korrekt. Nicht geprüft wurde, welche **Funktion** hinter einer Adresse
+lag und ob die Nuxt-Seite sie selbst hat. Der Kommentarbereich hatte keinen Test, und ein
+Link, der auf die eigene Seite zurückführt, wirft keinen Fehler.
+
+Dieselbe Klasse an drei weiteren Stellen, im selben Zug behoben:
+
+- „Direkt im Blog ansehen“ (Kommentare nicht ladbar) → Knopf „Erneut versuchen“.
+- „Alle im Blog lesen“ (mehr als 100 Kommentare) → die Route blättert jetzt selbst weiter.
+- „Der Blog ist auch direkt erreichbar“ auf `/blog` bei einem Ladefehler → „Erneut versuchen“.
+
+Bewusst belassen: `KOOPERATION_WERBUNG_ARCHIV` (`/tag/werbung/`) und der Blog-Link im
+Lebenslauf (`app/utils/cv.ts`) landen über die Weiterleitung auf `/blog`. Das ist kein
+toter Weg, aber ein Umweg: Die Nuxt-Seite hat kein Schlagwort-Archiv, auf das der erste
+direkt zeigen könnte.
+
+**→ AUDIT-PERSPEKTIVE:** „Führt jeder Link auf die eigene WordPress-Domain noch irgendwohin?"
+in `docs/audit-perspectives.md`.
+
