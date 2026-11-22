@@ -244,6 +244,20 @@
   }
 
   /*
+   * Videos aus der WordPress-Mediathek (Gutenberg-Block `wp:video`). Das <video> trägt
+   * kein width-Attribut und wäre ohne diese Regel so breit wie die Datei (1920px).
+   * `height: auto` ist hier richtig: Ein Video hat wie ein Bild eine eigene Proportion.
+   */
+  .wp-content video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 2px;
+    background: var(--color-graphite-950);
+  }
+
+  /*
    * iframes OHNE `height: auto`: Anders als ein Bild hat ein iframe keine eigene
    * Proportion, `auto` fällt auf die Browser-Standardhöhe von 150px zurück. So
    * behalten Karten und andere Einbettungen ihr `height`-Attribut aus WordPress.

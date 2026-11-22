@@ -135,3 +135,17 @@ Bei sechs erreichbaren Bildern fällt das im Hobby-Kontingent nicht ins Gewicht.
    INV:  HTML ohne fremde iframes bleibt unverändert;
          iframes der eigenen Domain bleiben unverändert
    ```
+
+## Eigene Videos aus der Mediathek (seit 22.11.2026)
+
+Ein Video, das in der WordPress-Mediathek liegt (Gutenberg-Block `wp:video`), kommt als
+`<figure class="wp-block-video"><video controls poster="…" src="…"></video></figure>` an.
+`guardEmbeds` fasst es nicht an: Die Datei liegt auf `blog.eduard-andrae.de`, es entsteht
+keine Verbindung zu einem Drittanbieter, ein Platzhalter wäre Leerlauf.
+
+- Darstellung: `.wp-content video` in `app/assets/css/main.css` (volle Spaltenbreite,
+  `height: auto`). Ohne die Regel wäre das Video so breit wie die Datei.
+- Im Block `preload="none"` und ein `poster` setzen: Dann lädt beim Öffnen des Beitrags nur
+  das Standbild, die Videodatei erst beim Klick auf Abspielen.
+- Erster Einsatz: Begrüßungsclip im Beitrag „Mein digitaler Zwilling“ (Post 18055).
+
