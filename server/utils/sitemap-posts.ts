@@ -35,7 +35,7 @@ export function wpPostsToSitemapUrls(posts: WpSitemapPost[]): SitemapPostUrl[] {
   return urls
 }
 
-function decodeSlug(raw: unknown): string | null {
+export function decodeSlug(raw: unknown): string | null {
   if (typeof raw !== 'string') return null
   const trimmed = raw.trim()
   if (!trimmed) return null

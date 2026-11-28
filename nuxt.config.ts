@@ -336,5 +336,12 @@ export default defineNuxtConfig({
   sitemap: {
     sources: ['/api/__sitemap__/posts'],
     xsl: false,
+    /**
+     * Seiten mit `robots: 'noindex'` gehören nicht in die Sitemap. Sonst meldet die Search
+     * Console sie als „Durch noindex-Tag ausgeschlossen“ (28.11.2026), und die Sitemap
+     * widerspricht der Seite. `server/utils/sitemap-exclude.spec.ts` prüft, dass jede
+     * noindex-Seite hier steht. docs/blog-archiv.md, „Weitere Maßnahmen“.
+     */
+    exclude: ['/datenschutz', '/impressum'],
   },
 })

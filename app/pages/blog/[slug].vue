@@ -19,6 +19,10 @@ if (!post.value) {
   })
 }
 
+// Nach der 404-Prüfung: Für einen unbekannten Slug braucht es keine Nachbarn. Scheitert
+// die Anfrage, entfällt nur der Weiterlesen-Block (docs/blog-archiv.md).
+const { nachbarn } = await useBlogNachbarn(slug)
+
 /**
  * Ohne Klick keine Verbindung zu Drittanbietern, so sagt es die Datenschutzerklärung zu:
  * Bilder von fremden Servern laufen über den eigenen Bild-Proxy, fremde Einbettungen
@@ -148,7 +152,9 @@ useSeoMeta({
     <!-- ═══════════════ ABSCHLUSS ═══════════════ -->
     <div class="post__foot">
       <UContainer>
-        <NuxtLink to="/blog" class="post__foot-link">
+        <!-- Ohne Nachbarn (Anfrage gescheitert) bleibt wenigstens der Weg zurück. -->
+        <BlogWeiterlesen v-if="nachbarn" :nachbarn="nachbarn" />
+        <NuxtLink v-else to="/blog" class="post__foot-link">
           <Icon name="lucide:arrow-left" class="size-4" />
           Weiter im Blog
         </NuxtLink>

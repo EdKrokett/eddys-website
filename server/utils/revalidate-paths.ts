@@ -109,7 +109,7 @@ export function statistikPaths(): string[] {
   return ['/statistik', '/statistik/_payload.json']
 }
 
-/** Die Pfade der Beitragsübersicht. */
+/** Die Pfade der Beitragsübersicht und des Archivs (beide listen Beiträge). */
 export function blogIndexPaths(): string[] {
-  return ['/blog', '/blog/_payload.json']
+  return ['/blog', '/blog/_payload.json', '/blog/archiv', '/blog/archiv/_payload.json']
 }

@@ -82,6 +82,13 @@ useSeoMeta({
           Angefangen als Protokoll eines Rauchers, der Marathon laufen wollte.
           Heute: Laufen, Wandern und alles, was beim Bloggen dazugehört.
         </p>
+
+        <!-- Echter Link statt „Mehr laden“-Knopf: der einzige Weg, auf dem Suchmaschinen
+             alle Beiträge erreichen (docs/blog-archiv.md). -->
+        <NuxtLink to="/blog/archiv" class="head__archiv">
+          Alle Beiträge nach Jahr
+          <Icon name="lucide:arrow-right" class="size-3.5" />
+        </NuxtLink>
       </UContainer>
     </section>
 
@@ -209,6 +216,9 @@ useSeoMeta({
                 <Icon name="lucide:arrow-down" class="size-4" />
               </template>
             </button>
+            <NuxtLink to="/blog/archiv" class="more__archiv">
+              oder das ganze Archiv auf einen Blick
+            </NuxtLink>
           </div>
         </template>
       </UContainer>
@@ -245,6 +255,24 @@ useSeoMeta({
   font-size: var(--text-lg);
   line-height: 1.65;
   color: var(--color-steel-300);
+}
+
+.head__archiv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-steel-200);
+  border-bottom: 1px solid var(--color-accent-500);
+  padding-bottom: 0.3rem;
+  transition: color 200ms ease;
+}
+.head__archiv:hover {
+  color: var(--color-accent-400);
 }
 
 /* ── Filter ─────────────────────────────────────────────────────────────── */
@@ -406,8 +434,25 @@ useSeoMeta({
 /* ── Nachladen ──────────────────────────────────────────────────────────── */
 .more {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
   margin-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+.more__archiv {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-steel-500);
+  border-bottom: 1px solid var(--color-graphite-600);
+  padding-bottom: 0.2rem;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.more__archiv:hover {
+  color: var(--color-accent-400);
+  border-color: var(--color-accent-500);
 }
 
 .more__button {

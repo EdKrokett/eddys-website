@@ -1391,3 +1391,120 @@ direkt zeigen könnte.
 **→ AUDIT-PERSPEKTIVE:** „Führt jeder Link auf die eigene WordPress-Domain noch irgendwohin?"
 in `docs/audit-perspectives.md`.
 
+---
+
+## Eigener Weg an einem Filter vorbei, der das Original an eingebauten Merkmalen erkennt
+
+**Gefunden:** 28.11.2026, von Eddy gemeldet: Sein Testkommentar über das neue Formular „ist
+nirgendwo angekommen“. Er lag im Spam (ID 140805), wie schon der Testkommentar vom
+22.11.2026 (ID 140801). Der Fehler bestand seit dem ersten Tag des Formulars.
+
+**FALSCH** (`wordpress/eddy-headless-redirect/`, Version 1.3.0):
+```php
+// „exakt der Weg des alten Formulars“
+$comment = wp_handle_comment_submission( array( /* Felder aus dem JSON-Body */ ) );
+```
+
+**RICHTIG** (Version 1.3.1):
+```php
+add_filter( 'akismet_comment_nonce', 'eddy_hr_akismet_nonce_inactive' );   // 'inactive' statt 'failed'
+add_filter( 'akismet_request_args', 'eddy_hr_akismet_request_args', 10, 2 ); // permalink, POST_ak_js
+$comment = wp_handle_comment_submission( array( /* … */ ) );
+// danach Filter entfernen; bei Spam: eddy_hr_notify_spam( $comment )
+```
+
+**WARUM:** Die PHP-Funktion war dieselbe wie beim alten Formular, die **Anfrage** nicht.
+Akismet liest neben dem Kommentar `$_POST` und `$_SERVER` aus: seinen eigenen Nonce, das
+per JavaScript gesetzte Feld `ak_js`, die verweisende Seite. Das Theme-Formular bringt das
+alles mit, weil Akismet es dort einbaut. Ein JSON-Body von einer anderen Domain bringt
+nichts davon mit, und Akismet meldete seinem Dienst „Nonce fehlgeschlagen“, kein
+JavaScript, fremde verweisende Seite.
+
+Zwei Dinge haben es verdeckt:
+
+- Der erste (versehentliche) Kommentar über die Route kam per curl und wurde freigegeben.
+  Daraus hatte ich geschlossen, der Weg funktioniere bis zum gespeicherten Kommentar. Über
+  die Spam-Bewertung sagte er nichts.
+- Den Spam-Befund vom 22.11.2026 habe ich auf meinen ferngesteuerten Browser
+  (`HeadlessChrome`) geschoben. Das war eine Vermutung, die ich nicht prüfen konnte, und ich
+  habe den Quelltext von Akismet erst gelesen, als ein echter Browser dasselbe Ergebnis
+  brachte.
+
+Dazu kam, dass der Fehlschlag unsichtbar war: Das Formular zeigt bei Spam bewusst „wartet
+auf Freigabe“, und WordPress benachrichtigt bei Spam niemanden.
+
+**→ AUDIT-PERSPEKTIVE:** „Was liest ein Prüfer außer den Daten, die ich ihm übergebe?" in
+`docs/audit-perspectives.md`.
+
+
+## robots.txt fiel in die Catch-all-Route und landete bei WordPress
+
+**Gefunden:** 28.11.2026, bei der Analyse der Search Console (172 von 256 Sitemap-Adressen
+nicht indexiert). Konzept: `docs/blog-archiv.md`.
+
+**FALSCH:** keine Datei `public/robots.txt`. Der Kommentar in `app/pages/[...slug].vue`
+behauptete, statische Dateien wie `/robots.txt` würden vor dem Router bedient.
+```
+GET https://eduard-andrae.de/robots.txt
+→ 301 https://blog.eduard-andrae.de/robots.txt   (Regeln von WordPress, keine Sitemap-Zeile)
+```
+
+**RICHTIG:**
+```
+public/robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://eduard-andrae.de/sitemap.xml
+```
+
+**WARUM:** Der Kommentar stimmte nur für Dateien, die es gibt. Eine fehlende Datei ist
+für den Router ein unbekannter Pfad, und genau den schickt die Catch-all-Route an
+WordPress. Google folgt der Weiterleitung zwar, liest dann aber die Regeln einer anderen
+Seite (`Disallow: /comment*` usw.) und findet keinen Hinweis auf die Sitemap. Wächter:
+`server/utils/sitemap-exclude.spec.ts`.
+
+**→ AUDIT-PERSPEKTIVE:** „Antwortet jeder Maschinenpfad mit 200 und eigenem Inhalt?“ in
+`docs/audit-perspectives.md`.
+
+## noindex-Seiten in der Sitemap
+
+**Gefunden:** 28.11.2026, Search Console: „Durch noindex-Tag ausgeschlossen“.
+
+**FALSCH:** `/datenschutz` und `/impressum` setzen `useSeoMeta({ robots: 'noindex' })`,
+das Sitemap-Modul findet sie trotzdem als feste Seiten und listet sie.
+
+**RICHTIG:**
+```ts
+sitemap: {
+  sources: ['/api/__sitemap__/posts'],
+  exclude: ['/datenschutz', '/impressum'],
+}
+```
+
+**WARUM:** `@nuxtjs/sitemap` liest kein `useSeoMeta` aus den Seiten; es sieht nur die
+Dateien in `app/pages/`. Die beiden Angaben widersprechen sich also, ohne dass eine Stelle
+davon weiß. `server/utils/sitemap-exclude.spec.ts` sucht jede Seite mit `noindex` und
+verlangt sie in `exclude`.
+
+**→ AUDIT-PERSPEKTIVE:** „Antwortet jeder Maschinenpfad mit 200 und eigenem Inhalt?“ in
+`docs/audit-perspectives.md`.
+
+## Rund 200 Beiträge ohne einen einzigen internen Link
+
+**Gefunden:** 28.11.2026, Search Console: 160 Adressen „Gefunden – zurzeit nicht
+indexiert“.
+
+**FALSCH:** Beiträge nur über `/blog` (30 neueste, „Ältere laden“ als JavaScript-Knopf)
+und die Sitemap erreichbar; Beitragsseiten verlinkten keinen anderen Beitrag.
+
+**RICHTIG:** `/blog/archiv` mit allen Beiträgen als echte Links, verlinkt aus Footer,
+`/blog` und jeder Beitragsseite; am Ende jedes Beitrags Älter/Neuer und bis zu drei
+verwandte Beiträge (`BlogWeiterlesen.vue`).
+
+**WARUM:** „Mehr laden“ ist für Besucher bequem, für einen Crawler aber eine Sackgasse:
+Er klickt keine Knöpfe. Eine Adresse, die nur in der Sitemap steht, stuft Google als
+unwichtig ein und stellt sie zurück.
+
+**→ AUDIT-PERSPEKTIVE:** „Ist jede indexierbare Seite über echte Links erreichbar?“ in
+`docs/audit-perspectives.md`.

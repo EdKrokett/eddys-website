@@ -3,6 +3,8 @@ const CACHE_TTLS: Record<string, number> = {
   'blog-post': 3600,
   // Sitemap: Google liest sie selten, eine Stunde Verzug für neue Beiträge ist egal.
   'sitemap': 3600,
+  // Archivliste für /blog/archiv und den Weiterlesen-Block, so frisch wie die Blogliste.
+  'archiv': 1800,
 }
 
 /**

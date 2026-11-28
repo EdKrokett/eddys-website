@@ -68,3 +68,31 @@ export interface WordPressCommentsResponse {
   truncated: boolean
   threads: WordPressCommentNode[]
 }
+
+/**
+ * Ein Beitrag im Archiv (`/blog/archiv`) und im Weiterlesen-Block. Bewusst schlank: Die
+ * Liste umfasst alle ~250 Beiträge und landet vollständig in der Seiten-Payload.
+ * Konzept: docs/blog-archiv.md.
+ */
+export interface BlogArchivEntry {
+  /** Dekodiert, wie ihn der Router als `route.params.slug` liefert. */
+  slug: string
+  title: string
+  /** WordPress-Ortszeit ohne Zone, `2011-02-27T10:13:19`. */
+  date: string
+  categoryIds: number[]
+}
+
+/** Antwort von `/api/blog/<slug>/nachbarn`. */
+export interface BlogNachbarn {
+  /** Der nächstjüngere Beitrag, `null` beim neuesten. */
+  newer: BlogArchivEntry | null
+  /** Der nächstältere Beitrag, `null` beim ältesten. */
+  older: BlogArchivEntry | null
+  /** Bis zu drei Beiträge derselben Hauptkategorie, neueste zuerst. */
+  related: BlogArchivEntry[]
+  /** Hauptkategorie, aus der `related` stammt. */
+  category: { slug: string, label: string } | null
+  /** Anzahl aller Beiträge im Archiv. */
+  total: number
+}

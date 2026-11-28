@@ -500,3 +500,46 @@ Aus dem Kommentar-Link, der neun Tage auf die eigene Seite zurückführte (22.11
   `curl -s -X POST https://blog.eduard-andrae.de/wp-json/eddy-headless/v1/kommentare -H 'Content-Type: application/json' -d '{}'`
   muss `rest_missing_callback_param` (400) liefern, nicht `rest_no_route`.
 
+## Was liest ein Prüfer außer den Daten, die ich ihm übergebe?
+
+Aus den Kommentaren, die Akismet über die eigene Route als Spam einstufte (28.11.2026,
+`docs/error-catalog.md`).
+
+- Wird eine Kernfunktion von WordPress auf einem neuen Weg aufgerufen (eigene REST-Route
+  statt Formular, Skript statt Admin-Oberfläche)? Dann für jedes Plugin, das sich einhängt,
+  im Quelltext nachsehen, was es aus `$_POST`, `$_SERVER` und Cookies liest. Bei Akismet:
+  `grep -n "_POST\|_SERVER" class.akismet.php`. „Dieselbe Funktion“ heißt nicht „dieselbe
+  Anfrage“.
+- Hat der neue Weg einen Ausgang, den niemand sieht? Für jeden Status, den die Seite dem
+  Leser verschweigt (Spam als „wartet auf Freigabe“): Wer erfährt davon, und wie? Ohne
+  Antwort braucht es eine Benachrichtigung.
+- Stützt sich eine Erklärung („lag am Headless-Browser“) auf eine Messung oder auf eine
+  Vermutung? Eine Vermutung über fremde Software lässt sich oft am Quelltext prüfen, bevor
+  der nächste echte Fall sie widerlegt.
+- Nach jedem Akismet-Update: Stimmen die Feldnamen noch (`akismet_comment_nonce`,
+  `POST_ak_js`, Filter `akismet_request_args`)? Sie sind interne Schnittstellen.
+
+
+## Antwortet jeder Maschinenpfad mit 200 und eigenem Inhalt?
+
+Aus der robots.txt, die per Catch-all bei WordPress landete, und den noindex-Seiten in der
+Sitemap (28.11.2026, `docs/error-catalog.md`).
+
+- `curl -sI https://eduard-andrae.de/robots.txt`, `…/sitemap.xml`, `…/favicon.ico`: jeweils
+  200 und kein `location`. Eine 301 auf `blog.eduard-andrae.de` heißt, die Datei fehlt.
+- Neue Seite mit `robots: 'noindex'`? Dann in `sitemap.exclude` (nuxt.config.ts) eintragen;
+  `server/utils/sitemap-exclude.spec.ts` schlägt sonst an.
+- Kein Sitemap-Eintrag darf eine Weiterleitung, eine 404 oder `noindex` liefern. Prüfen:
+  alle `<loc>` aus `/sitemap.xml` abrufen, Status, `<meta name="robots">` und Canonical
+  vergleichen (Skript-Vorlage in `docs/blog-archiv.md`, Abschnitt Befund).
+
+## Ist jede indexierbare Seite über echte Links erreichbar?
+
+Aus den rund 200 Beiträgen ohne internen Link (28.11.2026, `docs/error-catalog.md`).
+
+- Neue Liste mit „Mehr laden“, Filter oder Tabs? Der Inhalt dahinter braucht zusätzlich
+  einen `<a href>`-Weg, sonst sieht ihn nur, wer klickt. Knöpfe zählen nicht.
+- Stichprobe: `curl -s https://eduard-andrae.de/blog/archiv | grep -o 'href="/blog/[^"#?]*"' | sort -u | wc -l`
+  muss der Zahl der Beiträge plus eins (das Archiv selbst, im Footer) entsprechen.
+- Eine beliebige Beitragsseite muss im HTML auf mindestens einen anderen Beitrag und auf
+  `/blog/archiv` verlinken (Weiterlesen-Block).

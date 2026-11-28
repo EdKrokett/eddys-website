@@ -15,8 +15,11 @@
  * der Router keine echte Seite gefunden hat. Neue Seiten müssen nirgends
  * nachgetragen werden.
  *
- * Nitro-Routen (/api/*), statische Dateien (/robots.txt, /sitemap.xml, /_nuxt/*)
- * werden vor dem Vue-Router bedient und sind hier ebenfalls nicht betroffen.
+ * Nitro-Routen (/api/*, /sitemap.xml) und Dateien aus public/ (/robots.txt, /_nuxt/*)
+ * werden vor dem Vue-Router bedient und sind hier nicht betroffen. ABER NUR, WENN SIE
+ * EXISTIEREN: /robots.txt lag bis 28.11.2026 nicht in public/, fiel deshalb hierher und
+ * ging per 301 an die robots.txt von WordPress (docs/error-catalog.md). Jeder Pfad, den
+ * eine Maschine fest erwartet, braucht eine eigene Datei oder Route.
  *
  * Bewusste Abwägung: Auch Tippfehler landen so bei WordPress statt auf der eigenen
  * 404-Seite. Der Anteil echter Alt-URLs ist nach 20 Jahren Blog aber ungleich
