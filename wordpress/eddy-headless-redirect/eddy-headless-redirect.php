@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Headless-Weiterleitung für eduard-andrae.de
  * Description: Leitet Leser des WordPress-Frontends per 301 auf die gleiche Seite unter eduard-andrae.de um und nimmt deren Kommentare über die REST-API an. WordPress bleibt Redaktionssystem, REST-API und Bildquelle. Mit Testmodus, der nur einen Header setzt.
- * Version:     1.3.0
+ * Version:     1.3.1
  * Author:      Eduard Andrae
  * License:     GPL-2.0-or-later
  *
@@ -326,6 +326,11 @@ function eddy_hr_register_comment_route() {
 					'type'     => 'string',
 					'required' => true,
 				),
+				// Zeitpunkt (ms), zu dem das Formular im Browser geöffnet wurde. Nur für Akismet.
+				'form_opened_at' => array(
+					'type'    => 'integer',
+					'default' => 0,
+				),
 			),
 		)
 	);
@@ -336,6 +341,17 @@ function eddy_hr_register_comment_route() {
  * @return WP_REST_Response|WP_Error 201 mit id und status, sonst der Fehler aus WordPress.
  */
 function eddy_hr_create_comment( WP_REST_Request $request ) {
+	// Was Akismet über diese Anfrage wissen muss, siehe eddy_hr_akismet_request_args().
+	eddy_hr_comment_context(
+		array(
+			'permalink' => eddy_hr_public_permalink( (int) $request['post'] ),
+			'opened_at' => eddy_hr_plausible_opened_at( $request['form_opened_at'] ),
+		)
+	);
+
+	add_filter( 'akismet_comment_nonce', 'eddy_hr_akismet_nonce_inactive' );
+	add_filter( 'akismet_request_args', 'eddy_hr_akismet_request_args', 10, 2 );
+
 	// REST-Parameter sind bereits ohne Maskierung, genau wie wp_handle_comment_submission()
 	// sie erwartet (wp-comments-post.php ruft vorher wp_unslash() auf).
 	$comment = wp_handle_comment_submission(
@@ -348,6 +364,10 @@ function eddy_hr_create_comment( WP_REST_Request $request ) {
 			'comment'         => (string) $request['content'],
 		)
 	);
+
+	remove_filter( 'akismet_comment_nonce', 'eddy_hr_akismet_nonce_inactive' );
+	remove_filter( 'akismet_request_args', 'eddy_hr_akismet_request_args', 10 );
+	eddy_hr_comment_context( array() );
 
 	if ( is_wp_error( $comment ) ) {
 		return new WP_Error(
@@ -362,6 +382,10 @@ function eddy_hr_create_comment( WP_REST_Request $request ) {
 		return new WP_Error( 'comment_save_error', 'Der Kommentar konnte nicht gespeichert werden.', array( 'status' => 500 ) );
 	}
 
+	if ( 'spam' === (string) $comment->comment_approved ) {
+		eddy_hr_notify_spam( $comment );
+	}
+
 	return new WP_REST_Response(
 		array(
 			'id'     => (int) $comment->comment_ID,
@@ -371,6 +395,174 @@ function eddy_hr_create_comment( WP_REST_Request $request ) {
 		),
 		201
 	);
+}
+
+/* -------------------------------------------------------------------------
+ * Akismet: was es über einen Kommentar von eduard-andrae.de erfährt (seit 1.3.1)
+ *
+ * Akismet erkennt das Kommentarformular des Themes an drei Dingen, die es selbst dort
+ * einbaut: einem Nonce, einem per JavaScript gesetzten Zeitstempel (ak_js) und daran, dass
+ * die verweisende Seite der Beitrag ist. Über diese Route fehlte alles drei. Akismet
+ * meldete seinem Dienst „Nonce fehlgeschlagen“, kein JavaScript, und eine verweisende
+ * Seite auf einer anderen Domain als der Beitrag: das Profil eines Skripts. Am 22.11. und
+ * 28.11.2026 landeten zwei Kommentare aus dem Formular im Spam, einer davon von Eddy.
+ *
+ * Die Angaben unten sind wahr, nicht geschönt: Einen Nonce gibt es auf diesem Weg nicht
+ * (also „inaktiv“ statt „fehlgeschlagen“), die öffentliche Adresse des Beitrags liegt auf
+ * eduard-andrae.de, und den Zeitstempel setzt das Formular wirklich per JavaScript.
+ *
+ * Herleitung am Akismet-Quelltext: docs/blog-kommentare.md.
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Hält die Angaben zur laufenden Anfrage für die Akismet-Filter bereit.
+ *
+ * @param array|null $set Neue Angaben; null liest nur.
+ * @return array{permalink?: string, opened_at?: int}
+ */
+function eddy_hr_comment_context( $set = null ) {
+	static $context = array();
+
+	if ( is_array( $set ) ) {
+		$context = $set;
+	}
+
+	return $context;
+}
+
+/**
+ * Akismet meldet „inactive“ statt „failed“: Das Formular auf eduard-andrae.de kann keinen
+ * WordPress-Nonce tragen. Der Filter ist von Akismet dafür vorgesehen (jeder Wert außer
+ * 'true' und '' schaltet den Nonce ab) und gilt nur, während diese Route läuft.
+ *
+ * @return string
+ */
+function eddy_hr_akismet_nonce_inactive() {
+	return 'inactive';
+}
+
+/**
+ * @param array  $args     Was Akismet an seinen Dienst schickt.
+ * @param string $endpoint Akismet-Endpunkt, z. B. 'comment-check'.
+ * @return array
+ */
+function eddy_hr_akismet_request_args( $args, $endpoint ) {
+	if ( 'comment-check' !== $endpoint || ! is_array( $args ) ) {
+		return $args;
+	}
+
+	$context = eddy_hr_comment_context();
+
+	// get_permalink() liefert die WordPress-Adresse, die seit der Weiterleitung niemand mehr
+	// sieht. Gelesen und kommentiert wird der Beitrag unter eduard-andrae.de/blog/<slug>.
+	if ( ! empty( $context['permalink'] ) ) {
+		$args['permalink'] = $context['permalink'];
+	}
+
+	// Dasselbe Feld, das Akismets eigenes Formular-Skript setzt: Zeitpunkt in Millisekunden,
+	// zu dem JavaScript im Browser das Formular geöffnet hat.
+	if ( ! empty( $context['opened_at'] ) ) {
+		$args['POST_ak_js'] = (string) $context['opened_at'];
+	}
+
+	return $args;
+}
+
+/**
+ * Öffentliche Adresse eines Beitrags auf der Nuxt-Seite.
+ *
+ * @param int $post_id Beitrags-ID aus der Anfrage.
+ * @return string Adresse, oder '' wenn es kein veröffentlichter Beitrag ist.
+ */
+function eddy_hr_public_permalink( $post_id ) {
+	$post = get_post( $post_id );
+
+	if ( ! $post instanceof WP_Post || 'post' !== $post->post_type || 'publish' !== $post->post_status ) {
+		return '';
+	}
+
+	return EDDY_HR_SITE . eddy_hr_post_path( $post );
+}
+
+/**
+ * Prüft den Zeitstempel aus dem Formular. EXTERN: Nur ein Wert aus den letzten 24 Stunden
+ * wird weitergegeben; alles andere (fehlend, Zukunft, uralt, keine Zahl) wird verworfen,
+ * damit Akismet keinen erfundenen Wert bekommt.
+ *
+ * @param mixed $raw Millisekunden seit 1970, wie Date.now() im Browser.
+ * @return int Zeitstempel in Millisekunden, oder 0.
+ */
+function eddy_hr_plausible_opened_at( $raw ) {
+	if ( ! is_numeric( $raw ) ) {
+		return 0;
+	}
+
+	$opened_at = (int) $raw;
+	$now       = (int) round( microtime( true ) * 1000 );
+
+	// Fünf Minuten Toleranz für eine vorgehende Uhr im Browser.
+	if ( $opened_at > $now + 5 * 60 * 1000 || $opened_at < $now - 24 * 60 * 60 * 1000 ) {
+		return 0;
+	}
+
+	return $opened_at;
+}
+
+/* -------------------------------------------------------------------------
+ * Sicherheitsnetz: Mail, wenn ein Kommentar aus dem Formular im Spam landet (seit 1.3.1)
+ *
+ * WordPress benachrichtigt bei Spam niemanden, und der Absender sieht nur „wartet auf
+ * Freigabe“. Ein fälschlich aussortierter Kommentar verschwände still. Deshalb eine kurze
+ * Mail an den Autor des Beitrags. Der Kommentar bleibt im Spam: Erst der Klick auf „Kein
+ * Spam“ meldet Akismet den Irrtum, und daraus lernt der Filter.
+ *
+ * Gilt nur für diese Route. Spam über wp-comments-post.php bleibt wie bisher stumm.
+ * ---------------------------------------------------------------------- */
+
+const EDDY_HR_SPAM_MAIL_LIMIT = 20;
+
+/**
+ * @param WP_Comment $comment Der eben als Spam gespeicherte Kommentar.
+ */
+function eddy_hr_notify_spam( WP_Comment $comment ) {
+	// Höchstens 20 Mails am Tag, falls Bots die Route entdecken.
+	$sent = (int) get_transient( 'eddy_hr_spam_mails' );
+
+	if ( $sent >= EDDY_HR_SPAM_MAIL_LIMIT ) {
+		return;
+	}
+
+	set_transient( 'eddy_hr_spam_mails', $sent + 1, DAY_IN_SECONDS );
+
+	$post      = get_post( (int) $comment->comment_post_ID );
+	$author    = $post instanceof WP_Post ? get_userdata( (int) $post->post_author ) : false;
+	$recipient = $author && is_email( $author->user_email ) ? $author->user_email : get_option( 'admin_email' );
+
+	if ( ! is_email( $recipient ) ) {
+		return;
+	}
+
+	$title = $post instanceof WP_Post ? wp_strip_all_tags( get_the_title( $post ) ) : '(unbekannter Beitrag)';
+	$name  = '' !== (string) $comment->comment_author ? (string) $comment->comment_author : '(ohne Namen)';
+
+	// Reiner Text. Fremdtext wird von Tags befreit und gekürzt, es ist nur eine Vorschau.
+	$excerpt = wp_html_excerpt( wp_strip_all_tags( (string) $comment->comment_content ), 500, ' […]' );
+
+	$lines = array(
+		'Ein Kommentar aus dem Formular auf eduard-andrae.de ist im Spam gelandet.',
+		'',
+		'Beitrag: ' . $title,
+		'Name:    ' . $name,
+		'',
+		$excerpt,
+		'',
+		'Ist er echt? Dann im Spam-Ordner auf „Kein Spam“ klicken, daraus lernt Akismet:',
+		admin_url( 'edit-comments.php?comment_status=spam' ),
+		'',
+		'Ist es wirklich Spam, ist nichts zu tun.',
+	);
+
+	wp_mail( $recipient, '[Blog] Kommentar im Spam: ' . $name, implode( "\n", $lines ) );
 }
 
 /**

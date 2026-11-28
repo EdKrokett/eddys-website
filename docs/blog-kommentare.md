@@ -163,6 +163,39 @@ WordPress-Einstellung abhängt. Gefahrlos sind nur Eingaben, die schon am Schema
 (`{}`), ein Text aus Leerzeichen (`require_valid_comment`) oder eine Beitrags-ID, die es
 nicht gibt.
 
+### Was Akismet über einen Kommentar erfährt (Plugin 1.3.1, 28.11.2026)
+
+Die ersten beiden Kommentare aus dem Formular landeten im Spam: ein Testkommentar am
+22.11.2026 und Eddys eigener am 28.11.2026 („ist nirgendwo angekommen“). Grund laut
+Akismet-Quelltext (`class.akismet.php`, `auto_check_comment`, Version 5.7.2): Akismet
+erkennt das Formular des Themes an Merkmalen, die es dort selbst einbaut, und über die
+Route fehlten alle.
+
+| Merkmal | Altes WordPress-Formular | Route bis 1.3.0 | Route ab 1.3.1 |
+|---|---|---|---|
+| `akismet_comment_nonce` | `passed` (verstecktes Feld) | `failed`, weil `$_POST` leer ist | `inactive` (Filter `akismet_comment_nonce`, nur während der Route) |
+| `POST_ak_js` (Zeitstempel, per JavaScript gesetzt) | vorhanden | fehlt | Öffnungszeitpunkt des Formulars (`form_opened_at`) |
+| `referrer` | Adresse des Beitrags | `https://eduard-andrae.de/` (vom Browser gekürzt) | volle Adresse des Beitrags (`referrerPolicy` im `$fetch`) |
+| `permalink` | Adresse des Beitrags | `blog.eduard-andrae.de/<slug>/`, also andere Domain als `referrer` | `https://eduard-andrae.de/blog/<slug>` (Filter `akismet_request_args`) |
+| Tippverhalten (`ak_bkp`, `ak_bmc`, … aus `akismet-frontend.js`) | vorhanden | fehlt | fehlt weiterhin, bewusst |
+
+„Nonce fehlgeschlagen, kein JavaScript, verweisende Seite auf fremder Domain“ ist das
+Profil eines Skripts, das direkt an WordPress sendet. Alle Angaben ab 1.3.1 sind wahr: Einen
+Nonce gibt es auf diesem Weg nicht, die öffentliche Adresse liegt auf `eduard-andrae.de`,
+und den Zeitstempel setzt das Formular wirklich im Browser. Das Tippverhalten nachzubauen
+hieße, ein internes Akismet-Protokoll zu kopieren und Verhaltensdaten zu erheben; das
+bleibt weg.
+
+Ob das reicht, entscheidet Akismets Dienst, und der nennt keine Gründe. Auch der Inhalt
+zählt: Eddys Testkommentar hieß „WTF ?!?!“ von „Anonymus“ ohne E-Mail. Deshalb zusätzlich:
+
+**Sicherheitsnetz:** Landet ein Kommentar aus dem Formular im Spam, schickt das Plugin eine
+Mail an den Autor des Beitrags (höchstens 20 am Tag). WordPress selbst benachrichtigt bei
+Spam niemanden, und der Absender sieht nur „wartet auf Freigabe“. Der Kommentar bleibt im
+Spam-Ordner: Erst der Klick auf „Kein Spam“ meldet Akismet den Irrtum (`submit-ham`), und
+daraus lernt der Filter für diese Seite. Spam über `wp-comments-post.php` bleibt stumm wie
+bisher.
+
 ### Nach dem Senden
 
 WordPress antwortet mit `{ id, status }`. `approved` heißt sofort öffentlich; alles andere
@@ -184,6 +217,8 @@ Die Datenschutzerklärung hat einen eigenen Abschnitt „Kommentare“.
 
 ### Reihenfolge beim Ausrollen
 
+Für 1.3.1 ist die Reihenfolge egal: Das Plugin ignoriert ein fehlendes `form_opened_at`,
+und Plugin 1.3.0 ignoriert das zusätzliche Feld. Für die Ersteinrichtung gilt:
 Erst das Plugin (ab 1.3.0) in WordPress einspielen, dann die Nuxt-Seite deployen. Ohne das
 Plugin antwortet WordPress mit `404 rest_no_route`; das Formular meldet dann „Kommentieren
 ist gerade nicht möglich“.

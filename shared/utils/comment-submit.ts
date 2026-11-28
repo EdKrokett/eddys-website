@@ -28,6 +28,12 @@ export interface CommentPayload {
   author_email: string
   author_url: string
   content: string
+  /**
+   * Zeitpunkt in Millisekunden, zu dem das Formular im Browser geöffnet wurde, 0 wenn
+   * unbekannt. Das Plugin reicht ihn an Akismet weiter (dort `ak_js`): der Beleg, dass
+   * JavaScript lief, wie beim alten WordPress-Formular. docs/blog-kommentare.md
+   */
+  form_opened_at: number
 }
 
 /** `approved` = sofort öffentlich. `hold` = alles andere (Moderation, Spamverdacht). */
@@ -147,9 +153,15 @@ export function validateCommentDraft(draft: CommentDraft): CommentFieldErrors {
  * Baut den Body für WordPress.
  *
  * PRE:  `validateCommentDraft(draft)` ist leer, `postId` eine positive Ganzzahl
- * POST: Texte getrimmt, Emojis kodiert, Website mit Schema oder leer
+ * POST: Texte getrimmt, Emojis kodiert, Website mit Schema oder leer, `form_opened_at`
+ *       eine positive Ganzzahl oder 0
  */
-export function buildCommentPayload(draft: CommentDraft, postId: number, parentId = 0): CommentPayload {
+export function buildCommentPayload(
+  draft: CommentDraft,
+  postId: number,
+  parentId = 0,
+  formOpenedAt = 0,
+): CommentPayload {
   return {
     post: postId,
     parent: parentId > 0 ? parentId : 0,
@@ -157,6 +169,8 @@ export function buildCommentPayload(draft: CommentDraft, postId: number, parentI
     author_email: draft.email.trim(),
     author_url: normalizeCommentUrl(draft.url) ?? '',
     content: encodeAstralAsEntities(draft.content.trim()),
+    // Nur eine brauchbare Zahl geht hinaus; das Plugin prüft sie ohnehin noch einmal.
+    form_opened_at: Number.isSafeInteger(formOpenedAt) && formOpenedAt > 0 ? formOpenedAt : 0,
   }
 }
 

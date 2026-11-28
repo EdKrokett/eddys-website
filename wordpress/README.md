@@ -190,3 +190,20 @@ Freigabe muss er auf der Beitragsseite erscheinen (Inhalts-Webhook).
 Bekannte Eigenheit: Steht Akismet auf „Den schlimmsten Spam automatisch löschen“, antwortet
 WordPress bei solchem Spam mit einer Weiterleitung statt mit JSON. Das Formular zeigt dann
 „Keine Verbindung zum Blog“. Für echte Leser tritt das nicht auf.
+
+### Update auf Version 1.3.1
+
+Kommentare aus dem Formular landeten im Spam, weil Akismet auf diesem Weg die Merkmale
+eines echten Formulars fehlten (`docs/blog-kommentare.md`, Abschnitt „Was Akismet über einen
+Kommentar erfährt“). Das Plugin meldet Akismet jetzt den Nonce als „inaktiv“ statt
+„fehlgeschlagen“, die Adresse des Beitrags auf `eduard-andrae.de` und den Zeitpunkt, zu dem
+das Formular geöffnet wurde.
+
+Neu außerdem: Landet ein Kommentar aus dem Formular trotzdem im Spam, kommt eine Mail
+„[Blog] Kommentar im Spam: <Name>“ an den Autor des Beitrags, höchstens 20 am Tag. Ist der
+Kommentar echt, im Spam-Ordner auf **Kein Spam** klicken; nur so erfährt Akismet von dem
+Irrtum.
+
+ZIP hochladen und ersetzen genügt, nichts einzutragen. Die Reihenfolge gegenüber dem Deploy
+der Nuxt-Seite ist egal.
+

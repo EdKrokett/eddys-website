@@ -134,7 +134,18 @@ describe('buildCommentPayload', () => {
       author_email: 'martina@example.org',
       author_url: 'https://laufblog.example/',
       content: 'Glückwunsch &#x1f389;',
+      form_opened_at: 0,
     })
+  })
+
+  it('gibt den Öffnungszeitpunkt des Formulars für Akismet mit', () => {
+    expect(buildCommentPayload(VALID, 18055, 0, 1795336675971).form_opened_at).toBe(1795336675971)
+  })
+
+  it('sendet 0 statt eines unbrauchbaren Öffnungszeitpunkts', () => {
+    expect(buildCommentPayload(VALID, 18055, 0, Number.NaN).form_opened_at).toBe(0)
+    expect(buildCommentPayload(VALID, 18055, 0, -5).form_opened_at).toBe(0)
+    expect(buildCommentPayload(VALID, 18055, 0, 12.5).form_opened_at).toBe(0)
   })
 
   it('übernimmt den Elternkommentar bei einer Antwort', () => {

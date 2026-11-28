@@ -56,6 +56,13 @@ const SUBMIT_TIMEOUT_MS = 30_000
 export function useCommentForm(postId: MaybeRefOrGetter<number>) {
   const config = useRuntimeConfig()
 
+  /**
+   * Wann das Formular geöffnet wurde. Die Komponente entsteht erst nach dem Klick auf
+   * „Kommentar schreiben“ und nur im Browser; der Wert belegt gegenüber Akismet, dass
+   * JavaScript lief (dort Feld `ak_js`).
+   */
+  const openedAt = Date.now()
+
   const draft = reactive<CommentDraft>({ name: '', email: '', url: '', content: '' })
   const status = ref<'idle' | 'pending' | 'success' | 'error'>('idle')
   const fieldErrors = ref<CommentFieldErrors>({})
@@ -91,7 +98,11 @@ export function useCommentForm(postId: MaybeRefOrGetter<number>) {
         `${config.public.wordpressUrl}/wp-json/eddy-headless/v1/kommentare`,
         {
           method: 'POST',
-          body: buildCommentPayload(draft, toValue(postId), replyTo?.id ?? 0),
+          body: buildCommentPayload(draft, toValue(postId), replyTo?.id ?? 0, openedAt),
+          // Volle Adresse des Beitrags als verweisende Seite. Die Voreinstellung der Browser
+          // kürzt sie über Domain-Grenzen auf „https://eduard-andrae.de/“; Akismet sah dann
+          // ein Formular, das nicht auf der Seite des Beitrags steht (Spam am 28.11.2026).
+          referrerPolicy: 'no-referrer-when-downgrade',
           // Nie Cookies mitschicken: Der Absender ist für WordPress immer ein Gast, auch
           // wenn im selben Browser jemand in WP-Admin angemeldet ist.
           credentials: 'omit',
