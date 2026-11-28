@@ -13,6 +13,8 @@ interface IsrRule {
 }
 
 let routeRules: Record<string, IsrRule>
+let nitroStorage: Record<string, { driver?: string }> | undefined
+let nitroDevStorage: Record<string, { driver?: string }> | undefined
 
 beforeAll(async () => {
   // `defineNuxtConfig` ist außerhalb von Nuxt nicht definiert; die Konfiguration ist
@@ -21,8 +23,16 @@ beforeAll(async () => {
   // Pfad bewusst als Variable: Ein fester Import zöge nuxt.config.ts in den Typecheck des
   // Server-Kontexts, und dort kennt TypeScript `defineNuxtConfig` nicht.
   const configPath = '../../nuxt.config'
-  const config = (await import(/* @vite-ignore */ configPath)).default as { routeRules: Record<string, IsrRule> }
+  const config = (await import(/* @vite-ignore */ configPath)).default as {
+    routeRules: Record<string, IsrRule>
+    nitro?: {
+      storage?: Record<string, { driver?: string }>
+      devStorage?: Record<string, { driver?: string }>
+    }
+  }
   routeRules = config.routeRules
+  nitroStorage = config.nitro?.storage
+  nitroDevStorage = config.nitro?.devStorage
 })
 
 describe('ISR-Regeln in nuxt.config.ts', () => {
@@ -46,5 +56,21 @@ describe('ISR-Regeln in nuxt.config.ts', () => {
     expect(routeRules['/blog']!.isr).toMatchObject({ expiration: 1800 })
     expect(routeRules['/blog/**']!.isr).toMatchObject({ expiration: 3600 })
     expect(routeRules['/statistik']!.isr).toMatchObject({ expiration: 86400 })
+  })
+})
+
+/**
+ * Wächter für „Neuer Kommentar blitzt auf und verschwindet“ (28.11.2026,
+ * docs/error-catalog.md). Solange es ISR-Seiten gibt, darf Nuxts Payload-Zwischenspeicher
+ * nichts behalten: Sonst beantwortet er die Payload-Anfrage des Webhooks mit einer alten
+ * Fassung, und die landet als frisch am Edge.
+ */
+describe('Nuxts Payload-Zwischenspeicher', () => {
+  it('ist in Produktion auf den Null-Treiber gelegt', () => {
+    expect(nitroStorage?.['cache:nuxt:payload']).toEqual({ driver: 'null' })
+  })
+
+  it('ist auch im Dev-Server abgeschaltet, damit sich beide gleich verhalten', () => {
+    expect(nitroDevStorage?.['cache:nuxt:payload']).toEqual({ driver: 'null' })
   })
 })

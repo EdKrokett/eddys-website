@@ -65,6 +65,51 @@ beim Direktaufruf steht im HTML `<script id="__NUXT_DATA__" data-src="…/_paylo
 und der Browser lädt die Datei beim Hydrieren nach. Ist sie älter als das HTML, zeigt die
 Seite kurz den neuen Stand und springt dann auf den alten zurück.
 
+## Nuxts eigener Payload-Speicher ist abgeschaltet (28.11.2026)
+
+Zwischen dem Edge und dem Render liegt noch eine Schicht, die bis 28.11.2026 niemand auf
+dem Zettel hatte: Für ISR-Seiten merkt sich Nuxt die Payload jeder gerenderten Seite im
+Nitro-Speicher `cache:nuxt:payload` und beantwortet jede spätere Anfrage nach
+`<pfad>/_payload.json` daraus (`@nuxt/nitro-server`, `runtime/handlers/renderer.mjs`:
+`payloadCache.hasItem(url + '.json')` → `getItem`). Kein Ablauf, keine Invalidierung; der
+Speicher lebt im Arbeitsspeicher der Function-Instanz, also so lange wie sie.
+
+Der Webhook fordert HTML und Payload neu an. Das HTML wird immer frisch gerendert. Die
+Payload-Anfrage dagegen bekam die gemerkte Fassung, sobald dieselbe Instanz die Seite schon
+einmal gerendert hatte, und Vercel legte diese alte Fassung als neuen Edge-Eintrag ab.
+
+Gemessen am 28.11.2026 nach Eddys Kommentar von 09:38:36 UTC:
+
+| Pfad | neu am Edge seit | Inhalt |
+|---|---|---|
+| `/blog/<slug>` | 09:38:46 | mit Kommentar |
+| `/blog/<slug>/_payload.json` | 09:38:46, aber `date: 09:33:50` | **ohne** Kommentar (Stand der vorherigen Revalidierung) |
+
+Der Browser baut die Seite nach dem Laden aus der Payload auf (Nachtrag oben): Der
+Kommentar stand kurz im HTML und verschwand beim Hydrieren.
+
+Lokal nachgestellt mit dem Produktions-Build (`PORT=3112 node .output/server/index.mjs`,
+viermal dieselbe Payload abgerufen):
+
+| | Abruf 1 | Abruf 2 bis 4 |
+|---|---|---|
+| vorher | 1,90 s (Render) | 0,002 s (aus dem Speicher, WordPress wird nie wieder gefragt) |
+| mit Null-Treiber | 1,80 s | 0,65 bis 0,89 s (jedes Mal neu gerendert) |
+
+**Lösung:** `nitro.storage['cache:nuxt:payload'] = { driver: 'null' }` in `nuxt.config.ts`
+(ebenso `devStorage`). Nuxt findet nie einen Eintrag und rendert jede Payload-Anfrage neu.
+Das kostet nichts, weil eine Payload-Anfrage die Function nur erreicht, wenn Vercel den
+Edge-Eintrag neu aufbaut. `server/utils/isr-route-rules.spec.ts` prüft die Einstellung.
+
+Nacheinander statt parallel zu revalidieren (erst HTML, dann Payload) wäre keine Lösung
+gewesen: Die Payload-Anfrage kann auf einer anderen Instanz landen, die noch ihre eigene
+alte Fassung hält.
+
+**Beim Nuxt-Update prüfen:** Speichername und Verhalten sind Interna von
+`@nuxt/nitro-server`. Probe nach jedem Update: Produktions-Build lokal starten, dieselbe
+`_payload.json` zweimal abrufen. Antwortet der zweite Abruf in Millisekunden, ist der
+Speicher wieder aktiv.
+
 ## Query-Werte zählen nicht: `allowQuery: []`
 
 Der Browser fragt die Payload **mit** Query an (`_payload.json?8b891b6b-…`, die Build-ID),

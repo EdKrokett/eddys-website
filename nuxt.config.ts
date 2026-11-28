@@ -182,6 +182,32 @@ export default defineNuxtConfig({
     compressPublicAssets: { brotli: true, gzip: true },
 
     /**
+     * Schaltet Nuxts Payload-Zwischenspeicher ab. NICHT ENTFERNEN, ohne den Webhook zu prüfen.
+     *
+     * Für ISR-Seiten merkt sich Nuxt die Payload jeder gerenderten Seite im Speicher
+     * `cache:nuxt:payload` (@nuxt/nitro-server, runtime/utils/cache.mjs) und beantwortet
+     * jede spätere Anfrage nach `<pfad>/_payload.json` daraus, ohne Ablauf und ohne neu zu
+     * rendern (runtime/handlers/renderer.mjs: `payloadCache.hasItem` → `getItem`). Der
+     * Speicher lebt im Arbeitsspeicher der Function-Instanz.
+     *
+     * Folge am 28.11.2026: Der Webhook ließ nach einem neuen Kommentar HTML und Payload neu
+     * bauen. Das HTML kam frisch, als Payload lieferte Nuxt die fünf Minuten alte Fassung
+     * aus diesem Speicher, und Vercel legte sie als „neu“ an den Edge. Der Browser baut die
+     * Seite nach dem Laden aus der Payload auf: Der Kommentar blitzte auf und verschwand.
+     *
+     * Mit dem Null-Treiber findet Nuxt nie einen Eintrag und rendert jede Payload-Anfrage
+     * neu. Das kostet nichts: Eine Payload-Anfrage erreicht die Function nur, wenn Vercel
+     * den Edge-Eintrag neu aufbaut. Geprüft von server/utils/isr-route-rules.spec.ts,
+     * Herleitung in docs/revalidierung.md.
+     */
+    storage: {
+      'cache:nuxt:payload': { driver: 'null' },
+    },
+    devStorage: {
+      'cache:nuxt:payload': { driver: 'null' },
+    },
+
+    /**
      * Schaltet On-Demand-Revalidierung für die ISR-Routen frei: Ein GET mit dem Header
      * `x-prerender-revalidate: <bypassToken>` verwirft den Edge-Eintrag und rendert neu.
      * Genutzt vom WordPress-Inhalts-Webhook, siehe docs/revalidierung.md.

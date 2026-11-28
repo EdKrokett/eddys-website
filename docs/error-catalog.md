@@ -1508,3 +1508,50 @@ unwichtig ein und stellt sie zurück.
 
 **→ AUDIT-PERSPEKTIVE:** „Ist jede indexierbare Seite über echte Links erreichbar?“ in
 `docs/audit-perspectives.md`.
+
+---
+
+## Neuer Kommentar blitzt auf und verschwindet: Nuxt beantwortet die Payload aus einem eigenen Speicher
+
+**Gefunden:** 28.11.2026, von Eddy gemeldet: Sein Kommentar wurde veröffentlicht, die Mail
+kam, nach dem Neuladen der Seite war er nicht zu sehen. Der Fehler bestand vermutlich, seit
+das Projekt eine Nuxt-Version mit Laufzeit-Payload-Speicher nutzt (installiert: 4.4.8).
+
+**FALSCH** (`nuxt.config.ts`, implizit):
+```ts
+nitro: {
+  // nichts: Nuxt legt Payloads von ISR-Seiten in `cache:nuxt:payload` (Arbeitsspeicher,
+  // ohne Ablauf) und beantwortet `_payload.json` daraus
+}
+```
+
+**RICHTIG:**
+```ts
+nitro: {
+  storage: { 'cache:nuxt:payload': { driver: 'null' } },
+  devStorage: { 'cache:nuxt:payload': { driver: 'null' } },
+}
+```
+
+**WARUM:** Der Webhook lässt Vercel HTML und Payload einer Seite neu aufbauen
+(`server/utils/revalidate-paths.ts`). Das HTML rendert Nuxt jedes Mal neu. Für die Payload
+sieht der Renderer zuerst in einem eigenen Speicher nach und gibt zurück, was dort liegt.
+Hatte die Function-Instanz die Seite schon einmal gerendert, kam die damalige Fassung zurück,
+und Vercel speicherte sie als frisch. Ergebnis: HTML mit dem neuen Kommentar, Payload ohne.
+Der Browser hydriert aus der Payload, der Kommentar verschwindet.
+
+Warum es so lange unbemerkt blieb:
+
+- `revalidatePaths` prüft `x-vercel-cache` und den Status. Beides war in Ordnung: Vercel
+  HAT die Payload neu angelegt, nur mit altem Inhalt. Die Doku nennt das schon „Ein 200 ist
+  kein Beweis“, geprüft wurde trotzdem nur die Hülle.
+- Der Fehler tritt nur auf, wenn dieselbe Instanz die Seite zweimal rendert. Nach einem
+  Deploy oder einer Pause ist der Speicher leer und alles stimmt. Wer direkt nach einem
+  Deploy nachmisst, sieht den Fehler also nicht.
+- Das Beitragsbild vom 01.11.2026 („blitzt auf und verschwindet“) wurde mit `allowQuery`
+  erklärt. Die Erklärung war richtig belegt, aber dieselbe Erscheinung hatte hier eine
+  zweite, unabhängige Ursache.
+
+**→ AUDIT-PERSPEKTIVE:** „Enthält die neu gebaute Fassung auch den neuen Inhalt?" in
+`docs/audit-perspectives.md`.
+

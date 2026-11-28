@@ -237,4 +237,7 @@ Zwei Dinge, die den Kommentarbereich davon betreffen:
   Kommentarbaum und ist ein eigener Cache-Eintrag. Sie muss mitrevalidiert werden, sonst
   bleibt sie für jeden veraltet, der aus der Übersicht auf den Beitrag klickt.
 
+- Bis 28.11.2026 konnte ein neuer Kommentar nach dem Neuladen wieder verschwinden: Nuxts
+  eigener Payload-Speicher lieferte dem Webhook eine alte Fassung. Seitdem abgeschaltet.
+
 Vollständige Herleitung, Auslöser und Fehlerbilder: `docs/revalidierung.md`.

@@ -543,3 +543,24 @@ Aus den rund 200 Beiträgen ohne internen Link (28.11.2026, `docs/error-catalog.
   muss der Zahl der Beiträge plus eins (das Archiv selbst, im Footer) entsprechen.
 - Eine beliebige Beitragsseite muss im HTML auf mindestens einen anderen Beitrag und auf
   `/blog/archiv` verlinken (Weiterlesen-Block).
+
+## Enthält die neu gebaute Fassung auch den neuen Inhalt?
+
+Aus dem Kommentar, der nach dem Neuladen wieder verschwand (28.11.2026,
+`docs/error-catalog.md`).
+
+- Nach einer Revalidierung nicht nur Status und `x-vercel-cache` prüfen, sondern den Inhalt,
+  und zwar in BEIDEN Fassungen:
+  `curl -s <seite> | grep -c "<neuer Text>"` und
+  `curl -s <seite>/_payload.json | grep -c "<neuer Text>"`. Beide müssen 1 liefern.
+- Stimmt `date` minus `age` einer Antwort mit dem Zeitpunkt der Revalidierung überein? Ein
+  `date`, das Minuten vor der Revalidierung liegt, heißt: Irgendeine Schicht hat eine alte
+  Antwort durchgereicht.
+- Welche Caches liegen zwischen Datenquelle und Browser, und kennt die Doku alle? Stand
+  28.11.2026: `withWpCache` (Function), Nuxts Payload-Speicher (abgeschaltet), Vercel-ISR
+  (Edge), CDN-Header der API-Routen, Browser. Bei jedem Nuxt- oder Nitro-Update im Quelltext
+  nach neuen suchen: `grep -rn "useStorage(" node_modules/@nuxt/nitro-server/dist`.
+- Zweimal hintereinander prüfen, nicht nur nach einem frischen Deploy: Ein Speicher im
+  Arbeitsspeicher der Instanz ist nach dem Deploy leer und zeigt den Fehler erst beim
+  zweiten Durchlauf.
+
